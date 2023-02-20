@@ -1,0 +1,18 @@
+#!/bin/bash
+
+python higgssearch/fromJF/join_fromJF.py --higgsmass="80" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="90" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="100" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="120" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="140" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="150" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="155" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="160" --type="sl"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="80" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="90" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="100" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="120" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="140" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="150" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="155" --type="sv"
+python higgssearch/fromJF/join_fromJF.py --higgsmass="160" --type="sv"
