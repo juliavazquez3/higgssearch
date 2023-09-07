@@ -30,6 +30,8 @@ parser.add_argument("--linear", action="store_true", default=False,
                     help="Plot linearly")
 parser.add_argument("--png", action="store_true", default=False,
                     help="png format")
+parser.add_argument("--norm", action="store_true", default=False,
+                    help="normalising test")
 parser.add_argument("--qcd", action="store_true", default=False,
                     help="include qcd samples")
 parser.add_argument("--nodata", action="store_true", default=False,
@@ -49,14 +51,33 @@ plotdir = '/nfs/cms/vazqueze/higgssearch/plotspng/'
 if not os.path.exists(plotdir):
     os.makedirs(plotdir)
 
+c_rat = 1.2
+c_rat2 = 0.8
+
+## no pile up id and jet id, lepton50, smearing
+norm_factorM = 0.9583
+norm_factorE = 0.9669
+
+## no pile up id and jet id, lepton50, smearing, ptjets30
+norm_factorM = 0.9513
+norm_factorE = 0.9551
+
+## no pile up id and jet id, btagM, smearing, ptjets30
+norm_factorM = 0.9515
+norm_factorE = 0.9377
+
+## no pile up id and jet id, btagM, smearing
+norm_factorM = 0.9608
+norm_factorE = 0.9469
+
 ## Open hists files
 
-filePath = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/"
+filePath = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/btagMM/"
 
 if args.ssos: ssos_add = "SSOS"
 else: ssos_add = "" 
 
-term = "histstt_wqq_fromJF"
+term = "histstt_wqq_fromJF_"
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
@@ -64,20 +85,24 @@ datayears = ["2016","2016B","2017","2018"]
 samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
         "ttbar_sl_charm","ttbar_sl_light","ttbar_sl_bottom","ttbar_dl","ttbar_dh","zz","wz",
-        "st_1","st_2","st_3","st_4", "ttbar_sl_else"]
+        "st_1","st_2","st_3","st_4", "ttbar_sl_else", "ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
 
 ## Adding QCD
 
 histFile = {}
 
 for data_op in datayears:
+        if data_op == "2016B": 
+            end_term = "2.root"
+        else:
+            end_term = ".root"
         ## mc files
         histFile[data_op] = {}
         for s in samplesHT:
-                if s[0:8] == "ttbar_sl" and isfile(filePath + term+"_"+s[0:8]+data_op+s[8:]+".root"):
-                        histFile[data_op][s] = TFile.Open(filePath + term+"_"+s[0:8]+data_op+s[8:]+".root","READ")
-                elif isfile(filePath + term+"_"+s+data_op+".root"):
-                        histFile[data_op][s] = TFile.Open(filePath + term+"_"+s+data_op+".root","READ")
+                if s[0:8] == "ttbar_sl" and isfile(filePath + term+s[0:8]+data_op+s[8:]+end_term):
+                        histFile[data_op][s] = TFile.Open(filePath + term+s[0:8]+data_op+s[8:]+end_term,"READ")
+                elif isfile(filePath + term+s+data_op+end_term):
+                        histFile[data_op][s] = TFile.Open(filePath + term+s+data_op+end_term,"READ")
         #print(histFile[data_op].keys())
 
 histFileD = {}
@@ -85,8 +110,8 @@ histFileD = {}
 for data_op in datayears:
 	histFileD[data_op] = {}
 	# data files
-	histFileD[data_op]["M"] = TFile.Open(filePath + term+ssos_add+"_"+data_op+"M.root","READ")
-	histFileD[data_op]["E"] = TFile.Open(filePath + term+ssos_add+"_"+data_op+"E.root","READ")
+	histFileD[data_op]["M"] = TFile.Open(filePath + term+data_op+"M.root","READ")
+	histFileD[data_op]["E"] = TFile.Open(filePath + term+data_op+"E.root","READ")
 
 samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
@@ -112,6 +137,16 @@ for data_op in samples_d:
         lumi[data_op]["ttbar_sl_light"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_bottom"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_else"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_charmgluon"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_bottomgluon"] = lumi[data_op]["ttbar_sl"]
+
+listsampl = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+        "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
+        "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz", "ttbar_sl_charm", "ttbar_sl_charmgluon",
+        "ttbar_sl_bottom", "ttbar_sl_bottomgluon", "ttbar_sl_else", "ttbar_sl_light"]
+
+for s in listsampl:
+   lumi["2016B"][s] = lumi["2016"][s]
 
 lumi_d = {}
 lumi_d["2016"] = 19.5
@@ -119,7 +154,20 @@ lumi_d["2016B"] = 16.8
 lumi_d["2017"] = 41.5
 lumi_d["2018"] = 59.8
 
-histNames = ["InvM_2jets"]
+histNames = ["InvM_2jets", "nJetGood", "jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt", "jet_2_eta", "jet_2_mass", "jet_2_qgl", "jet_2_nmu",
+   "lepton_pt", "lepton_eta", "InvM_bot_closer", "InvM_bot_farther", "deltaR_jet1_jet2", "deltaphi_jet1_jet2", "deltaeta_jet1_jet2", 
+   "MET_pt", "tracks_jet1", "tracks_jet2", "EMN_jet1", "EMtotal_jet1", "EMC_jet1", "pT_sum", "pT_product", "deltaR_lep_2jets", 
+   "deltaphi_MET_2jets", "deltaphi_lephad", "eta_2jets", "transverse_mass", "pt_2jets", "pt_Wlep", "deltaR_lep_jet1", 
+   "deltaR_lep_jet2", "deltaPhi_lep_jet1", "deltaPhi_lep_jet2", "deltaEta_lep_jet1", "deltaEta_lep_jet2", "jet_1_btag", "jet_2_btag", 
+   "jet_bot1_btag", "jet_bot2_btag", "jet_bot1_btag_thick", "jet_bot2_btag_thick", "pT_proy", "pT_sum_2J","deltaphi_MET_jets_1","deltaphi_MET_jets_2", 
+   "lepton_pt_detail", "jet_1_qgl", "jet_bot1_pt", "jet_bot1_eta", "jet_bot2_pt", "jet_bot2_eta", "lepton_eta_thick", "MET_sig", "deltaphi_MET_lep", "MET_my_sig",
+   "jet_1_btag_thick", "jet_2_btag_thick", "jet_bot1_btagnumber", "jet_bot2_btagnumber", "jet_1_btagnumber", "jet_2_btagnumber"]
+
+#histNames = ["jet_bot1_btag_thick", "jet_bot2_btag_thick","jet_1_btag_thick", "jet_2_btag_thick", "jet_1_nmu", "jet_2_nmu",
+#     "jet_bot1_btag", "jet_bot2_btag","jet_1_btag", "jet_2_btag", "jet_bot1_btagnumber", "jet_bot2_btagnumber","jet_1_btagnumber", "jet_2_btagnumber"]
+
+if args.nodata: histNames = ["jet_1_flavourP","jet_2_flavourP","jet_bot1_flavourP","jet_bot2_flavourP","btag_sf","lep_id_sf","lep_trig_sf","puWeight","PUjetID_SF","topweight"]
+
 
 #######################################################
 ########### Start of plot creation ####################
@@ -150,7 +198,7 @@ for name in histNames:
   samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
         "ttbar_sl_charm","ttbar_sl_light","ttbar_sl_bottom","ttbar_dl","ttbar_dh","zz","wz",
-        "st_1","st_2","st_3","st_4","ttbar_sl_else"]
+        "st_1","st_2","st_3","st_4","ttbar_sl_else","ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
 
   ## HISTS
   samples_foryear = {}
@@ -167,12 +215,12 @@ for name in histNames:
       hist_E[data_op][s] = histFile[data_op][s].Get(name+"_E")
     if not args.nodata: histdata_M[data_op] = histFileD[data_op]["M"].Get(name+"_M")
     if not args.nodata: histdata_E[data_op] = histFileD[data_op]["E"].Get(name+"_E")
-  
+
   samples_st = {}
   samples_wjets = {}
   samples_zjets = {}
   ## Scaling to lumi
-  #print(name) 
+  print(name) 
   for data_op in datayears:
     lumi_data = lumi_d[data_op]
     for s in samples_foryear[data_op]:
@@ -180,8 +228,10 @@ for name in histNames:
       #print(data_op)
       hist_M[data_op][s].Scale(lumi_data/lumi[data_op][s])
       hist_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
+      if args.norm: hist_M[data_op][s].Scale(norm_factorM)
+      if args.norm: hist_E[data_op][s].Scale(norm_factorE)
       ## Fixing single top
-    #print(samples_stc[data_op],samples_stnc[data_op],samples_wjetsc[data_op],samples_wjetsdc[data_op],samples_wjetsl[data_op],samples_wjetsb[data_op],samples_zjets[data_op]) 
+    #print(samples_foryear[data_op]) 
     hist_M[data_op]["st"] = hist_M[data_op]["st_1"]
     hist_E[data_op]["st"] = hist_E[data_op]["st_1"]
     hist_M[data_op]["st"].Add(hist_M[data_op]["st_2"])
@@ -229,7 +279,7 @@ for name in histNames:
     hist_M[data_op]["vv"].Add(hist_M[data_op]["zz"])
     hist_E[data_op]["vv"].Add(hist_E[data_op]["zz"])
 
-  samples = ["ttbar_sl_bottom","ttbar_sl_charm","ttbar_sl_else","ttbar_sl_light","ttbar_dl","ttbar_dh","zjets","vv","st","wjets"]
+  samples = ["ttbar_sl_bottom","ttbar_sl_charm","ttbar_sl_else","ttbar_sl_light","ttbar_dl","ttbar_dh","zjets","vv","st","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon"]
 
   histT_M = {}
   histT_E = {}
@@ -250,23 +300,18 @@ for name in histNames:
   gStyle.SetOptStat(kFALSE);  ## remove statistics box in histos
 
   colors = {}
-  colors["vv"] = (222,90,106)
-  colors["WW_semi_nocharm"] = (246,165,42)
-  colors["WW_hadronic"] = (183,2,2)
-  colors["WW_leptonic"] = (153,76,0)
+  colors["ttbar_dl"] = (222,90,106)
   colors["wjets"] = (155,152,204)
-  colors["wjets_bottom"] = (255,0,127)
-  colors["wjets_light"] = (255,153,204)
+  colors["ttbar_sl_bottomgluon"] = (236,164,207)
   colors["ttbar_sl_charm"] = (204,255,153)
   colors["ttbar_sl_light"] = (120,154,86)
-  colors["ttbar_sl_bottom"] = (255,0,127)
-  colors["ttbar_dl"] = (255,255,0)
+  colors["ttbar_sl_bottom"] = (201,79,152)
+  colors["ttbar_sl_else"] = (242,193,121)
+  colors["ttbar_sl_charmgluon"] = (222,212,74)
+  colors["vv"] = (255,180,85)
   colors["ttbar_dh"] = (204,204,0)
-  colors["zjets"] = (153,255,255)
-  colors["wz"] = (153,153,0)
+  colors["zjets"] = (113,209,223)
   colors["st"] = (153,51,255)
-  colors["ttbar_sl_else"] = (190,153,228)
-  colors["QCD"] = (0,153,76)
 
   if args.stack:
     ymax_M = 0
@@ -287,28 +332,28 @@ for name in histNames:
       ym = histT_M[s].GetMinimum()
       if y>ymax_M: ymax_M=y
       if ymin_M>ym: ymin_M=ym
-      histD_M.GetMaximum()
+      y = histD_M.GetMaximum()
       if y>ymax_M: ymax_M=y
 
       y = histT_E[s].GetMaximum()
       ym = histT_E[s].GetMinimum()
       if y>ymax_E: ymax_E=y
       if ymin_E>ym: ymin_E=ym
-      histD_E.GetMaximum()
+      y = histD_E.GetMaximum()
       if y>ymax_E: ymax_E=y
 
-      histT_M["vv"].SetMinimum(ymin_M)
-      histT_M["vv"].SetMaximum(5*ymax_M)
+      #histT_M["vv"].SetMinimum(1000.)
+      #histT_M["vv"].SetMaximum(3*ymax_M)
       if args.linear: histT_M["vv"].SetMaximum(1.3*ymax_M)
       if args.linear: histT_M["vv"].SetMinimum(1.3*ymin_M)
 
-      histT_E["vv"].SetMinimum(ymin_E)
-      histT_E["vv"].SetMaximum(5*ymax_E)
+      #histT_E["vv"].SetMinimum(1000.)
+      #histT_E["vv"].SetMaximum(3*ymax_E)
       if args.linear: histT_E["vv"].SetMaximum(1.3*ymax_E)
       if args.linear: histT_E["vv"].SetMinimum(1.3*ymin_E)
 
     ## Stack creation
-    samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_else","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
+    samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon","ttbar_sl_else","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
 
     if args.ratio and not args.nodata: upper_pad.cd()
     stack_M = ROOT.THStack()
@@ -319,14 +364,16 @@ for name in histNames:
 
     y_M = stack_M.GetMaximum()
     if y_M>ymax_M: ymax_M=y_M
-    stack_M.SetMinimum(1.)
-    stack_M.SetMaximum(5*ymax_M)
+    #stack_M.SetMinimum(1000.)
+    #stack_M.SetMaximum(3*ymax_M)
     if args.linear: stack_M.SetMaximum(1.3*ymax_M)
+    if args.linear: stack_M.SetMinimum(1.)
     y_E = stack_E.GetMaximum()
     if y_E>ymax_E: ymax_E=y_E
-    stack_E.SetMinimum(1.)
-    stack_E.SetMaximum(5*ymax_E)
+    #stack_E.SetMinimum(1000.)
+    #stack_E.SetMaximum(3*ymax_E)
     if args.linear: stack_E.SetMaximum(1.3*ymax_E)
+    if args.linear: stack_M.SetMinimum(1.)
 
     stack_M.Draw("HIST")
     histD_M.SetMarkerStyle(20)
@@ -341,8 +388,8 @@ for name in histNames:
       ratio.SetLineColor(kBlack)
       ratio.SetMarkerStyle(21)
       ratio.SetTitle("")
-      ratio.SetMinimum(0)
-      ratio.SetMaximum(2)
+      ratio.SetMinimum(c_rat2)
+      ratio.SetMaximum(c_rat)
       ratio.GetYaxis().SetTitle("Data/MC")
       ratio.GetXaxis().SetTitle(name)
       ratio.GetXaxis().SetLabelSize(0.08)
@@ -361,6 +408,11 @@ for name in histNames:
       ratio.Divide(hTotal)
       ratio.Draw("ep")
 
+    if name == "InvM_2jets":
+      print("Integral of M data is "+str(histD_M.Integral()))
+      print("Integral of M MC is "+str(hTotal.Integral()))
+      print("Ratio is "+str(histD_M.Integral()/hTotal.Integral()))
+
     ## Legends
     if args.ratio and not args.nodata: upper_pad.cd()
     leg = TLegend(0.7,0.6,0.89,0.89)
@@ -374,6 +426,9 @@ for name in histNames:
     leg.AddEntry(histT_M["ttbar_sl_bottom"],"Top antitop, bottom","f")
     leg.AddEntry(histT_M["ttbar_sl_light"],"Top antitop, light","f")
     leg.AddEntry(histT_M["ttbar_sl_charm"],"Top antitop, charm","f")
+    leg.AddEntry(histT_M["ttbar_sl_bottomgluon"],"Top antitop, bottom gluon","f")
+    leg.AddEntry(histT_M["ttbar_sl_charmgluon"],"Top antitop, charm gluon","f")
+    leg.AddEntry(histT_M["ttbar_sl_else"],"Top antitop, gluon gluon","f")
     if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data" ,"lep")
     leg.Draw()
     term= "totalHT_wqq_M"
@@ -385,7 +440,7 @@ for name in histNames:
       notation = "_normed_"
 
     if args.png: c1.Print(plotdir+term+notation+ name + ".png")
-    else: c1.Print(plotdir+term+notation + name + ".pdf")
+    else: c1.Print(plotdir+term+notation + name + ".root")
 
     stack_E.Draw("HIST")
     histD_E.SetMarkerStyle(20)
@@ -399,8 +454,8 @@ for name in histNames:
       ratio.SetLineColor(kBlack)
       ratio.SetMarkerStyle(21)
       ratio.SetTitle("")
-      ratio.SetMinimum(0)
-      ratio.SetMaximum(2)
+      ratio.SetMinimum(c_rat2)
+      ratio.SetMaximum(c_rat)
       ratio.GetYaxis().SetTitle("Data/MC")
       ratio.GetXaxis().SetTitle(name)
       ratio.GetXaxis().SetLabelSize(0.08)
@@ -419,6 +474,11 @@ for name in histNames:
       ratio.Divide(hTotal)
       ratio.Draw("ep")
 
+    if name == "InvM_2jets":
+      print("Integral of E data is "+str(histD_E.Integral()))
+      print("Integral of E MC is "+str(hTotal.Integral()))
+      print("Ratio is "+str(histD_E.Integral()/hTotal.Integral()))
+
     ## Legends
     if args.ratio and not args.nodata: upper_pad.cd()
     leg = TLegend(0.7,0.6,0.89,0.89)
@@ -432,6 +492,9 @@ for name in histNames:
     leg.AddEntry(histT_E["ttbar_sl_bottom"],"Top antitop, bottom","f")
     leg.AddEntry(histT_E["ttbar_sl_light"],"Top antitop, light","f")
     leg.AddEntry(histT_E["ttbar_sl_charm"],"Top antitop, charm","f")
+    leg.AddEntry(histT_E["ttbar_sl_bottomgluon"],"Top antitop, bottom gluon","f")
+    leg.AddEntry(histT_E["ttbar_sl_charmgluon"],"Top antitop, charm gluon","f")
+    leg.AddEntry(histT_E["ttbar_sl_else"],"Top antitop, gluon gluon","f")
     if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"lep")
     leg.Draw()
     term= "totalHT_wqq_E"
@@ -443,7 +506,7 @@ for name in histNames:
       notation = "_normed_"
 
     if args.png: c1.Print(plotdir+term+notation+ name + ".png")
-    else: c1.Print(plotdir+term+notation + name + ".pdf")
+    else: c1.Print(plotdir+term+notation + name + ".root")
 
 
 

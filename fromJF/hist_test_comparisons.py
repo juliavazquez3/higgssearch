@@ -56,51 +56,50 @@ if not os.path.exists(plotdir):
 c_rat = 1.2
 c_rat2 = 0.8
 norm_factorM = {}
+#norm_factorM["2016"] = 0.9134
+#norm_factorM["2016B"] = 0.9522
+#norm_factorM["2017"] = 0.9323
+#norm_factorM["2018"] = 0.9677
 norm_factorE = {}
+#norm_factorE["2016"] = 0.9136
+#norm_factorE["2016B"] = 0.9605
+#norm_factorE["2017"] = 0.9042
+#norm_factorE["2018"] = 0.9740
+### down version
+#norm_factorM["2016"] = 0.9499
+#norm_factorM["2016B"] = 0.9908
+#norm_factorM["2017"] = 0.9772
+#norm_factorM["2018"] = 1.026
+#norm_factorE["2016"] = 0.9501
+#norm_factorE["2016B"] = 0.9992
+#norm_factorE["2017"] = 0.9483
+#norm_factorE["2018"] = 1.034
+### no pileup and jet id
+norm_factorM["2016"] = 0.9254
+norm_factorM["2016B"] = 1.0709
+norm_factorM["2017"] = 0.9201
+norm_factorM["2018"] = 0.9437
+norm_factorE["2016"] = 0.9296
+norm_factorE["2016B"] = 1.0874
+norm_factorE["2017"] = 0.8925
+norm_factorE["2018"] = 0.9534
 
-### no pileup and jet id, lepton50 smeared
-norm_factorM["2016"] = 0.9370
-norm_factorM["2016B"] = 0.9945
-norm_factorM["2017"] = 0.9444
-norm_factorM["2018"] = 0.9704
-norm_factorE["2016"] = 0.9519
-norm_factorE["2016B"] = 1.0028
-norm_factorE["2017"] = 0.9331
-norm_factorE["2018"] = 0.9922
+### no pileup jet id nor electron id
+norm_factorM["2018"] = 0.9499
+norm_factorE["2018"] = 1.1304
 
-### no pileup and jet id and btagMM, smearing
-norm_factorM["2016"] = 0.9397
-norm_factorM["2016B"] = 0.9980
-norm_factorM["2017"] = 0.9683
-norm_factorM["2018"] = 0.9812
-norm_factorE["2016"] = 0.9340
-norm_factorE["2016B"] = 0.9784
-norm_factorE["2017"] = 0.9355
-norm_factorE["2018"] = 0.9786
+### no pileup jet id nor electron id
+norm_factorM["2018"] = 0.9499
+norm_factorE["2018"] = 0.9451
 
-### no pileup and jet id and btagMM, smearing, ptjets30
-norm_factorM["2016"] = 0.9329
-norm_factorM["2016B"] = 0.9918
-norm_factorM["2017"] = 0.9605
-norm_factorM["2018"] = 0.9619
-norm_factorE["2016"] = 0.9293
-norm_factorE["2016B"] = 0.9716
-norm_factorE["2017"] = 0.9275
-norm_factorE["2018"] = 0.9596
-
-### no pileup and jet id, lepton50 smeared, ptjets30
-norm_factorM["2016"] = 0.9267
-norm_factorM["2016B"] = 0.9818
-norm_factorM["2017"] = 0.9393
-norm_factorM["2018"] = 0.9548
-norm_factorE["2016"] = 0.9369
-norm_factorE["2016B"] = 0.9850
-norm_factorE["2017"] = 0.9233
-norm_factorE["2018"] = 0.9716
+### no pileup jet id, el ID but no SF
+norm_factorM["2018"] = 0.9439
+norm_factorE["2018"] = 0.9005
 
 ## Open hists files
 
-filePath = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/lepton50/ptjets30/"
+filePath = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/"
+filePath2 = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/test/"
 
 if args.ssos: ssos_add = "SSOS"
 else: ssos_add = "" 
@@ -108,7 +107,7 @@ else: ssos_add = ""
 term = "histstt_wqq_fromJF_"
 
 datayears = ["2016","2016B","2017","2018"]
-#datayears = ["2018"]
+datayears = ["2017"]
 
 samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
@@ -118,28 +117,32 @@ samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","w
 ## Adding QCD
 
 histFile = {}
+histFile2 = {}
 
 for data_op in datayears:
-        if data_op == "2016B":
-            end_term = "2.root"
-        else:
-            end_term = ".root"
         ## mc files
         histFile[data_op] = {}
+        histFile2[data_op] = {}
         for s in samplesHT:
-                if s[0:8] == "ttbar_sl" and isfile(filePath + term+s[0:8]+data_op+s[8:]+end_term):
-                        histFile[data_op][s] = TFile.Open(filePath + term+s[0:8]+data_op+s[8:]+end_term,"READ")
-                elif isfile(filePath + term+s+data_op+end_term):
-                        histFile[data_op][s] = TFile.Open(filePath + term+s+data_op+end_term,"READ")
+                if s[0:8] == "ttbar_sl" and isfile(filePath + term+s[0:8]+data_op+s[8:]+".root"):
+                        histFile[data_op][s] = TFile.Open(filePath + term+s[0:8]+data_op+s[8:]+".root","READ")
+                        histFile2[data_op][s] = TFile.Open(filePath2 + term+s[0:8]+data_op+s[8:]+".root","READ")
+                elif isfile(filePath + term+s+data_op+".root"):
+                        histFile[data_op][s] = TFile.Open(filePath + term+s+data_op+".root","READ")
+                        histFile2[data_op][s] = TFile.Open(filePath2 + term+s+data_op+".root","READ")
         #print(histFile[data_op].keys())
 
 histFileD = {}
+histFileD2 = {}
 
 for data_op in datayears:
-	histFileD[data_op] = {}
-	# data files
-	histFileD[data_op]["M"] = TFile.Open(filePath + term+data_op+"M.root","READ")
-	histFileD[data_op]["E"] = TFile.Open(filePath + term+data_op+"E.root","READ")
+        histFileD[data_op] = {}
+        histFileD2[data_op] = {}
+        # data files
+        histFileD[data_op]["M"] = TFile.Open(filePath + term+data_op+"M.root","READ")
+        histFileD[data_op]["E"] = TFile.Open(filePath + term+data_op+"E.root","READ")
+        histFileD2[data_op]["M"] = TFile.Open(filePath2 + term+data_op+"M.root","READ")
+        histFileD2[data_op]["E"] = TFile.Open(filePath2 + term+data_op+"E.root","READ")
 
 samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
@@ -168,30 +171,18 @@ for data_op in samples_d:
         lumi[data_op]["ttbar_sl_charmgluon"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_bottomgluon"] = lumi[data_op]["ttbar_sl"]
 
-listsampl = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
-        "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
-        "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz", "ttbar_sl_charm", "ttbar_sl_charmgluon",
-        "ttbar_sl_bottom", "ttbar_sl_bottomgluon", "ttbar_sl_else", "ttbar_sl_light"]
-
-for s in listsampl:
-   lumi["2016B"][s] = lumi["2016"][s]
-
 lumi_d = {}
 lumi_d["2016"] = 19.5
 lumi_d["2016B"] = 16.8
 lumi_d["2017"] = 41.5
 lumi_d["2018"] = 59.8
 
-histNames = ["InvM_2jets", "nJetGood", "jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt", "jet_2_eta", "jet_2_mass", "jet_2_qgl", "jet_2_nmu",
-   "lepton_pt", "lepton_eta", "InvM_bot_closer", "InvM_bot_farther", "deltaR_jet1_jet2", "deltaphi_jet1_jet2", "deltaeta_jet1_jet2", 
-   "MET_pt", "tracks_jet1", "tracks_jet2", "EMN_jet1", "EMtotal_jet1", "EMC_jet1", "pT_sum", "pT_product", "deltaR_lep_2jets", 
-   "deltaphi_MET_2jets", "deltaphi_lephad", "eta_2jets", "transverse_mass", "pt_2jets", "pt_Wlep", "deltaR_lep_jet1", 
-   "deltaR_lep_jet2", "deltaPhi_lep_jet1", "deltaPhi_lep_jet2", "deltaEta_lep_jet1", "deltaEta_lep_jet2", "jet_1_btag", "jet_2_btag",
+histNames = ["InvM_2jets", "nJetGood", "jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt", "jet_2_eta", "jet_2_mass", "jet_2_qgl", "lepton_pt", "lepton_eta",
+   "InvM_bot_closer", "InvM_bot_farther", "deltaR_jet1_jet2", "deltaphi_jet1_jet2", "deltaeta_jet1_jet2", "MET_pt", "tracks_jet1", "tracks_jet2", "EMN_jet1",
+   "EMtotal_jet1", "EMC_jet1", "pT_sum", "pT_product", "deltaR_lep_2jets", "deltaphi_MET_2jets", "deltaphi_lephad", "eta_2jets", "transverse_mass",
+   "pt_2jets", "pt_Wlep", "deltaR_lep_jet1", "deltaR_lep_jet2", "deltaPhi_lep_jet1", "deltaPhi_lep_jet2", "deltaEta_lep_jet1", "deltaEta_lep_jet2", "jet_1_btag", "jet_2_btag",
    "jet_bot1_btag", "jet_bot2_btag", "jet_bot1_btag_thick", "jet_bot2_btag_thick", "pT_proy", "pT_sum_2J","deltaphi_MET_jets_1","deltaphi_MET_jets_2",
-   "lepton_pt_detail", "jet_1_qgl", "jet_bot1_pt", "jet_bot1_eta", "jet_bot2_pt", "jet_bot2_eta", "lepton_eta_thick", "MET_sig", "deltaphi_MET_lep", "MET_my_sig",
-   "jet_1_btag_thick", "jet_2_btag_thick", "jet_bot1_btagnumber", "jet_bot2_btagnumber", "jet_1_btagnumber", "jet_2_btagnumber"]
-
-#histNames = ["InvM_bot_closer", "InvM_bot_farther","deltaphi_MET_lep", "deltaphi_MET_lep_old"]
+   "lepton_pt_detail", "jet_1_qgl", "jet_bot1_pt", "jet_bot1_eta", "jet_bot2_pt", "jet_bot2_eta"]
 
 if args.nodata: histNames = ["jet_1_flavourP","jet_2_flavourP","jet_bot1_flavourP","jet_bot2_flavourP","btag_sf","lep_id_sf","lep_trig_sf","puWeight","PUjetID_SF","topweight"]
 
@@ -228,19 +219,31 @@ for name in histNames:
 
   ## HISTS
   samples_foryear = {}
+  samples_foryear2 = {}
   hist_M = {}
   hist_E = {}
   histdata_M = {}
   histdata_E = {}
+  hist_M2 = {}
+  hist_E2 = {}
+  histdata_M2 = {}
+  histdata_E2 = {}
   for data_op in datayears:
     samples_foryear[data_op] = [s for s in samples if s in histFile[data_op].keys()]
     hist_M[data_op] = {}
     hist_E[data_op] = {}
+    samples_foryear2[data_op] = [s for s in samples if s in histFile2[data_op].keys()]
+    hist_M2[data_op] = {}
+    hist_E2[data_op] = {}
     for s in samples_foryear[data_op]:
       hist_M[data_op][s] = histFile[data_op][s].Get(name+"_M")
       hist_E[data_op][s] = histFile[data_op][s].Get(name+"_E")
+      hist_M2[data_op][s] = histFile2[data_op][s].Get(name+"_M")
+      hist_E2[data_op][s] = histFile2[data_op][s].Get(name+"_E")
     if not args.nodata: histdata_M[data_op] = histFileD[data_op]["M"].Get(name+"_M")
     if not args.nodata: histdata_E[data_op] = histFileD[data_op]["E"].Get(name+"_E")
+    if not args.nodata: histdata_M2[data_op] = histFileD2[data_op]["M"].Get(name+"_M")
+    if not args.nodata: histdata_E2[data_op] = histFileD2[data_op]["E"].Get(name+"_E")
   
   samples_st = {}
   samples_wjets = {}
@@ -256,6 +259,10 @@ for name in histNames:
       hist_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
       if args.norm: hist_M[data_op][s].Scale(norm_factorM[str(args.year)])
       if args.norm: hist_E[data_op][s].Scale(norm_factorE[str(args.year)])
+      hist_M2[data_op][s].Scale(lumi_data/lumi[data_op][s])
+      hist_E2[data_op][s].Scale(lumi_data/lumi[data_op][s])
+      if args.norm: hist_M2[data_op][s].Scale(norm_factorM[str(args.year)])
+      if args.norm: hist_E2[data_op][s].Scale(norm_factorE[str(args.year)])
       ## Fixing single top
     #print(samples_stc[data_op],samples_stnc[data_op],samples_wjetsc[data_op],samples_wjetsdc[data_op],samples_wjetsl[data_op],samples_wjetsb[data_op],samples_zjets[data_op]) 
     hist_M[data_op]["st"] = hist_M[data_op]["st_1"]
@@ -266,6 +273,15 @@ for name in histNames:
     hist_E[data_op]["st"].Add(hist_E[data_op]["st_3"])
     hist_M[data_op]["st"].Add(hist_M[data_op]["st_4"])
     hist_E[data_op]["st"].Add(hist_E[data_op]["st_4"])
+    hist_M2[data_op]["st"] = hist_M2[data_op]["st_1"]
+    hist_E2[data_op]["st"] = hist_E2[data_op]["st_1"]
+    hist_M2[data_op]["st"].Add(hist_M2[data_op]["st_2"])
+    hist_E2[data_op]["st"].Add(hist_E2[data_op]["st_2"])
+    hist_M2[data_op]["st"].Add(hist_M2[data_op]["st_3"])
+    hist_E2[data_op]["st"].Add(hist_E2[data_op]["st_3"])
+    hist_M2[data_op]["st"].Add(hist_M2[data_op]["st_4"])
+    hist_E2[data_op]["st"].Add(hist_E2[data_op]["st_4"])
+
     hist_M[data_op]["wjets"] = hist_M[data_op]["wjets_1"]
     hist_E[data_op]["wjets"] = hist_E[data_op]["wjets_1"]
     hist_M[data_op]["wjets"].Add(hist_M[data_op]["wjets_2"])
@@ -282,6 +298,23 @@ for name in histNames:
     hist_E[data_op]["wjets"].Add(hist_E[data_op]["wjets_7"])
     hist_M[data_op]["wjets"].Add(hist_M[data_op]["wjets_8"])
     hist_E[data_op]["wjets"].Add(hist_E[data_op]["wjets_8"])
+    hist_M2[data_op]["wjets"] = hist_M2[data_op]["wjets_1"]
+    hist_E2[data_op]["wjets"] = hist_E2[data_op]["wjets_1"]
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_2"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_2"])
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_3"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_3"])
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_4"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_4"])
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_5"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_5"])
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_6"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_6"])
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_7"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_7"])
+    hist_M2[data_op]["wjets"].Add(hist_M2[data_op]["wjets_8"])
+    hist_E2[data_op]["wjets"].Add(hist_E2[data_op]["wjets_8"])
+
     hist_M[data_op]["zjets"] = hist_M[data_op]["zjets_1"]
     hist_E[data_op]["zjets"] = hist_E[data_op]["zjets_1"]
     hist_M[data_op]["zjets"].Add(hist_M[data_op]["zjets_2"])
@@ -298,26 +331,53 @@ for name in histNames:
     hist_E[data_op]["zjets"].Add(hist_E[data_op]["zjets_7"])
     hist_M[data_op]["zjets"].Add(hist_M[data_op]["zjets_8"])
     hist_E[data_op]["zjets"].Add(hist_E[data_op]["zjets_8"])
+    hist_M2[data_op]["zjets"] = hist_M2[data_op]["zjets_1"]
+    hist_E2[data_op]["zjets"] = hist_E2[data_op]["zjets_1"]
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_2"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_2"])
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_3"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_3"])
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_4"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_4"])
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_5"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_5"])
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_6"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_6"])
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_7"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_7"])
+    hist_M2[data_op]["zjets"].Add(hist_M2[data_op]["zjets_8"])
+    hist_E2[data_op]["zjets"].Add(hist_E2[data_op]["zjets_8"])
+
     hist_M[data_op]["vv"] = hist_M[data_op]["ww"]
     hist_E[data_op]["vv"] = hist_E[data_op]["ww"]
     hist_M[data_op]["vv"].Add(hist_M[data_op]["wz"])
     hist_E[data_op]["vv"].Add(hist_E[data_op]["wz"])
     hist_M[data_op]["vv"].Add(hist_M[data_op]["zz"])
     hist_E[data_op]["vv"].Add(hist_E[data_op]["zz"])
+    hist_M2[data_op]["vv"] = hist_M2[data_op]["ww"]
+    hist_E2[data_op]["vv"] = hist_E2[data_op]["ww"]
+    hist_M2[data_op]["vv"].Add(hist_M2[data_op]["wz"])
+    hist_E2[data_op]["vv"].Add(hist_E2[data_op]["wz"])
+    hist_M2[data_op]["vv"].Add(hist_M2[data_op]["zz"])
+    hist_E2[data_op]["vv"].Add(hist_E2[data_op]["zz"])
 
   samples = ["ttbar_sl_bottom","ttbar_sl_charm","ttbar_sl_light","ttbar_dl","ttbar_dh","zjets","vv","st","wjets","ttbar_sl_else","ttbar_sl_bottomgluon","ttbar_sl_charmgluon"]
 
   histT_M = {}
   histT_E = {}
+  histT_M2 = {}
+  histT_E2 = {}
   for s in samples:
        histT_M[s] = hist_M[str(args.year)][s]
        histT_E[s] = hist_E[str(args.year)][s]
+       histT_M2[s] = hist_M2[str(args.year)][s]
+       histT_E2[s] = hist_E2[str(args.year)][s]
 
   if not args.nodata:
     histD_M = histdata_M[str(args.year)]
     histD_E = histdata_E[str(args.year)]
-    #histD_M = histdata_M["2016B"]
-    #histD_E = histdata_E["2016B"]
+    histD_M2 = histdata_M2[str(args.year)]
+    histD_E2 = histdata_E2[str(args.year)]
 
   gStyle.SetOptStat(kFALSE);  ## remove statistics box in histos
 
@@ -341,12 +401,8 @@ for name in histNames:
     ymax_E = 0
     ymin_E = 0
     for s in samples:
-      histT_M[s].SetLineWidth(1)
-      histT_M[s].SetFillColor(ROOT.TColor.GetColor(*colors[s]))
       histT_M[s].GetYaxis().SetTitle("Number of events")
       histT_M[s].GetXaxis().SetTitle(name)
-      histT_E[s].SetLineWidth(1)
-      histT_E[s].SetFillColor(ROOT.TColor.GetColor(*colors[s]))
       histT_E[s].GetYaxis().SetTitle("Number of events")
       histT_E[s].GetXaxis().SetTitle(name)
 
@@ -378,29 +434,55 @@ for name in histNames:
     samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_bottomgluon","ttbar_sl_else","ttbar_sl_charmgluon","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
 
     if args.ratio and not args.nodata: upper_pad.cd()
-    stack_M = ROOT.THStack()
-    stack_E = ROOT.THStack()
-    for s in samples:
-      stack_M.Add(histT_M[s])
-      stack_E.Add(histT_E[s])
+    histTT_M = histT_M[samples[0]]
+    histTT_E = histT_E[samples[0]]
+    histTT_M2 = histT_M2[samples[0]]
+    histTT_E2 = histT_E2[samples[0]]
 
-    y_M = stack_M.GetMaximum()
+    for s in samples[1:]:
+      histTT_M.Add(histT_M[s])
+      histTT_E.Add(histT_E[s])
+      histTT_M2.Add(histT_M2[s])
+      histTT_E2.Add(histT_E2[s])
+
+    y_M = histTT_M.GetMaximum()
     if y_M>ymax_M: ymax_M=y_M
-    stack_M.SetMinimum(1.)
-    stack_M.SetMaximum(5*ymax_M)
-    if args.linear: stack_M.SetMaximum(1.3*ymax_M)
-    y_E = stack_E.GetMaximum()
+    histTT_M.SetMinimum(1.)
+    histTT_M.SetMaximum(5*ymax_M)
+    if args.linear: histTT_M.SetMaximum(1.3*ymax_M)
+    y_E = histTT_E.GetMaximum()
     if y_E>ymax_E: ymax_E=y_E
-    stack_E.SetMinimum(1.)
-    stack_E.SetMaximum(5*ymax_E)
-    if args.linear: stack_E.SetMaximum(1.3*ymax_E)
+    histTT_E.SetMinimum(1.)
+    histTT_E.SetMaximum(5*ymax_E)
+    if args.linear: histTT_E.SetMaximum(1.3*ymax_E)
+    y_M = histTT_M2.GetMaximum()
+    if y_M>ymax_M: ymax_M=y_M
+    histTT_M2.SetMinimum(1.)
+    histTT_M2.SetMaximum(5*ymax_M)
+    if args.linear: histTT_M2.SetMaximum(1.3*ymax_M)
+    y_E = histTT_E2.GetMaximum()
+    if y_E>ymax_E: ymax_E=y_E
+    histTT_E2.SetMinimum(1.)
+    histTT_E2.SetMaximum(5*ymax_E)
+    if args.linear: histTT_E2.SetMaximum(1.3*ymax_E)
 
-    stack_M.Draw("HIST")
+    histTT_M.SetLineColor(kRed-3)
+    histTT_E.SetLineColor(kRed-3)
+    histTT_M2.SetLineColor(kBlue-6)
+    histTT_E2.SetLineColor(kBlue-6)
+
+    histTT_M.Draw()
+    histTT_M2.Draw("SAME")
     histD_M.SetMarkerStyle(20)
     histD_M.SetMarkerSize(0.3)
     histD_M.SetLineWidth(1)
     histD_M.SetLineColor(ROOT.kBlack)
     histD_M.Draw("E SAME")
+    histD_M2.SetMarkerStyle(20)
+    histD_M2.SetMarkerSize(0.3)
+    histD_M2.SetLineWidth(1)
+    histD_M2.SetLineColor(ROOT.kGreen+2)
+    histD_M2.Draw("E SAME")
 
     if args.ratio and not args.nodata:
       lower_pad.cd()
@@ -422,34 +504,46 @@ for name in histNames:
       # Set up plot for markers and errors
       ratio.Sumw2()
       ratio.SetStats(0)
-      hTotal = histT_M["vv"].Clone('hTotal')
-      for s in samples[1:]:
-        hTotal.Add(histT_M[s])
-      ratio.Divide(hTotal)
+      ratio.Divide(histTT_M)
       ratio.Draw("ep")
 
+      ratio2 = histD_M2.Clone("ratio2")
+      ratio2.SetLineColor(kGreen+2)
+      ratio2.SetMarkerStyle(21)
+      ratio2.SetTitle("")
+      ratio2.SetMinimum(c_rat2)
+      ratio2.SetMaximum(c_rat)
+      ratio2.GetYaxis().SetTitle("Data/MC")
+      ratio2.GetXaxis().SetTitle(name)
+      ratio2.GetXaxis().SetLabelSize(0.08)
+      ratio2.GetXaxis().SetTitleSize(0.12)
+      ratio2.GetXaxis().SetTitleOffset(1.0)
+      ratio2.GetYaxis().SetLabelSize(0.05)
+      ratio2.GetYaxis().SetTitleSize(0.09)
+      ratio2.GetYaxis().CenterTitle()
+      ratio2.GetYaxis().SetTitleOffset(0.5)
+      # Set up plot for markers and errors
+      ratio2.Sumw2()
+      ratio2.SetStats(0)
+      ratio2.Divide(histTT_M2)
+      ratio2.Draw("ep SAME")
+
     if name == "InvM_2jets": 
-      print("Integral of M data is "+str(histD_M.Integral()))
-      print("Integral of M MC is "+str(hTotal.Integral()))
-      print("Ratio is "+str(histD_M.Integral()/hTotal.Integral()))
+      print("Integral of M data with no SF is "+str(histD_M.Integral()))
+      print("Integral of M MC with no SF is "+str(histTT_M.Integral()))
+      print("Ratio for no SF is "+str(histD_M.Integral()/histTT_M.Integral()))
+      print("Integral of M data with SF is "+str(histD_M2.Integral()))
+      print("Integral of M MC with SF is "+str(histTT_M2.Integral()))
+      print("Ratio for SF is "+str(histD_M2.Integral()/histTT_M2.Integral()))
 
     ## Legends
     if args.ratio and not args.nodata: upper_pad.cd()
     leg = TLegend(0.7,0.6,0.89,0.89)
     leg.SetBorderSize(1)
-    leg.AddEntry(histT_M["vv"],"VV","f")
-    leg.AddEntry(histT_M["ttbar_dl"],"Dileptonic top antitop","f")
-    leg.AddEntry(histT_M["zjets"],"Z plus jets","f")
-    leg.AddEntry(histT_M["wjets"],"W plus jets","f")
-    leg.AddEntry(histT_M["st"],"Single top","f")
-    leg.AddEntry(histT_M["ttbar_dh"],"Hadronic top antitop","f")
-    leg.AddEntry(histT_M["ttbar_sl_bottom"],"Top antitop, bottom","f")
-    leg.AddEntry(histT_M["ttbar_sl_light"],"Top antitop, light","f")
-    leg.AddEntry(histT_M["ttbar_sl_charm"],"Top antitop, charm","f")
-    leg.AddEntry(histT_M["ttbar_sl_bottomgluon"],"Top antitop, bottom gluon","f")
-    leg.AddEntry(histT_M["ttbar_sl_charmgluon"],"Top antitop, charm gluon","f")
-    leg.AddEntry(histT_M["ttbar_sl_else"],"Top antitop, gluon gluon","f")
-    if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data" ,"lep")
+    leg.AddEntry(histTT_M,"MC with no ID SF","f")
+    if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data with no ID SF" ,"lep")
+    leg.AddEntry(histTT_M2,"MC with ID SF","f")
+    if args.stack and not args.nodata: leg.AddEntry(histD_M2, "Data with ID SF" ,"lep")
     leg.Draw()
     term= "totalHT_wqq_M"+str(args.year)
     if args.ratio: 
@@ -462,12 +556,19 @@ for name in histNames:
     if args.png: c1.Print(plotdir+term+notation+ name + ".png")
     else: c1.Print(plotdir+term+notation + name + ".pdf")
 
-    stack_E.Draw("HIST")
+    histTT_E.Draw()
+    histTT_E2.Draw("SAME")
     histD_E.SetMarkerStyle(20)
     histD_E.SetMarkerSize(0.3)
     histD_E.SetLineWidth(1)
     histD_E.SetLineColor(ROOT.kBlack)
     histD_E.Draw("E SAME")
+    histD_E2.SetMarkerStyle(20)
+    histD_E2.SetMarkerSize(0.3)
+    histD_E2.SetLineWidth(1)
+    histD_E2.SetLineColor(ROOT.kGreen+2)
+    histD_E2.Draw("E SAME")
+
     if args.ratio and not args.nodata:
       lower_pad.cd()
       ratio = histD_E.Clone("ratio")
@@ -488,34 +589,46 @@ for name in histNames:
       # Set up plot for markers and errors
       ratio.Sumw2()
       ratio.SetStats(0)
-      hTotal = histT_E["vv"].Clone('hTotal')
-      for s in samples[1:]:
-        hTotal.Add(histT_E[s])
-      ratio.Divide(hTotal)
+      ratio.Divide(histTT_E)
       ratio.Draw("ep")
 
+      ratio2 = histD_E2.Clone("ratio2")
+      ratio2.SetLineColor(kGreen+2)
+      ratio2.SetMarkerStyle(21)
+      ratio2.SetTitle("")
+      ratio2.SetMinimum(c_rat2)
+      ratio2.SetMaximum(c_rat)
+      ratio2.GetYaxis().SetTitle("Data/MC")
+      ratio2.GetXaxis().SetTitle(name)
+      ratio2.GetXaxis().SetLabelSize(0.08)
+      ratio2.GetXaxis().SetTitleSize(0.12)
+      ratio2.GetXaxis().SetTitleOffset(1.0)
+      ratio2.GetYaxis().SetLabelSize(0.05)
+      ratio2.GetYaxis().SetTitleSize(0.09)
+      ratio2.GetYaxis().CenterTitle()
+      ratio2.GetYaxis().SetTitleOffset(0.5)
+      # Set up plot for markers and errors
+      ratio2.Sumw2()
+      ratio2.SetStats(0)
+      ratio2.Divide(histTT_E2)
+      ratio2.Draw("ep SAME")
+
     if name == "InvM_2jets":
-      print("Integral of E data is "+str(histD_E.Integral()))
-      print("Integral of E MC is "+str(hTotal.Integral()))
-      print("Ratio is "+str(histD_E.Integral()/hTotal.Integral()))
+      print("Integral of E data with no SF is "+str(histD_E.Integral()))
+      print("Integral of E MC with no SF is "+str(histTT_E.Integral()))
+      print("Ratio for no SF is "+str(histD_E.Integral()/histTT_E.Integral()))
+      print("Integral of E data with SF is "+str(histD_E2.Integral()))
+      print("Integral of E MC with SF is "+str(histTT_E2.Integral()))
+      print("Ratio for SF is "+str(histD_E2.Integral()/histTT_E2.Integral()))
 
     ## Legends
     if args.ratio and not args.nodata: upper_pad.cd()
     leg = TLegend(0.7,0.6,0.89,0.89)
     leg.SetBorderSize(1)
-    leg.AddEntry(histT_E["vv"],"VV","f")
-    leg.AddEntry(histT_E["ttbar_dl"],"Dileptonic top antitop","f")
-    leg.AddEntry(histT_E["zjets"],"Z plus jets","f")
-    leg.AddEntry(histT_E["wjets"],"W plus jets","f")
-    leg.AddEntry(histT_E["st"],"Single top","f")
-    leg.AddEntry(histT_E["ttbar_dh"],"Hadronic top antitop","f")
-    leg.AddEntry(histT_E["ttbar_sl_bottom"],"Top antitop, bottom","f")
-    leg.AddEntry(histT_E["ttbar_sl_light"],"Top antitop, light","f")
-    leg.AddEntry(histT_E["ttbar_sl_charm"],"Top antitop, charm","f")
-    leg.AddEntry(histT_E["ttbar_sl_bottomgluon"],"Top antitop, bottom gluon","f")
-    leg.AddEntry(histT_E["ttbar_sl_charmgluon"],"Top antitop, charm gluon","f")
-    leg.AddEntry(histT_E["ttbar_sl_else"],"Top antitop, gluon gluon","f")
-    if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"lep")
+    leg.AddEntry(histTT_E,"MC with no ID SF","f")
+    if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data with no ID SF" ,"lep")
+    leg.AddEntry(histTT_E2,"MC with ID SF","f")
+    if args.stack and not args.nodata: leg.AddEntry(histD_E2, "Data with ID SF" ,"lep")
     leg.Draw()
     term= "totalHT_wqq_E"+str(args.year)
     if args.ratio:
@@ -533,9 +646,12 @@ for name in histNames:
 for s in samplesHT:
         for data_op in datayears:
                         histFile[data_op][s].Close()
+                        histFile2[data_op][s].Close()
 
 for data_op in datayears:
-	histFileD[data_op]["M"].Close()
-	histFileD[data_op]["E"].Close()
+        histFileD[data_op]["M"].Close()
+        histFileD[data_op]["E"].Close()
+        histFileD2[data_op]["M"].Close()
+        histFileD2[data_op]["E"].Close()
 
 

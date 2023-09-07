@@ -28,13 +28,14 @@ args = parser.parse_args()
 ## Open hists files
 
 filePath = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/"
-term = "histstt_wqq_fromJF"
+term = "histstt_wqq_fromJF_"
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
 
 samplesHT=["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
-        "ttbar_sl_charm","ttbar_sl_bottom","ttbar_sl_light","ttbar_sl_else","ttbar_dl","ttbar_dh",
+        "ttbar_sl_charm","ttbar_sl_bottom","ttbar_sl_light","ttbar_sl_else",
+        "ttbar_sl_charmgluon","ttbar_sl_bottomgluon","ttbar_dl","ttbar_dh",
         "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
         "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz"]
 
@@ -46,13 +47,13 @@ for data_op in datayears:
 	## mc files
 	histFile[data_op] = {}
 	for s in samplesHT:
-		if s[0:8] == "ttbar_sl" and isfile(filePath + term+"_"+s[0:8]+data_op+s[8:]+".root"):
-			histFile[data_op][s] = TFile.Open(filePath + term+"_"+s[0:8]+data_op+s[8:]+".root","READ")
-		elif isfile(filePath + term+"_"+s+data_op+".root"):
-			histFile[data_op][s] = TFile.Open(filePath + term+"_"+s+data_op+".root","READ")
+		if s[0:8] == "ttbar_sl" and isfile(filePath + term+s[0:8]+data_op+s[8:]+".root"):
+			histFile[data_op][s] = TFile.Open(filePath + term+s[0:8]+data_op+s[8:]+".root","READ")
+		elif isfile(filePath + term+s+data_op+".root"):
+			histFile[data_op][s] = TFile.Open(filePath + term+s+data_op+".root","READ")
 	#print(histFile[data_op].keys())
 
-histFile["2016"]["higgs"] = TFile.Open(filePath + term+"_"+"higgs_tocs_m"+str(args.higgsmass)+"2016"+".root","READ")
+histFile["2016"]["higgs"] = TFile.Open(filePath + term+"higgs_tocs_m"+str(args.higgsmass)+"2016"+".root","READ")
 #print(histFile.keys())
 
 histFileD = {}
@@ -60,8 +61,8 @@ histFileD = {}
 for data_op in datayears:
 	histFileD[data_op] = {}
 	# data files
-	histFileD[data_op]["M"] = TFile.Open(filePath + term+"_"+data_op+"M.root","READ")
-	histFileD[data_op]["E"] = TFile.Open(filePath + term+"_"+data_op+"E.root","READ")
+	histFileD[data_op]["M"] = TFile.Open(filePath + term+data_op+"M.root","READ")
+	histFileD[data_op]["E"] = TFile.Open(filePath + term+data_op+"E.root","READ")
 
 samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
@@ -87,6 +88,8 @@ for data_op in samples_d:
 	lumi[data_op]["ttbar_sl_light"] = lumi[data_op]["ttbar_sl"]
 	lumi[data_op]["ttbar_sl_bottom"] = lumi[data_op]["ttbar_sl"]
 	lumi[data_op]["ttbar_sl_else"] = lumi[data_op]["ttbar_sl"]
+	lumi[data_op]["ttbar_sl_charmgluon"] = lumi[data_op]["ttbar_sl"]
+	lumi[data_op]["ttbar_sl_bottomgluon"] = lumi[data_op]["ttbar_sl"]
 
 n_eventsH = {}
 n_eventsH["80"] = 978770 
@@ -116,7 +119,8 @@ print("the higgs mass is ",args.higgsmass)
 #######################################################
 
 samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
-        "ttbar_sl_charm","ttbar_sl_bottom","ttbar_sl_light","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
+        "ttbar_sl_charm","ttbar_sl_bottom","ttbar_sl_light","ttbar_sl_charmgluon","ttbar_sl_bottomgluon",
+        "ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
         "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz","ttbar_sl_else"]
 
 ## HISTS
@@ -253,10 +257,14 @@ histT_E["ttbar_sl_bottom"].SetName("mjj4jwqq"+"_19")
 histT_M["ttbar_sl_bottom"].SetName("mjj4jwqq"+"_20")
 histT_E["ttbar_sl_else"].SetName("mjj4jwqq"+"_21")
 histT_M["ttbar_sl_else"].SetName("mjj4jwqq"+"_22")
+histT_E["ttbar_sl_charmgluon"].SetName("mjj4jwqq"+"_23")
+histT_M["ttbar_sl_charmgluon"].SetName("mjj4jwqq"+"_24")
+histT_E["ttbar_sl_bottomgluon"].SetName("mjj4jwqq"+"_25")
+histT_M["ttbar_sl_bottomgluon"].SetName("mjj4jwqq"+"_26")
 
-samplesF = ["data","ttbar_sl_charm","ttbar_rest","st","wjets","zjets","vv","higgs","ttbar_sl_light","ttbar_sl_bottom","ttbar_sl_else"]
+samplesF = ["data","ttbar_sl_charm","ttbar_rest","st","wjets","zjets","vv","higgs","ttbar_sl_light","ttbar_sl_bottom","ttbar_sl_else","ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
  
-path = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/hm"+str(args.higgsmass)+"/mjj4jwqq.root"
+path = "/nfs/cms/vazqueze/hists_ttbar/hists/higgs/fromJF/wqq/down/hm"+str(args.higgsmass)+"/mjj4jwqq.root"
 
 myfile = TFile( path , 'RECREATE')
 for s in samplesF:
