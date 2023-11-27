@@ -1,0 +1,46 @@
+000 (433494.016.000) 2023-09-13 18:49:08 Job submitted from host: <172.17.47.42:9618?addrs=172.17.47.42-9618&alias=condorsc1.ciemat.es&noUDP&sock=schedd_1710_7f09>
+...
+040 (433494.016.000) 2023-09-13 18:57:53 Started transferring input files
+	Transferring to host: <172.17.36.201:9618?addrs=172.17.36.201-9618&alias=gaew0201.ciemat.es&noUDP&sock=slot1_5_3793_42f3_2229>
+...
+040 (433494.016.000) 2023-09-13 18:57:54 Finished transferring input files
+...
+001 (433494.016.000) 2023-09-13 18:57:54 Job executing on host: <172.17.36.201:9618?addrs=172.17.36.201-9618&alias=gaew0201.ciemat.es&noUDP&sock=startd_2612_3176>
+...
+006 (433494.016.000) 2023-09-13 18:58:03 Image size of job updated: 129548
+	127  -  MemoryUsage of job (MB)
+	129548  -  ResidentSetSize of job (KB)
+...
+006 (433494.016.000) 2023-09-13 18:59:03 Image size of job updated: 4476000
+	2208  -  MemoryUsage of job (MB)
+	2260044  -  ResidentSetSize of job (KB)
+...
+006 (433494.016.000) 2023-09-13 19:00:04 Image size of job updated: 4476000
+	2425  -  MemoryUsage of job (MB)
+	2482780  -  ResidentSetSize of job (KB)
+...
+006 (433494.016.000) 2023-09-13 19:01:05 Image size of job updated: 4534800
+	2469  -  MemoryUsage of job (MB)
+	2527364  -  ResidentSetSize of job (KB)
+...
+040 (433494.016.000) 2023-09-13 19:01:41 Started transferring output files
+...
+040 (433494.016.000) 2023-09-13 19:01:42 Finished transferring output files
+...
+005 (433494.016.000) 2023-09-13 19:01:42 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:38:12, Sys 0 00:01:47  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:38:12, Sys 0 00:01:47  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	348  -  Run Bytes Sent By Job
+	217  -  Run Bytes Received By Job
+	348  -  Total Bytes Sent By Job
+	217  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 4         4 
+	   Disk (KB)            :       12        1    743351 
+	   Memory (MB)          :     2469        1       128 
+
+	Job terminated of its own accord at 2023-09-13T17:01:41Z.
+...

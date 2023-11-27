@@ -1,0 +1,42 @@
+000 (433495.008.000) 2023-09-13 18:49:11 Job submitted from host: <172.17.47.42:9618?addrs=172.17.47.42-9618&alias=condorsc1.ciemat.es&noUDP&sock=schedd_1710_7f09>
+...
+040 (433495.008.000) 2023-09-13 19:46:35 Started transferring input files
+	Transferring to host: <172.17.36.203:9618?addrs=172.17.36.203-9618&alias=gaew0203.ciemat.es&noUDP&sock=slot1_5_3849_b7f6_1438>
+...
+040 (433495.008.000) 2023-09-13 19:46:35 Finished transferring input files
+...
+001 (433495.008.000) 2023-09-13 19:46:36 Job executing on host: <172.17.36.203:9618?addrs=172.17.36.203-9618&alias=gaew0203.ciemat.es&noUDP&sock=startd_2728_c273>
+...
+006 (433495.008.000) 2023-09-13 19:46:45 Image size of job updated: 129548
+	127  -  MemoryUsage of job (MB)
+	129544  -  ResidentSetSize of job (KB)
+...
+006 (433495.008.000) 2023-09-13 19:47:46 Image size of job updated: 4470016
+	1177  -  MemoryUsage of job (MB)
+	1204456  -  ResidentSetSize of job (KB)
+...
+006 (433495.008.000) 2023-09-13 19:47:55 Image size of job updated: 4470100
+	1177  -  MemoryUsage of job (MB)
+	1204456  -  ResidentSetSize of job (KB)
+...
+040 (433495.008.000) 2023-09-13 19:47:55 Started transferring output files
+...
+040 (433495.008.000) 2023-09-13 19:47:55 Finished transferring output files
+...
+005 (433495.008.000) 2023-09-13 19:47:55 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:07:47, Sys 0 00:00:22  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:07:47, Sys 0 00:00:22  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	352  -  Run Bytes Sent By Job
+	217  -  Run Bytes Received By Job
+	352  -  Total Bytes Sent By Job
+	217  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 4         4 
+	   Disk (KB)            :       12        1    741177 
+	   Memory (MB)          :     1177        1       128 
+
+	Job terminated of its own accord at 2023-09-13T17:47:55Z.
+...

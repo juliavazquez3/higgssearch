@@ -1,0 +1,94 @@
+000 (433495.006.000) 2023-09-13 18:49:11 Job submitted from host: <172.17.47.42:9618?addrs=172.17.47.42-9618&alias=condorsc1.ciemat.es&noUDP&sock=schedd_1710_7f09>
+...
+040 (433495.006.000) 2023-09-13 19:44:04 Started transferring input files
+	Transferring to host: <172.17.36.200:9618?addrs=172.17.36.200-9618&alias=gaew0200.ciemat.es&noUDP&sock=slot1_5_3729_2af1_1135>
+...
+040 (433495.006.000) 2023-09-13 19:44:04 Finished transferring input files
+...
+001 (433495.006.000) 2023-09-13 19:44:05 Job executing on host: <172.17.36.200:9618?addrs=172.17.36.200-9618&alias=gaew0200.ciemat.es&noUDP&sock=startd_2654_0071>
+...
+006 (433495.006.000) 2023-09-13 19:44:13 Image size of job updated: 3448
+	4  -  MemoryUsage of job (MB)
+	3448  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:45:13 Image size of job updated: 1894624
+	488  -  MemoryUsage of job (MB)
+	499368  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:46:13 Image size of job updated: 6858304
+	2670  -  MemoryUsage of job (MB)
+	2733196  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:47:13 Image size of job updated: 6858304
+	2882  -  MemoryUsage of job (MB)
+	2950876  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:48:14 Image size of job updated: 6858304
+	3019  -  MemoryUsage of job (MB)
+	3090484  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:49:15 Image size of job updated: 7099620
+	3064  -  MemoryUsage of job (MB)
+	3136528  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:50:16 Image size of job updated: 8636816
+	5247  -  MemoryUsage of job (MB)
+	5371928  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:51:17 Image size of job updated: 8728516
+	5473  -  MemoryUsage of job (MB)
+	5603892  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:52:18 Image size of job updated: 8998596
+	5916  -  MemoryUsage of job (MB)
+	6057948  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:53:19 Image size of job updated: 9034948
+	6184  -  MemoryUsage of job (MB)
+	6332224  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:54:20 Image size of job updated: 9101216
+	6257  -  MemoryUsage of job (MB)
+	6407124  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:55:20 Image size of job updated: 9139524
+	6482  -  MemoryUsage of job (MB)
+	6637332  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 19:56:20 Image size of job updated: 9188448
+	6483  -  MemoryUsage of job (MB)
+	6638076  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 20:08:26 Image size of job updated: 9188448
+	6608  -  MemoryUsage of job (MB)
+	6766524  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 20:09:27 Image size of job updated: 9430344
+	6613  -  MemoryUsage of job (MB)
+	6771552  -  ResidentSetSize of job (KB)
+...
+006 (433495.006.000) 2023-09-13 20:20:30 Image size of job updated: 9554944
+	6613  -  MemoryUsage of job (MB)
+	6771552  -  ResidentSetSize of job (KB)
+...
+040 (433495.006.000) 2023-09-13 20:29:42 Started transferring output files
+...
+040 (433495.006.000) 2023-09-13 20:29:42 Finished transferring output files
+...
+005 (433495.006.000) 2023-09-13 20:29:42 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 10:01:09, Sys 0 00:22:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 10:01:09, Sys 0 00:22:00  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	8527  -  Run Bytes Sent By Job
+	217  -  Run Bytes Received By Job
+	8527  -  Total Bytes Sent By Job
+	217  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :    15.06        4         4 
+	   Disk (KB)            :    26           1    740042 
+	   Memory (MB)          :  6613           1       128 
+
+	Job terminated of its own accord at 2023-09-13T18:29:42Z.
+...

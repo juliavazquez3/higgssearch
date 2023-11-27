@@ -21,6 +21,7 @@ import json
 import argparse
 
 sys.path.append('/nfs/cms/vazqueze/ttbaranalisis/last_corrections/')
+sys.path.append('/nfs/cms/vazqueze/higgssearch/fromJF/ratios_muons_botjet/')
 
 # Some defaults
 gROOT.SetStyle("Plain")
@@ -47,6 +48,8 @@ parser.add_argument("--presel", type=string, default="btagMM_chitest",
                     help="preselection")
 parser.add_argument("--jetbot", type=string, default="one",
                     help="jet to apply selection")
+parser.add_argument("--etabin", type=string, default="none",
+                    help="eta muon requirement")
 parser.add_argument("--syst", type=string, default="nom",
                     help="Selec type of systematic to run")
 parser.add_argument('-l','--list', nargs='+', help='range of sample to use')
@@ -90,8 +93,20 @@ print(chan)
 
 if args.jetbot == "one": channel = "jet_bot1"
 elif args.jetbot == "two": channel = "jet_bot2"
+elif args.jetbot == "one_chi": channel = "jet_bot1_chi"
+elif args.jetbot == "two_chi": channel = "jet_bot2_chi"
+elif args.jetbot == "both_chi": channel = "jet_both_chi"
 else: raise NameError('Incorrect channel')
 print(channel)
+
+if args.etabin == "none": eta_bin = "none"
+elif args.etabin == "one": eta_bin = "one"
+elif args.etabin == "two": eta_bin = "two"
+elif args.etabin == "three": eta_bin = "three"
+elif args.etabin == "four": eta_bin = "four"
+elif args.etabin == "five": eta_bin = "five"
+else: raise NameError('Incorrect channel')
+print(eta_bin)
 
 samples = []
 
@@ -242,6 +257,60 @@ met_filter["2017"] = ("Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_g
 met_filter["2018"] = ("Flag_HBHENoiseFilter && Flag_HBHENoiseIsoFilter && Flag_globalSuperTightHalo2016Filter "
              "&& Flag_EcalDeadCellTriggerPrimitiveFilter && Flag_goodVertices && Flag_BadPFMuonFilter")
 
+######## LUMI Info #############
+
+lumi = {}
+xsecs = {}
+nevents = {}
+
+if mode == "mc":
+   for data_op in years:
+        if data_op=="2016B":        
+           files = json.load(open("/nfs/cms/vazqueze/higgssearch/mcinfo2016.json"))
+        else:
+           files = json.load(open("/nfs/cms/vazqueze/higgssearch/mcinfo"+data_op+".json"))
+        lumi[data_op] = {}
+        xsecs[data_op] = {}
+        for p in samples:
+                if years[0]=="2016B": 
+                  p = p[:-5]
+                else: 
+                  p = p[:-4]
+                xsecval = files[p]["xsec"]
+                num_files = files[p]["files"] # Number of files
+                luminosity = files[p]["lumi"] # Luminosity
+                #print(files[p]["type"])
+                lumi[data_op][p] = luminosity
+                xsecs[data_op][p] = xsecval
+        lumi[data_op]["ttbar_sl_nomuon"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_muon_charm"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_muon_bottom"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_muon_else"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_dl_nomuon"] = lumi[data_op]["ttbar_dl"]
+        lumi[data_op]["ttbar_dl_muon_charm"] = lumi[data_op]["ttbar_dl"]
+        lumi[data_op]["ttbar_dl_muon_bottom"] = lumi[data_op]["ttbar_dl"]
+        lumi[data_op]["ttbar_dl_muon_else"] = lumi[data_op]["ttbar_dl"]
+        xsecs[data_op]["ttbar_sl_nomuon"] = xsecs[data_op]["ttbar_sl"]
+        xsecs[data_op]["ttbar_sl_muon_charm"] = xsecs[data_op]["ttbar_sl"]
+        xsecs[data_op]["ttbar_sl_muon_bottom"] = xsecs[data_op]["ttbar_sl"]
+        xsecs[data_op]["ttbar_sl_muon_else"] = xsecs[data_op]["ttbar_sl"]
+        xsecs[data_op]["ttbar_dl_nomuon"] = xsecs[data_op]["ttbar_dl"]
+        xsecs[data_op]["ttbar_dl_muon_charm"] = xsecs[data_op]["ttbar_dl"]
+        xsecs[data_op]["ttbar_dl_muon_bottom"] = xsecs[data_op]["ttbar_dl"]
+        xsecs[data_op]["ttbar_dl_muon_else"] = xsecs[data_op]["ttbar_dl"]
+
+listsampl = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+        "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
+        "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz", "ttbar_sl_nomuon", "ttbar_sl_muon_charm",
+        "ttbar_sl_muon_bottom", "ttbar_sl_muon_else","ttbar_dl_nomuon", "ttbar_dl_muon_charm",
+        "ttbar_dl_muon_bottom", "ttbar_dl_muon_else","ttbar_sl","ttbar_dl"]
+
+lumi_d = {}
+lumi_d["2016"] = 19.5
+lumi_d["2016B"] = 16.8
+lumi_d["2017"] = 41.5
+lumi_d["2018"] = 59.8
+
 ###################################################
 ################   DEFINITIONS   ##################
 ###################################################
@@ -338,6 +407,48 @@ gInterpreter.Declare("""
 
             auto mJet = std::sqrt((e+e1+e2)*(e+e1+e2)-(x+x1+x2)*(x+x1+x2)-(y+y1+y2)*(y+y1+y2)-(z+z1+z2)*(z+z1+z2));
             return mJet;
+      };
+""")
+
+######### Jet pT reconstruction
+
+gInterpreter.Declare("""
+      using Vbool = const ROOT::RVec<bool>&;
+      using Vfloat = const ROOT::RVec<float>&;
+      using Vint = const ROOT::RVec<int>&;
+      auto ptreconstruction(Vint jetgood, Vfloat pt, Vfloat eta, Vfloat phi, Vfloat mass, Vfloat mu_pt, Vfloat mu_eta, Vfloat mu_phi, Vfloat mu_mass, Vint mu_good, Vbool mu_id){
+            vector<float> vb;
+            vector<int> muind;
+            int indM = -1;
+            bool cond1 = false;
+            bool condmu = true;
+            float pt_rec{-10.};
+            float ptM = -10.;
+            ROOT::Math::PtEtaPhiMVector ptjetvec;
+            ROOT::Math::PtEtaPhiMVector ptmuonvec;
+            for (unsigned int j=0; j<pt.size(); ++j){
+              ptjetvec.SetPt(pt[j]); ptjetvec.SetEta(eta[j]); ptjetvec.SetPhi(phi[j]); ptjetvec.SetM(mass[j]);              
+              for (unsigned int i=0; i<mu_pt.size(); ++i){
+                  cond1 = ROOT::VecOps::DeltaR(mu_eta[i],eta[j],mu_phi[i],phi[j]) < 0.4;
+                  if (mu_good.size() > 0) condmu = mu_good[0] != i;
+                  if(condmu && mu_id[i] && mu_pt[i]<40. && cond1 && mu_pt[i]>3. && mu_pt[i]>ptM){
+                    //muind.push_back(i);
+                    indM = i;
+                    ptM = mu_pt[i];
+                  }
+              }
+              if (indM > -1) {
+                  ptmuonvec.SetPt(mu_pt[indM]); ptmuonvec.SetEta(mu_eta[indM]); ptmuonvec.SetPhi(mu_phi[indM]); ptmuonvec.SetM(mu_mass[indM]);
+                  ptjetvec = 0.99*(ptjetvec - ptmuonvec) + ptmuonvec;              
+              }
+              //for (unsigned int i=0; i<muind.size(); ++i){
+              //    ptmuonvec.SetPt(mu_pt[i]); ptmuonvec.SetEta(mu_eta[i]); ptmuonvec.SetPhi(mu_phi[i]); ptmuonvec.SetM(mu_mass[i]);
+              //    ptjetvec = ptjetvec + ptmuonvec;
+              //}
+              pt_rec = ptjetvec.Pt(); 
+              vb.push_back(pt_rec);
+            }
+            return vb;
       };
 """)
 
@@ -622,13 +733,13 @@ gInterpreter.Declare("""
                 if (mu_good.size() > 0) condmu = mu_good[0] != i;
                 cond1 = ROOT::VecOps::DeltaR(mu_eta[i],eta[blep],mu_phi[i],phi[blep]) < 0.4;
                 cond2 = ROOT::VecOps::DeltaR(mu_eta[i],eta[bhad],mu_phi[i],phi[bhad]) < 0.4;
-                if (condmu && mu_id[i] && mu_pt[i]<40. && cond1 && mu_pt[i]>3.){
+                if (condmu && mu_id[i] && mu_pt[i]<40. && cond1 && mu_pt[i]>3. && fabs(mu_eta[i])<2.4){
                    muon_mul_lep = muon_mul_lep+1;
                    if (mu_pt[i]>ptMlep) {
                      indMlep = i;
                      ptMlep = mu_pt[i];
                    }
-                } else if (condmu && mu_id[i] && mu_pt[i]<40. && cond2 && mu_pt[i]>3.) {
+                } else if (condmu && mu_id[i] && mu_pt[i]<40. && cond2 && mu_pt[i]>3. && fabs(mu_eta[i])<2.4) {
                    muon_mul_had = muon_mul_had+1;
                    if (mu_pt[i]>ptMhad) {
                      indMhad = i;
@@ -697,6 +808,38 @@ gInterpreter.Declare("""
                  mother_id_v2 = 0;
             }
             return mother_id_v2;
+      };
+""")
+
+#### muon calculations
+
+gInterpreter.Declare("""
+      using Vbool = const ROOT::RVec<bool>&;
+      using Vfloat = const ROOT::RVec<float>&;
+      using Vint = const ROOT::RVec<int>&;
+      auto scalprod(const float x1, const float y1, const float z1, const float x2, const float y2, const float z2) {
+          float pr;
+          pr = x1*x2+y1*y2+z1*z2;
+          return pr;
+      };
+      auto muons_zvals(Vfloat mu_iso, Vfloat mu_pt, Vfloat mu_eta, Vfloat mu_phi, Vfloat mu_mass, Vfloat jet_pt, Vfloat jet_eta, Vfloat jet_phi, Vfloat jet_mass, const int muind, const int jetind) {
+            vector<float> vb;
+            ROOT::Math::PtEtaPhiMVector muvec;
+            ROOT::Math::PtEtaPhiMVector jetvec;
+            if (muind>-1) {
+               muvec.SetPt(mu_pt[muind]);muvec.SetEta(mu_eta[muind]);muvec.SetPhi(mu_phi[muind]);muvec.SetM(mu_mass[muind]);
+            } else {
+               muvec.SetPt(0);muvec.SetEta(0);muvec.SetPhi(0);muvec.SetM(0);
+            }
+            jetvec.SetPt(jet_pt[jetind]);jetvec.SetEta(jet_eta[jetind]);jetvec.SetPhi(jet_phi[jetind]);jetvec.SetM(jet_mass[jetind]);
+            float z2; float z3; float z4;
+            z2 = (muvec.Dot(jetvec))/(jetvec.Dot(jetvec));
+            z3 = (1+mu_iso[muind])*(muvec.Pt()/jetvec.Pt());
+            z4 = (scalprod(muvec.X(),muvec.Y(),muvec.Z(),jetvec.X(),jetvec.Y(),jetvec.Z()))/(scalprod(jetvec.X(),jetvec.Y(),jetvec.Z(),jetvec.X(),jetvec.Y(),jetvec.Z()));
+            vb.push_back(z2);
+            vb.push_back(z3);
+            vb.push_back(z4);
+            return vb;
       };
 """)
 
@@ -832,7 +975,8 @@ df_test = {}
 if mode == "mc":
    if args.syst == "nom":
         for s in samples:
-           df[s] = df[s].Define('Jet_pt_aux','0.99*Jet_pt_nom')
+           df[s] = df[s].Define('Jet_pt_aux','ptreconstruction(JetGoodInd, Jet_pt_nom, Jet_eta, Jet_phi, Jet_mass, Muon_pt, Muon_eta, Muon_phi, Muon_mass, MuonGoodInd, Muon_tightId)')
+           #df[s] = df[s].Define('Jet_pt_aux','0.99*Jet_pt_nom')
            #df[s] = df[s].Define('Jet_pt_aux','Jet_pt')
            df[s] = df[s].Define('MET_pt_aux','MET_smeared_pt')
            #df[s] = df[s].Define('MET_pt_aux','MET_pt')
@@ -923,6 +1067,8 @@ for s in samples:
         df[s] = df[s].Define('deltaEta_lep_jet2','aux_various[19]')
         df[s] = df[s].Define('jet_bot1_btag','Jet_btagDeepFlavB[JetGoodInd[JetBotInd[0]]]')
         df[s] = df[s].Define('jet_bot2_btag','Jet_btagDeepFlavB[JetGoodInd[JetBotInd[1]]]')
+        df[s] = df[s].Define('jet_bot1_bcorr','Jet_bRegCorr[JetGoodInd[JetBotInd[0]]]')
+        df[s] = df[s].Define('jet_bot2_bcorr','Jet_bRegCorr[JetGoodInd[JetBotInd[1]]]')
         df[s] = df[s].Define('jet_bot1_pt','Jet_pt_aux[JetGoodInd[JetBotInd[0]]]')
         df[s] = df[s].Define('jet_bot2_pt','Jet_pt_aux[JetGoodInd[JetBotInd[1]]]')
         df[s] = df[s].Define('jet_bot1_eta','Jet_eta[JetGoodInd[JetBotInd[0]]]')
@@ -985,14 +1131,47 @@ for s in samples:
         df[s] = df[s].Define('muon_bot2_eta','bot2_muon_id > -1 ? Muon_eta[bot2_muon_id] : -10')
         df[s] = df[s].Define('muon_bot1_pt','bot1_muon_id > -1 ? Muon_pt[bot1_muon_id] : -10')
         df[s] = df[s].Define('muon_bot2_pt','bot2_muon_id > -1 ? Muon_pt[bot2_muon_id] : -10')
-        df[s] = df[s].Define('muon_bot1_z','jet_bot1_pt > 0. ? muon_bot1_pt/jet_bot1_pt : -10.')
-        df[s] = df[s].Define('muon_bot2_z','jet_bot2_pt > 0. ? muon_bot2_pt/jet_bot2_pt : -10.')
+        if mode == "mc":
+            df[s] = df[s].Define('muon_bot1_z','jet_bot1_pt > 0. ? 0.99*muon_bot1_pt/jet_bot1_pt : -10.')
+            df[s] = df[s].Define('muon_bot2_z','jet_bot2_pt > 0. ? 0.99*muon_bot2_pt/jet_bot2_pt : -10.')
+        else:
+            df[s] = df[s].Define('muon_bot1_z','jet_bot1_pt > 0. ? muon_bot1_pt/jet_bot1_pt : -10.')
+            df[s] = df[s].Define('muon_bot2_z','jet_bot2_pt > 0. ? muon_bot2_pt/jet_bot2_pt : -10.')
         df[s] = df[s].Define('muon_bot1_iso','bot1_muon_id > -1 ? Muon_pfRelIso04_all[bot1_muon_id] : -10')
         df[s] = df[s].Define('muon_bot2_iso','bot2_muon_id > -1 ? Muon_pfRelIso04_all[bot2_muon_id] : -10')
+        df[s] = df[s].Define('muon_bot1_iso_abs','bot1_muon_id > -1 ? Muon_pfRelIso04_all[bot1_muon_id]*muon_bot1_pt : -10')
+        df[s] = df[s].Define('muon_bot2_iso_abs','bot2_muon_id > -1 ? Muon_pfRelIso04_all[bot2_muon_id]*muon_bot2_pt : -10')
+        df[s] = df[s].Define('muon_both_iso_abs','bot1_muon_id > -1 ? muon_bot1_iso_abs : (bot2_muon_id > -1 ? muon_bot2_iso_abs : -10.)')
         df[s] = df[s].Define('muon_bot1_pt_rel','bot1_muon_id > -1 ?  Muon_pt[bot1_muon_id]*ROOT::VecOps::DeltaR(Muon_eta[bot1_muon_id],Jet_eta[JetGoodInd[JetBotInd[0]]],Muon_phi[bot1_muon_id],Jet_phi[JetGoodInd[JetBotInd[0]]]) : -10')
         df[s] = df[s].Define('muon_bot2_pt_rel','bot2_muon_id > -1 ?  Muon_pt[bot2_muon_id]*ROOT::VecOps::DeltaR(Muon_eta[bot2_muon_id],Jet_eta[JetGoodInd[JetBotInd[1]]],Muon_phi[bot2_muon_id],Jet_phi[JetGoodInd[JetBotInd[1]]]) : -10')
         df[s] = df[s].Define('muon_bot1_iso_log','bot1_muon_id > -1 ? std::log(Muon_pfRelIso04_all[bot1_muon_id]+1) : -10')
         df[s] = df[s].Define('muon_bot2_iso_log','bot2_muon_id > -1 ? std::log(Muon_pfRelIso04_all[bot2_muon_id]+1) : -10')
+        df[s] = df[s].Define('muon_both_eta','bot1_muon_id > -1 ? Muon_eta[bot1_muon_id] : (bot2_muon_id > -1 ? Muon_eta[bot2_muon_id] : -10.)')
+        df[s] = df[s].Define('muon_both_pt','bot1_muon_id > -1 ? Muon_pt[bot1_muon_id] : (bot2_muon_id > -1 ? Muon_pt[bot2_muon_id] : -10.)')
+        df[s] = df[s].Define('muon_both_z','bot1_muon_id > -1 ? muon_bot1_z : muon_bot2_z')
+        df[s] = df[s].Define('muon_both_iso','bot1_muon_id > -1 ? Muon_pfRelIso04_all[bot1_muon_id] : (bot2_muon_id > -1 ? Muon_pfRelIso04_all[bot2_muon_id] : -10.)')
+        df[s] = df[s].Define('muon_both_pt_rel','bot1_muon_id > -1 ?  Muon_pt[bot1_muon_id]*ROOT::VecOps::DeltaR(Muon_eta[bot1_muon_id],Jet_eta[JetGoodInd[JetBotInd[0]]],Muon_phi[bot1_muon_id],Jet_phi[JetGoodInd[JetBotInd[1]]]) : (bot2_muon_id > -1 ?  Muon_pt[bot2_muon_id]*ROOT::VecOps::DeltaR(Muon_eta[bot2_muon_id],Jet_eta[JetGoodInd[JetBotInd[1]]],Muon_phi[bot2_muon_id],Jet_phi[JetGoodInd[JetBotInd[1]]]) : -10.)')
+        df[s] = df[s].Define('muon_both_iso_log','bot1_muon_id > -1 ? std::log(Muon_pfRelIso04_all[bot1_muon_id]+1) : (bot2_muon_id > -1 ? std::log(Muon_pfRelIso04_all[bot2_muon_id]+1) : -10.)')
+        df[s] = df[s].Define('deltaR_muon_jet','bot1_muon_id > -1 ? ROOT::VecOps::DeltaR(Muon_eta[bot1_muon_id],jet_bot1_eta,Muon_phi[bot1_muon_id],jet_bot1_phi) : (bot2_muon_id > -1 ? ROOT::VecOps::DeltaR(Muon_eta[bot2_muon_id],jet_bot2_eta,Muon_phi[bot2_muon_id],jet_bot2_phi) : -10.)')
+        df[s] = df[s].Define('aux_muons1','muons_zvals(Muon_pfRelIso04_all, Muon_pt, Muon_eta, Muon_phi, Muon_mass, Jet_pt, Jet_eta, Jet_phi, Jet_mass, bot1_muon_id,JetGoodInd[JetBotInd[0]])')
+        df[s] = df[s].Define('aux_muons2','muons_zvals(Muon_pfRelIso04_all, Muon_pt, Muon_eta, Muon_phi, Muon_mass, Jet_pt, Jet_eta, Jet_phi, Jet_mass, bot2_muon_id,JetGoodInd[JetBotInd[1]])')
+        if mode == "mc":
+           df[s] = df[s].Define('muon_bot1_z2','0.99*aux_muons1[0]')
+           df[s] = df[s].Define('muon_bot1_z2_v2','0.99*aux_muons1[2]')
+           df[s] = df[s].Define('muon_bot1_z3','0.99*aux_muons1[1]')
+           df[s] = df[s].Define('muon_bot2_z2','0.99*aux_muons2[0]')
+           df[s] = df[s].Define('muon_bot2_z2_v2','0.99*aux_muons2[2]')
+           df[s] = df[s].Define('muon_bot2_z3','0.99*aux_muons2[1]')
+        else:
+           df[s] = df[s].Define('muon_bot1_z2','aux_muons1[0]')
+           df[s] = df[s].Define('muon_bot1_z2_v2','aux_muons1[2]')
+           df[s] = df[s].Define('muon_bot1_z3','aux_muons1[1]')
+           df[s] = df[s].Define('muon_bot2_z2','aux_muons2[0]')
+           df[s] = df[s].Define('muon_bot2_z2_v2','aux_muons2[2]')
+           df[s] = df[s].Define('muon_bot2_z3','aux_muons2[1]')
+        df[s] = df[s].Define('muon_both_z2','bot1_muon_id > -1 ? muon_bot1_z2 : muon_bot2_z2')
+        df[s] = df[s].Define('muon_both_z2_v2','bot1_muon_id > -1 ? muon_bot1_z2_v2 : muon_bot2_z2_v2')
+        df[s] = df[s].Define('muon_both_z3','bot1_muon_id > -1 ? muon_bot1_z3 : muon_bot2_z3')
 
 ############################################################
 #### Distinguishing between same sign and opposite sign ####
@@ -1026,12 +1205,62 @@ for s in samples:
         df[s] = df[s].Define('chi_bool','kinfittest(InvM_2jets, InvM30, InvM31, InvMl0, InvMl1)')
         df[s] = df[s].Filter('jet_bot1_btag >'+str(cuts_btag[years[0]][1]))
         df[s] = df[s].Filter('jet_bot2_btag >'+str(cuts_btag[years[0]][1]))
-        #df[s] = df[s].Filter('kinfittest(InvM_2jets, InvM30, InvM31, InvMl0, InvMl1)')
+        if channel[8:] == "_chi": df[s] = df[s].Filter('kinfittest(InvM_2jets, InvM30, InvM31, InvMl0, InvMl1)')
         ### bot requirements
-        if channel == "jet_bot1":
+        if channel[0:8] == "jet_bot1":
            df[s] = df[s].Filter('bot1_muon_id > -1')
-        elif channel == "jet_bot2":
+           df[s] = df[s].Filter('muon_bot1_z < 0.5')
+           #df[s] = df[s].Filter('muon_bot1_iso_abs > 2.5')
+        elif channel[0:8] == "jet_bot2":
            df[s] = df[s].Filter('bot2_muon_id > -1')
+           df[s] = df[s].Filter('muon_bot2_z < 0.5')
+           #df[s] = df[s].Filter('muon_bot2_iso_abs > 2.5')
+        elif channel[0:8] == "jet_both":
+           df[s] = df[s].Filter('bot1_muon_id > -1 || (bot2_muon_id > -1 && bot1_muon_id < 0)')
+           #df[s] = df[s].Filter('bot1_muon_id > -1 || bot2_muon_id > -1')
+           #df[s] = df[s].Filter('muon_both_z < 0.5')
+           #df[s] = df[s].Filter('muon_both_iso_abs > 2.5')
+        if eta_bin == "one":
+           if channel[0:8] == "jet_bot1":
+              df[s] = df[s].Filter('fabs(muon_bot1_eta)<0.45')
+           elif channel[0:8] == "jet_bot2":
+              df[s] = df[s].Filter('fabs(muon_bot2_eta)<0.45')
+        elif eta_bin == "two":
+       	   if channel[0:8] == "jet_bot1":
+              df[s] = df[s].Filter('fabs(muon_bot1_eta)>0.45 && fabs(muon_bot1_eta)<0.9')
+       	   elif channel[0:8] == "jet_bot2":
+              df[s] = df[s].Filter('fabs(muon_bot2_eta)>0.45 && fabs(muon_bot2_eta)<0.9')
+        elif eta_bin == "three":
+           if channel[0:8] == "jet_bot1":
+              df[s] = df[s].Filter('fabs(muon_bot1_eta)>0.9 && fabs(muon_bot1_eta)<1.2')
+           elif channel[0:8] == "jet_bot2":
+              df[s] = df[s].Filter('fabs(muon_bot2_eta)>0.9 && fabs(muon_bot2_eta)<1.2')
+        elif eta_bin == "four":
+           if channel[0:8] == "jet_bot1":
+              df[s] = df[s].Filter('fabs(muon_bot1_eta)>1.2 && fabs(muon_bot1_eta)<1.8')
+           elif channel[0:8] == "jet_bot2":
+              df[s] = df[s].Filter('fabs(muon_bot2_eta)>1.2 && fabs(muon_bot2_eta)<1.8')
+        elif eta_bin == "five":
+           if channel[0:8] == "jet_bot1":
+              df[s] = df[s].Filter('fabs(muon_bot1_eta)>1.8 && fabs(muon_bot1_eta)<2.4')
+           elif channel[0:8] == "jet_bot2":
+              df[s] = df[s].Filter('fabs(muon_bot2_eta)>1.8 && fabs(muon_bot2_eta)<2.4')
+
+########### XSEC vars ############
+
+if mode == "mc":
+     for s in samples:
+        if years[0]=="2016B":
+               df[s] = df[s].Define('var_xsec',str(xsecs[years[0]][s[:-5]]))
+               df[s] = df[s].Define('var_lumi',str(lumi[years[0]][s[:-5]]))
+               df[s] = df[s].Define('lumi_data',str(lumi_d[years[0]]))
+               df[s] = df[s].Define('weight_lumi','lumi_data/var_lumi')
+        else:
+               df[s] = df[s].Define('var_xsec',str(xsecs[years[0]][s[:-4]]))
+               df[s] = df[s].Define('var_lumi',str(lumi[years[0]][s[:-4]]))
+               df[s] = df[s].Define('lumi_data',str(lumi_d[years[0]]))
+               df[s] = df[s].Define('weight_lumi','lumi_data/var_lumi')
+
 
 ############ Trigger scale factors ##############
 
@@ -1099,6 +1328,30 @@ if mode == "mc":
                 b= branchingfractions_SL_corRDF(**kwargs)
                 df[s] = b().run(df[s])
 
+############ Muon in bot jet SF ##############
+
+from muon_in_bot_sf import *
+
+if mode=="mc":
+        for s in samples:
+                if s[-1]=="B":
+                  if channel[0:8] == "jet_bot1":
+                       kwargs = {"year":s[-5:],"isMC":True, "isUL":True, "canal":"bot1"}
+                  elif channel[0:8] == "jet_bot2":
+                       kwargs = {"year":s[-5:],"isMC":True, "isUL":True, "canal":"bot2"}
+                  elif channel[0:8] == "jet_both":
+                       kwargs = {"year":s[-5:],"isMC":True, "isUL":True, "canal":"both"}
+                else:
+                  if channel[0:8] == "jet_bot1":
+                       kwargs = {"year":s[-4:],"isMC":True, "isUL":True, "canal":"bot1"}
+                  elif channel[0:8] == "jet_bot2":
+                       kwargs = {"year":s[-4:],"isMC":True, "isUL":True, "canal":"bot2"}
+                  elif channel[0:8] == "jet_both":
+                       kwargs = {"year":s[-4:],"isMC":True, "isUL":True, "canal":"both"}
+                       #print(kwargs)
+                b= muon_frombot_sfRDF(**kwargs)
+                df[s] = b().run(df[s])
+
 ############ Gen level definitions
 
 if mode == "mc":
@@ -1138,7 +1391,7 @@ cond42 = 'muon_bot2_mother_mine == 0'
 if mode == "mc":
         for s in samples:
                 if (s[0:8] == "ttbar_sl" and (s[-1]=="6" or s[-1]=="7" or s[-1]=="8" or s[-1]=="B")):
-                   if channel == "jet_bot1":
+                   if channel[0:8] == "jet_bot1":
                         df[s+"_nomuon"] = df[s].Filter('muon_bot1_mother_mine < 0')
                         df[s+"_muon_charm"] = df[s].Filter('muon_bot1_mother_mine > 0 && muon_bot1_mother_mine < 5')
                         df[s+"_muon_bottom"] = df[s].Filter('muon_bot1_mother_mine > 4 && muon_bot1_mother_mine < 9')
@@ -1148,18 +1401,28 @@ if mode == "mc":
                         samples.append(s+"_muon_charm")
                         samples.append(s+"_muon_bottom")
                         samples.append(s+"_muon_else")
-                   elif channel == "jet_bot2":
+                   elif channel[0:8] == "jet_bot2":
                         df[s+"_nomuon"] = df[s].Filter('muon_bot2_mother_mine < 0')
                         df[s+"_muon_charm"] = df[s].Filter('muon_bot2_mother_mine > 0 && muon_bot2_mother_mine < 5')
                         df[s+"_muon_bottom"] = df[s].Filter('muon_bot2_mother_mine > 4 && muon_bot2_mother_mine < 9')
                         df[s+"_muon_else"] = df[s].Filter('muon_bot2_mother_mine == 0')
+                        ## Samples correction
+                        samples.append(s+"_nomuon")
+                        samples.append(s+"_muon_charm")
+                        samples.append(s+"_muon_bottom")
+                        samples.append(s+"_muon_else")
+                   elif channel[0:8] == "jet_both":
+                        df[s+"_nomuon"] = df[s].Filter('bot1_muon_id > -1 ? muon_bot1_mother_mine < 0 : muon_bot2_mother_mine < 0')
+                        df[s+"_muon_charm"] = df[s].Filter('bot1_muon_id > -1 ? (muon_bot1_mother_mine > 0 && muon_bot1_mother_mine < 5) : (muon_bot2_mother_mine > 0 && muon_bot2_mother_mine < 5)')
+                        df[s+"_muon_bottom"] = df[s].Filter('bot1_muon_id > -1 ? (muon_bot1_mother_mine > 4 && muon_bot1_mother_mine < 9) : (muon_bot2_mother_mine > 4 && muon_bot2_mother_mine < 9)')
+                        df[s+"_muon_else"] = df[s].Filter('bot1_muon_id > -1 ? (muon_bot1_mother_mine == 0) : (muon_bot2_mother_mine == 0)')
                         ## Samples correction
                         samples.append(s+"_nomuon")
                         samples.append(s+"_muon_charm")
                         samples.append(s+"_muon_bottom")
                         samples.append(s+"_muon_else")
                 if (s[0:8] == "ttbar_dl" and (s[-1]=="6" or s[-1]=="7" or s[-1]=="8" or s[-1]=="B")):
-                   if channel == "jet_bot1":
+                   if channel[0:8] == "jet_bot1":
                         df[s+"_nomuon"] = df[s].Filter('muon_bot1_mother_mine < 0')
                         df[s+"_muon_charm"] = df[s].Filter('muon_bot1_mother_mine > 0 && muon_bot1_mother_mine < 5')
                         df[s+"_muon_bottom"] = df[s].Filter('muon_bot1_mother_mine > 4 && muon_bot1_mother_mine < 9')
@@ -1169,11 +1432,21 @@ if mode == "mc":
                         samples.append(s+"_muon_charm")
                         samples.append(s+"_muon_bottom")
                         samples.append(s+"_muon_else")
-       	       	   elif	channel == "jet_bot2":
+       	       	   elif	channel[0:8] == "jet_bot2":
                         df[s+"_nomuon"] = df[s].Filter('muon_bot2_mother_mine < 0')
                         df[s+"_muon_charm"] = df[s].Filter('muon_bot2_mother_mine > 0 && muon_bot2_mother_mine < 5')
                         df[s+"_muon_bottom"] = df[s].Filter('muon_bot2_mother_mine > 4 && muon_bot2_mother_mine < 9')
                         df[s+"_muon_else"] = df[s].Filter('muon_bot2_mother_mine == 0')
+                        ## Samples correction
+                        samples.append(s+"_nomuon")
+                        samples.append(s+"_muon_charm")
+                        samples.append(s+"_muon_bottom")
+                        samples.append(s+"_muon_else")
+                   elif channel[0:8] == "jet_both":
+                        df[s+"_nomuon"] = df[s].Filter('bot1_muon_id > -1 ? muon_bot1_mother_mine < 0 : muon_bot2_mother_mine < 0')
+                        df[s+"_muon_charm"] = df[s].Filter('bot1_muon_id > -1 ? (muon_bot1_mother_mine > 0 && muon_bot1_mother_mine < 5) : (muon_bot2_mother_mine > 0 && muon_bot2_mother_mine < 5)')
+                        df[s+"_muon_bottom"] = df[s].Filter('bot1_muon_id > -1 ? (muon_bot1_mother_mine > 4 && muon_bot1_mother_mine < 9) : (muon_bot2_mother_mine > 4 && muon_bot2_mother_mine < 9)')
+                        df[s+"_muon_else"] = df[s].Filter('bot1_muon_id > -1 ? (muon_bot1_mother_mine == 0) : (muon_bot2_mother_mine == 0)')
                         ## Samples correction
                         samples.append(s+"_nomuon")
                         samples.append(s+"_muon_charm")
@@ -1209,7 +1482,15 @@ for s in samples:
                df[s] = df[s].Define('lep_trig_sf','nMuonGood>0 ? trigger_sf_mu_aux[MuonGoodInd[0]] : trigger_sf_el_aux[ElectronGoodInd[0]]')
                #df_M[s] = df_M[s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*puWeight*PUjetID_SF*lep_trig_sf*top_weight')
                #df_E[s] = df_E[s].Define('weightSSOS_final','weight_aux*lep_id_sf*btag_sf*puWeight*PUjetID_SF*lep_trig_sf*top_weight')
-               df[s] = df[s].Define('lep_id_lowpt_sf','1.')
+               #if (channel[0:8]=="jet_bot1"):
+               #   df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso[bot1_muon_id]')
+               #if (channel[0:8]=="jet_bot2"):
+               #   df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso[bot2_muon_id]')
+               #if (channel[0:8]=="jet_both"):
+               #   df[s] = df[s].Define('lep_id_lowpt_sf','bot1_muon_id > -1 ? muon_from_bot_sf_iso[bot1_muon_id] : muon_from_bot_sf_iso[bot2_muon_id]')
+               df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso_abs[0]')
+               #df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_z[0]')
+               #df[s] = df[s].Define('lep_id_lowpt_sf','1.')
                df[s] = df[s].Define('frag_weight','1.')
                df[s] = df[s].Define('ssos_weight','1.')
                df[s] = df[s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
@@ -1260,7 +1541,10 @@ observable_names = ["nJetGood", "jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt"
    "deltaR_jet1_tau","jet_1_eta_thick","jet_2_eta_thick","jet_bot1_eta_thick","jet_bot2_eta_thick",
    "InvM_2jets_thick","InvM_2jets_short","bot1_muons","bot2_muons","muon_bot1_eta","muon_bot2_eta","muon_bot1_pt","muon_bot2_pt",
    "muon_bot1_z","muon_bot2_z","muon_bot1_iso","muon_bot2_iso","muon_bot1_pt_rel","muon_bot2_pt_rel","muon_bot1_iso_log","muon_bot2_iso_log",
-   "jet_bot1_tracks", "jet_bot2_tracks"]
+   "jet_bot1_tracks", "jet_bot2_tracks","muon_bot1_z_short","muon_bot2_z_short",
+   "muon_both_eta","muon_both_pt","muon_both_z","muon_both_iso","muon_both_pt_rel","muon_both_iso_log","muon_both_z_short","deltaR_muon_jet",
+   "muon_bot1_z2","muon_bot1_z3","muon_bot2_z2","muon_bot2_z3","muon_both_z2","muon_both_z3","muon_both_z2_v2","muon_bot1_z_short","muon_bot2_z_short",
+   "muon_bot1_z2_v2","muon_bot2_z2_v2","muon_bot1_iso_abs","muon_bot2_iso_abs","muon_both_iso_abs"]
 
 column_names = {}
 
@@ -1273,6 +1557,7 @@ column_names["MET_sig"] = "MET_significance"; column_names["MET_my_sig"] = "MET_
 column_names["jet_1_eta_thick"] = "jet_1_eta";column_names["jet_2_eta_thick"] = "jet_2_eta";column_names["jet_bot1_eta_thick"] = "jet_bot1_eta";column_names["jet_bot2_eta_thick"] = "jet_bot2_eta";
 column_names["InvM_2jets_thick"] = "InvM_2jets";column_names["InvM_2jets_short"] = "InvM_2jets";
 column_names["muon_bot1_mother_detail"] = "muon_bot1_mother";column_names["muon_bot2_mother_detail"] = "muon_bot2_mother";
+column_names["muon_bot1_z_short"] = "muon_bot1_z";column_names["muon_bot2_z_short"] = "muon_bot2_z";column_names["muon_both_z_short"] = "muon_both_z";
 
 dict_binlim = {}
 dict_binlim["nJetGood"] = [7,4,11]; dict_binlim["jet_2_mass"] = [40,0,40];
@@ -1315,9 +1600,16 @@ dict_binlim["muon_bot1_pt"]=[45,0,45];dict_binlim["muon_bot2_pt"]=[45,0,45];dict
 dict_binlim["muon_bot1_mother"]=[500,300,800];dict_binlim["muon_bot2_mother"]=[500,300,800];
 dict_binlim["muon_bot1_mother_mine"]=[10,0,10];dict_binlim["muon_bot2_mother_mine"]=[10,0,10];
 dict_binlim["muon_bot1_iso"]=[40,0,20];dict_binlim["muon_bot2_iso"]=[40,0,20];
-dict_binlim["muon_bot1_mother_detail"]=[40,0,40];dict_binlim["muon_bot2_mother_detail"]=[40,0,40];
-dict_binlim["muon_bot1_iso_log"]=[50,0,3];dict_binlim["muon_bot2_iso_log"]=[50,0,3];dict_binlim["muon_bot1_pt_rel"]=[50,0,3];dict_binlim["muon_bot2_pt_rel"]=[50,0,3];
-dict_binlim["jet_bot1_tracks"] = [60,0,60]; dict_binlim["jet_bot2_tracks"] = [60,0,60];
+dict_binlim["muon_bot1_mother_detail"]=[40,0,40];dict_binlim["muon_bot2_mother_detail"]=[40,0,40];dict_binlim["muon_bot1_z_short"]=[20,0,0.5];dict_binlim["muon_bot2_z_short"]=[20,0,0.5];
+dict_binlim["muon_bot1_iso_log"]=[30,0,3];dict_binlim["muon_bot2_iso_log"]=[30,0,3];dict_binlim["muon_bot1_pt_rel"]=[50,0,3];dict_binlim["muon_bot2_pt_rel"]=[50,0,3];
+dict_binlim["jet_bot1_tracks"] = [60,0,60]; dict_binlim["jet_bot2_tracks"] = [60,0,60]; dict_binlim["muon_from_bot_sf_z"] = [50,0.5,1.1];
+dict_binlim["muon_both_pt"]=[45,0,45];dict_binlim["muon_both_z"]=[40,0,1];dict_binlim["muon_both_eta"]=[18,-2.7,2.7];dict_binlim["muon_both_iso"]=[40,0,20];
+dict_binlim["muon_both_z_short"]=[20,0,0.5];dict_binlim["muon_both_iso_log"]=[30,0,3];dict_binlim["muon_both_pt_rel"]=[50,0,3];
+dict_binlim["deltaR_muon_jet"]=[40,0,0.4];dict_binlim["muon_bot1_z_short"]=[20,0,0.5];dict_binlim["muon_bot2_z_short"]=[20,0,0.5];
+dict_binlim["muon_bot1_z2"]=[40,0,1];dict_binlim["muon_bot2_z2"]=[40,0,1];dict_binlim["muon_bot1_z3"]=[40,0,1];dict_binlim["muon_bot2_z3"]=[40,0,1];
+dict_binlim["muon_both_z2"]=[40,0,1];dict_binlim["muon_both_z3"]=[40,0,1];dict_binlim["muon_both_z2_v2"]=[40,0,1];
+dict_binlim["muon_bot2_z2_v2"]=[40,0,1];dict_binlim["muon_bot1_z2_v2"]=[40,0,1];
+dict_binlim["muon_bot1_iso_abs"]=[40,0,100];dict_binlim["muon_bot2_iso_abs"]=[40,0,100];dict_binlim["muon_both_iso_abs"]=[40,0,100];
 
 dict_binlim_M = dict(dict_binlim); dict_binlim_E = dict(dict_binlim);
 dict_binlim_M["lepton_pt"] = [50,20,120];dict_binlim_E["lepton_pt"] = [50,25,125];
@@ -1356,7 +1648,7 @@ hist_mc = {}
 
 observable_mc_names = ["jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP", "btag_sf", "lep_id_sf", "lep_trig_sf", "lep_iso_sf",
      "puWeight", "PUjetID_SF", "top_weight","Frag_weight_sl","Br_weight_sl","muon_bot1_mother","muon_bot2_mother","muon_bot1_mother_mine","muon_bot2_mother_mine",
-     "muon_bot1_mother_detail","muon_bot2_mother_detail"]
+     "muon_bot1_mother_detail","muon_bot2_mother_detail","muon_from_bot_sf_z"]
 
 for name in observable_mc_names:
    column_names[name] = name
@@ -1369,14 +1661,127 @@ if mode == "mc":
         for s in samples:
               hist_mc[name][s] = df[s].Histo1D((s+"_"+name,"",dict_binlim[name][0],dict_binlim[name][1],dict_binlim[name][2]),column_names[name],"weightSSOS_final")
 
+##################################################
+################ NTUPLES SAVING ##################
+##################################################
+
+brlist = ["nElectronGood","ElectronGoodInd", "nElectron","Electron_charge", "Electron_cleanmask", "Electron_convVeto", "Electron_cutBased", "Electron_cutBased_HEEP", "Electron_dEscaleDown",
+  "Electron_dEscaleUp", "Electron_dEsigmaDown", "Electron_dEsigmaUp", "Electron_deltaEtaSC", "Electron_dr03EcalRecHitSumEt", "Electron_dr03HcalDepth1TowerSumEt",
+  "Electron_dr03TkSumPt", "Electron_dr03TkSumPtHEEP", "Electron_dxy", "Electron_dxyErr", "Electron_dz", "Electron_dzErr", "Electron_eCorr", "Electron_eInvMinusPInv",
+  "Electron_energyErr", "Electron_eta", "Electron_hoe", "Electron_ip3d", "Electron_isPFcand", "Electron_jetIdx",
+  "Electron_jetNDauCharged", "Electron_jetPtRelv2", "Electron_jetRelIso", "Electron_lostHits", "Electron_mass", "Electron_miniPFRelIso_all",
+  "Electron_miniPFRelIso_chg", "Electron_mvaFall17V2Iso", "Electron_mvaFall17V2Iso_WP80", "Electron_mvaFall17V2Iso_WP90", "Electron_mvaFall17V2Iso_WPL",
+  "Electron_mvaFall17V2noIso", "Electron_mvaFall17V2noIso_WP80", "Electron_mvaFall17V2noIso_WP90", "Electron_mvaFall17V2noIso_WPL", "Electron_mvaTTH",
+  "Electron_pdgId", "Electron_pfRelIso03_all", "Electron_pfRelIso03_chg", "Electron_phi", "Electron_photonIdx", "Electron_pt", "Electron_r9", "Electron_scEtOverPt",
+  "Electron_seedGain", "Electron_sieie", "Electron_sip3d", "Electron_tightCharge", "Electron_vidNestedWPBitmap", "Electron_vidNestedWPBitmapHEEP",
+  "nJet", "Jet_area", "Jet_bRegCorr", "Jet_bRegRes", "Jet_btagCSVV2", "Jet_btagDeepB", "Jet_btagDeepCvB", "Jet_btagDeepCvL", "Jet_btagDeepFlavB",
+  "Jet_btagDeepFlavCvB", "Jet_btagDeepFlavCvL", "Jet_btagDeepFlavQG", "Jet_cRegCorr", "Jet_cRegRes", "Jet_chEmEF", "Jet_chFPV0EF", "Jet_chHEF",
+  "Jet_cleanmask", "Jet_electronIdx1", "Jet_electronIdx2", "Jet_eta", "Jet_hfadjacentEtaStripsSize",
+  "Jet_hfcentralEtaStripSize", "Jet_hfsigmaEtaEta", "Jet_hfsigmaPhiPhi", "Jet_jetId", "Jet_mass", "Jet_mass_nom",
+  "Jet_muEF", "Jet_muonIdx1", "Jet_muonIdx2", "Jet_muonSubtrFactor", "Jet_nConstituents", "Jet_nElectrons", "Jet_nMuons", "Jet_neEmEF",
+  "Jet_neHEF", "Jet_phi", "Jet_pt", "Jet_pt_nom", "Jet_puId", "Jet_puIdDisc", "Jet_qgl",
+  "Jet_rawFactor", "nJetGood","JetGoodInd", "nJetMuonInd", "JetMuonInd", "nJetSVInd", "JetSVInd", "nJetBotInd", "JetBotInd", "MET_MetUnclustEnUpDeltaX",
+  "MET_MetUnclustEnUpDeltaY", "MET_covXX", "MET_covXY", "MET_covYY", "MET_phi", "MET_pt", "MET_significance", "nJetQInd", "JetQInd",
+  "MET_smeared_phi", "MET_smeared_pt", "MET_sumEt", "MET_sumPtUnclustered", "nMuonGood","MuonGoodInd", "MuonJetGood", "nMuonJetInd", "MuonJetInd", "MuonLepSign",
+  "nMuon","Muon_charge", "Muon_cleanmask", "Muon_dxy", "Muon_dxyErr", "Muon_dxybs", "Muon_dz", "Muon_dzErr", "Muon_eta", "Muon_fsrPhotonIdx",
+  "Muon_highPtId", "Muon_highPurity", "Muon_inTimeMuon", "Muon_ip3d", "Muon_isGlobal", "Muon_isPFcand", "Muon_isStandalone", "Muon_isTracker",
+  "Muon_jetIdx", "Muon_jetNDauCharged", "Muon_jetPtRelv2", "Muon_jetRelIso", "Muon_looseId", "Muon_mass", "Muon_mediumId", "Muon_mediumPromptId", "Muon_miniIsoId",
+  "Muon_miniPFRelIso_all", "Muon_miniPFRelIso_chg", "Muon_multiIsoId", "Muon_mvaId", "Muon_mvaLowPt", "Muon_mvaLowPtId", "Muon_mvaTTH", "Muon_nStations",
+  "Muon_nTrackerLayers", "Muon_pdgId", "Muon_pfIsoId", "Muon_pfRelIso03_all", "Muon_pfRelIso03_chg", "Muon_pfRelIso04_all", "Muon_phi", "Muon_pt", "Muon_ptErr",
+  "Muon_puppiIsoId", "Muon_segmentComp", "Muon_sip3d", "Muon_softId", "Muon_softMva", "Muon_softMvaId", "Muon_tightCharge", "Muon_tightId", "Muon_tkIsoId",
+  "Muon_tkRelIso", "Muon_triggerIdLoose", "Muon_tunepRelPt", "SVJetGood", "SVLepSign", "nSVJetInd", "SVJetInd", "nSV","SV_charge", "SV_chi2", "SV_dlen",
+  "SV_dlenSig", "SV_dxy", "SV_dxySig", "SV_eta", "SV_mass", "SV_ndof", "SV_ntracks", "SV_pAngle", "SV_phi", "SV_pt", "SV_x", "SV_y", "SV_z", "nTau","Tau_charge",
+  "Tau_chargedIso", "Tau_cleanmask", "Tau_decayMode", "Tau_dxy", "Tau_dz", "Tau_eta", "Tau_idAntiEleDeadECal", "Tau_idAntiMu",
+  "Tau_idDecayModeOldDMs", "Tau_idDeepTau2017v2p1VSe", "Tau_idDeepTau2017v2p1VSjet", "Tau_idDeepTau2017v2p1VSmu", "Tau_jetIdx", "Tau_leadTkDeltaEta",
+  "Tau_leadTkDeltaPhi", "Tau_leadTkPtOverTauPt", "Tau_mass", "Tau_neutralIso", "Tau_phi", "Tau_photonsOutsideSignalCone", "Tau_pt", "Tau_puCorr",
+  "Tau_rawDeepTau2017v2p1VSe", "Tau_rawDeepTau2017v2p1VSjet", "Tau_rawDeepTau2017v2p1VSmu", "Tau_rawIso", "Tau_rawIsodR03", "jet_1_pt","jet_1_nmu","jet_1_qgl",
+  "jet_2_pt","jet_1_eta","jet_2_eta", "jet_1_phi","jet_2_phi","jet_1_mass","jet_2_mass","jet_2_qgl","jet_2_nmu", "InvM_2jets","deltaR_jet1_jet2","deltaphi_jet1_jet2",
+  "deltaeta_jet1_jet2", "deltapt_jet1_jet2","tracks_jet1","tracks_jet2","EMN_jet1","EMC_jet1", "EMtotal_jet1","pT_sum","pT_product","deltaR_lep_2jets",
+  "deltaphi_MET_2jets", "deltaphi_MET_jets_1","deltaphi_MET_jets_2","eta_2jets","pt_2jets", "deltaphi_lephad","deltaR_lephad","deltaphi_lep_2jets","deltaeta_lephad",
+  "deltaeta_lep_2jets","pT_proy","pT_sum_2J","pT_Wlep","deltaR_lep_jet1","deltaR_lep_jet2", "jet_bot1_btag","jet_bot2_btag","jet_bot1_pt","jet_bot2_pt","jet_bot1_eta",
+  "jet_bot2_eta","jet_bot1_phi","jet_bot2_phi","jet_1_btag","jet_2_btag", "InvM_bot_closer","InvM_bot_farther","jet_bot1_btagnumber","jet_bot2_btagnumber",
+  "jet_1_btagnumber","jet_2_btagnumber","jet_1_cvltag","jet_2_cvltag","jet_1_cvltag_csv","jet_2_cvltag_csv","weightSSOS_final","InvM30","InvM31","InvMl0","InvMl1",
+  "chi2_test0", "chi2_test1", "InvMl_good", "InvMl_bad", "InvM3_good", "InvM3_bad", "chi2_test_good", "chi2_test_bad", "jet_max_cvltag", "jet_min_cvltag","chi_bool",
+  "jet_1_cvbtag","jet_2_cvbtag","jet_1_cvbtag_csv","jet_2_cvbtag_csv", "jet_max_cvbtag","jet_min_cvbtag","jet_bot1_bcorr","jet_bot2_bcorr","bot1_muon_id","bot2_muon_id"]
+
+if mode == "mc":
+   brlist = brlist + ["nGenJet", "GenJet_eta", "GenJet_hadronFlavour", "GenJet_mass", "GenJet_partonFlavour", "GenJet_phi", "GenJet_pt",
+       "GenMET_phi", "GenMET_pt", "nGenPart","GenPart_eta", "GenPart_genPartIdxMother", "GenPart_mass", "GenPart_pdgId", "GenPart_phi",
+       "GenPart_pt", "GenPart_status", "GenPart_statusFlags", "Jet_hadronFlavour", "Jet_mass_smeared_down", "Jet_mass_smeared_up",
+       "Jet_partonFlavour", "Jet_pt_smeared_down", "Jet_pt_smeared_up","lep_id_lowpt_sf","muon_bot1_mother_mine","muon_bot2_mother_mine",
+       "var_xsec","var_lumi","lumi_data","weight_lumi"]
+
+#for s in samples:
+#       path = '/pnfs/ciemat.es/data/cms/store/user/juvazque/data_further_analysis/btagMM/muonfrombot/folder'+years[0]+'/'
+#       term = 'dataset_wqq_btagMM_fromJF_'+s
+#       df[s].Snapshot("Events", path+term+".root", brlist)
+
+
+
 #############################
 ####     DATA SAVING     ####
 #############################
 
-if channel == "jet_bot1":
-   term1 = "botjets_muons/muon_bot1/nochitest/"
-elif channel == "jet_bot2":
-   term1 = "botjets_muons/muon_bot2/nochitest/"
+if channel[8:] == "_chi":
+   if channel[0:8] == "jet_bot1":
+      term1 = "botjets_muons_corr/muon_bot1/"
+   elif channel[0:8] == "jet_bot2":
+      term1 = "botjets_muons_corr/muon_bot2/"
+   elif channel[0:8] == "jet_both":
+      term1 = "botjets_muons_corr/muon_both/"
+else:
+   if channel[0:8] == "jet_bot1":
+      term1 = "botjets_muons_corr/muon_bot1/nochitest/"
+   elif channel[0:8] == "jet_bot2":
+      term1 = "botjets_muons_corr/muon_bot2/nochitest/"
+   elif channel[0:8] == "jet_both":
+      term1 = "botjets_muons_corr/muon_both/nochitest/"
+
+if eta_bin == "one":
+   if channel == "jet_bot1_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot1/chitest/eta1/"
+   if channel == "jet_bot2_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot2/chitest/eta1/"
+   if channel == "jet_bot1":
+      term1 = "botjets_muons/eta_bins/muon_bot1/nochitest/eta1/"
+   if channel == "jet_bot2":
+      term1 = "botjets_muons/eta_bins/muon_bot2/nochitest/eta1/"
+if eta_bin == "two":
+   if channel == "jet_bot1_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot1/chitest/eta2/"
+   if channel == "jet_bot2_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot2/chitest/eta2/"
+   if channel == "jet_bot1":
+      term1 = "botjets_muons/eta_bins/muon_bot1/nochitest/eta2/"
+   if channel == "jet_bot2":
+      term1 = "botjets_muons/eta_bins/muon_bot2/nochitest/eta2/"
+if eta_bin == "three":
+   if channel == "jet_bot1_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot1/chitest/eta3/"
+   if channel == "jet_bot2_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot2/chitest/eta3/"
+   if channel == "jet_bot1":
+      term1 = "botjets_muons/eta_bins/muon_bot1/nochitest/eta3/"
+   if channel == "jet_bot2":
+      term1 = "botjets_muons/eta_bins/muon_bot2/nochitest/eta3/"
+if eta_bin == "four":
+   if channel == "jet_bot1_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot1/chitest/eta4/"
+   if channel == "jet_bot2_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot2/chitest/eta4/"
+   if channel == "jet_bot1":
+      term1 = "botjets_muons/eta_bins/muon_bot1/nochitest/eta4/"
+   if channel == "jet_bot2":
+      term1 = "botjets_muons/eta_bins/muon_bot2/nochitest/eta4/"
+if eta_bin == "five":
+   if channel == "jet_bot1_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot1/chitest/eta5/"
+   if channel == "jet_bot2_chi":
+      term1 = "botjets_muons/eta_bins/muon_bot2/chitest/eta5/"
+   if channel == "jet_bot1":
+      term1 = "botjets_muons/eta_bins/muon_bot1/nochitest/eta5/"
+   if channel == "jet_bot2":
+      term1 = "botjets_muons/eta_bins/muon_bot2/nochitest/eta5/"
 
 #observable_names = ["transverse_mass","MET_pt_aux"]
 
@@ -1426,6 +1831,28 @@ if (mode == "data" and samples[0][-1] == "E"):
 
         myfile.Close()
 
+#if mode == "mc":
+#      for s in samples:
+#          print("Number of events after selection for %s sample are %s" %(s,df[s].Count().GetValue()))
+#          print("Number of events after selection with weights for %s sample are %s" %(s,df[s].Sum("weightSSOS_final").GetValue()))
+#          if channel[0:8] == "jet_bot1":
+#             print("Number of muons in jet bot1 for %s sample are %s" %(s,df[s].Sum("bot1_muons").GetValue()))
+#          elif channel[0:8] == "jet_bot2":
+#             print("Number of muons in jet bot2 for %s sample are %s" %(s,df[s].Sum("bot2_muons").GetValue()))
+#if (mode == "data" and samples[0][-1] == "M"):
+#      for s in samples:
+#          print("Number of events after selection for %s sample are %s" %(s,df_M[s].Count().GetValue()))
+#          if channel[0:8] == "jet_bot1":
+#             print("Number of muons in jet bot1 for %s sample are %s" %(s,df_M[s].Sum("bot1_muons").GetValue()))
+#          elif channel[0:8] == "jet_bot2":
+#             print("Number of muons in jet bot2 for %s sample are %s" %(s,df_M[s].Sum("bot2_muons").GetValue()))
+#if (mode == "data" and samples[0][-1] == "E"):
+#      for s in samples:
+#          print("Number of events after selection for %s sample are %s" %(s,df_E[s].Count().GetValue()))
+#          if channel[0:8] == "jet_bot1":
+#             print("Number of muons in jet bot1 for %s sample are %s" %(s,df_E[s].Sum("bot1_muons").GetValue()))
+#          elif channel[0:8] == "jet_bot2":
+#             print("Number of muons in jet bot2 for %s sample are %s" %(s,df_E[s].Sum("bot2_muons").GetValue()))
 
 print('Ended succesfully')
 

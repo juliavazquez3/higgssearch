@@ -1,0 +1,132 @@
+SL CHANNEL
+btagMM_chitest
+jet_bot2_chi
+the samples treated are ['ww2016', 'wjets_12016', 'wjets_22016', 'wjets_32016', 'wjets_42016', 'wjets_52016', 'wjets_62016', 'wjets_72016', 'wjets_82016', 'zjets_12016', 'zjets_22016', 'zjets_32016', 'zjets_42016', 'zjets_52016', 'zjets_62016', 'zjets_72016', 'zjets_82016', 'ttbar_sl2016', 'ttbar_dl2016', 'ttbar_dh2016', 'zz2016', 'wz2016', 'st_12016', 'st_22016', 'st_32016', 'st_42016']
+Number of files for ww2016 22
+Number of files for wjets_12016 19
+Number of files for wjets_22016 19
+Number of files for wjets_32016 30
+Number of files for wjets_42016 12
+Number of files for wjets_52016 5
+Number of files for wjets_62016 24
+Number of files for wjets_72016 19
+Number of files for wjets_82016 17
+Number of files for zjets_12016 31
+Number of files for zjets_22016 44
+Number of files for zjets_32016 17
+Number of files for zjets_42016 25
+Number of files for zjets_52016 13
+Number of files for zjets_62016 32
+Number of files for zjets_72016 39
+Number of files for zjets_82016 8
+Number of files for ttbar_sl2016 117
+Number of files for ttbar_dl2016 33
+Number of files for ttbar_dh2016 79
+Number of files for zz2016 8
+Number of files for wz2016 13
+Number of files for st_12016 4
+Number of files for st_22016 5
+Number of files for st_32016 27
+Number of files for st_42016 41
+Trigger scale factors
+Trigger scale factors
+Low pt muons scale factors
+BTAG scale factors
+D hadrons corrections
+Number of events after selection for ww2016 sample are 8
+Number of events after selection with weights for ww2016 sample are 6.3166992792159835
+Number of muons in jet bot2 for ww2016 sample are 8.0
+Number of events after selection for wjets_12016 sample are 0
+Number of events after selection with weights for wjets_12016 sample are 0.0
+Number of muons in jet bot2 for wjets_12016 sample are 0.0
+Number of events after selection for wjets_22016 sample are 12
+Number of events after selection with weights for wjets_22016 sample are 11.989412592063326
+Number of muons in jet bot2 for wjets_22016 sample are 12.0
+Number of events after selection for wjets_32016 sample are 39
+Number of events after selection with weights for wjets_32016 sample are 36.011385841901
+Number of muons in jet bot2 for wjets_32016 sample are 39.0
+Number of events after selection for wjets_42016 sample are 2
+Number of events after selection with weights for wjets_42016 sample are 1.8360525634098734
+Number of muons in jet bot2 for wjets_42016 sample are 2.0
+Number of events after selection for wjets_52016 sample are 0
+Number of events after selection with weights for wjets_52016 sample are 0.0
+Number of muons in jet bot2 for wjets_52016 sample are 0.0
+Number of events after selection for wjets_62016 sample are 0
+Number of events after selection with weights for wjets_62016 sample are 0.0
+Number of muons in jet bot2 for wjets_62016 sample are 0.0
+Number of events after selection for wjets_72016 sample are 0
+Number of events after selection with weights for wjets_72016 sample are 0.0
+Number of muons in jet bot2 for wjets_72016 sample are 0.0
+Number of events after selection for wjets_82016 sample are 0
+Number of events after selection with weights for wjets_82016 sample are 0.0
+Number of muons in jet bot2 for wjets_82016 sample are 0.0
+Number of events after selection for zjets_12016 sample are 1
+Number of events after selection with weights for zjets_12016 sample are 1.4681753414225844
+Number of muons in jet bot2 for zjets_12016 sample are 1.0
+Number of events after selection for zjets_22016 sample are 57
+Number of events after selection with weights for zjets_22016 sample are 60.94364032839403
+Number of muons in jet bot2 for zjets_22016 sample are 59.0
+Number of events after selection for zjets_32016 sample are 90
+Number of events after selection with weights for zjets_32016 sample are 98.48766262818197
+Number of muons in jet bot2 for zjets_32016 sample are 93.0
+Number of events after selection for zjets_42016 sample are 12
+Number of events after selection with weights for zjets_42016 sample are 11.723763673789554
+Number of muons in jet bot2 for zjets_42016 sample are 13.0
+Number of events after selection for zjets_52016 sample are 2
+Number of events after selection with weights for zjets_52016 sample are 1.8194184496691586
+Number of muons in jet bot2 for zjets_52016 sample are 2.0
+Number of events after selection for zjets_62016 sample are 3
+Number of events after selection with weights for zjets_62016 sample are 4.071743051720541
+Number of muons in jet bot2 for zjets_62016 sample are 3.0
+Number of events after selection for zjets_72016 sample are 0
+Number of events after selection with weights for zjets_72016 sample are 0.0
+Number of muons in jet bot2 for zjets_72016 sample are 0.0
+Number of events after selection for zjets_82016 sample are 0
+Number of events after selection with weights for zjets_82016 sample are 0.0
+Number of muons in jet bot2 for zjets_82016 sample are 0.0
+Number of events after selection for ttbar_dh2016 sample are 38
+Number of events after selection with weights for ttbar_dh2016 sample are 35.777247369787474
+Number of muons in jet bot2 for ttbar_dh2016 sample are 38.0
+Number of events after selection for zz2016 sample are 7
+Number of events after selection with weights for zz2016 sample are 8.861327232085337
+Number of muons in jet bot2 for zz2016 sample are 7.0
+Number of events after selection for wz2016 sample are 17
+Number of events after selection with weights for wz2016 sample are 16.832844556985428
+Number of muons in jet bot2 for wz2016 sample are 17.0
+Number of events after selection for st_12016 sample are 462
+Number of events after selection with weights for st_12016 sample are 432.3759364510406
+Number of muons in jet bot2 for st_12016 sample are 483.0
+Number of events after selection for st_22016 sample are 513
+Number of events after selection with weights for st_22016 sample are 482.68028372256316
+Number of muons in jet bot2 for st_22016 sample are 537.0
+Number of events after selection for st_32016 sample are 183
+Number of events after selection with weights for st_32016 sample are 179.8624542525807
+Number of muons in jet bot2 for st_32016 sample are 195.0
+Number of events after selection for st_42016 sample are 370
+Number of events after selection with weights for st_42016 sample are 351.924821715093
+Number of muons in jet bot2 for st_42016 sample are 390.0
+Number of events after selection for ttbar_sl2016_nomuon sample are 0
+Number of events after selection with weights for ttbar_sl2016_nomuon sample are 0.0
+Number of muons in jet bot2 for ttbar_sl2016_nomuon sample are 0.0
+Number of events after selection for ttbar_sl2016_muon_charm sample are 123112
+Number of events after selection with weights for ttbar_sl2016_muon_charm sample are 113920.19844885214
+Number of muons in jet bot2 for ttbar_sl2016_muon_charm sample are 127043.0
+Number of events after selection for ttbar_sl2016_muon_bottom sample are 156426
+Number of events after selection with weights for ttbar_sl2016_muon_bottom sample are 145534.2956152524
+Number of muons in jet bot2 for ttbar_sl2016_muon_bottom sample are 161824.0
+Number of events after selection for ttbar_sl2016_muon_else sample are 24859
+Number of events after selection with weights for ttbar_sl2016_muon_else sample are 23024.837085431023
+Number of muons in jet bot2 for ttbar_sl2016_muon_else sample are 25993.0
+Number of events after selection for ttbar_dl2016_nomuon sample are 0
+Number of events after selection with weights for ttbar_dl2016_nomuon sample are 0.0
+Number of muons in jet bot2 for ttbar_dl2016_nomuon sample are 0.0
+Number of events after selection for ttbar_dl2016_muon_charm sample are 8778
+Number of events after selection with weights for ttbar_dl2016_muon_charm sample are 8903.509615225832
+Number of muons in jet bot2 for ttbar_dl2016_muon_charm sample are 9093.0
+Number of events after selection for ttbar_dl2016_muon_bottom sample are 11985
+Number of events after selection with weights for ttbar_dl2016_muon_bottom sample are 12230.12250314773
+Number of muons in jet bot2 for ttbar_dl2016_muon_bottom sample are 12427.0
+Number of events after selection for ttbar_dl2016_muon_else sample are 2785
+Number of events after selection with weights for ttbar_dl2016_muon_else sample are 3003.957544457057
+Number of muons in jet bot2 for ttbar_dl2016_muon_else sample are 2923.0
+Ended succesfully

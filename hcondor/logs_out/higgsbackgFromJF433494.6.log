@@ -1,0 +1,90 @@
+000 (433494.006.000) 2023-09-13 18:49:08 Job submitted from host: <172.17.47.42:9618?addrs=172.17.47.42-9618&alias=condorsc1.ciemat.es&noUDP&sock=schedd_1710_7f09>
+...
+040 (433494.006.000) 2023-09-13 18:49:32 Started transferring input files
+	Transferring to host: <172.17.36.202:9618?addrs=172.17.36.202-9618&alias=gaew0202.ciemat.es&noUDP&sock=slot1_5_7018_90d6_126>
+...
+040 (433494.006.000) 2023-09-13 18:49:32 Finished transferring input files
+...
+001 (433494.006.000) 2023-09-13 18:49:33 Job executing on host: <172.17.36.202:9618?addrs=172.17.36.202-9618&alias=gaew0202.ciemat.es&noUDP&sock=startd_6985_b51d>
+...
+006 (433494.006.000) 2023-09-13 18:49:42 Image size of job updated: 833000
+	181  -  MemoryUsage of job (MB)
+	184808  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:50:42 Image size of job updated: 1841704
+	562  -  MemoryUsage of job (MB)
+	574640  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:51:42 Image size of job updated: 6858052
+	2791  -  MemoryUsage of job (MB)
+	2857396  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:52:42 Image size of job updated: 6858052
+	2946  -  MemoryUsage of job (MB)
+	3015880  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:53:42 Image size of job updated: 6858052
+	3032  -  MemoryUsage of job (MB)
+	3104244  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:54:42 Image size of job updated: 7506440
+	3110  -  MemoryUsage of job (MB)
+	3184348  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:55:42 Image size of job updated: 8633572
+	5213  -  MemoryUsage of job (MB)
+	5337156  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:56:43 Image size of job updated: 8693636
+	5405  -  MemoryUsage of job (MB)
+	5534476  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:57:44 Image size of job updated: 9029832
+	6106  -  MemoryUsage of job (MB)
+	6251728  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:58:45 Image size of job updated: 9365876
+	6197  -  MemoryUsage of job (MB)
+	6345100  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 18:59:46 Image size of job updated: 9365876
+	6446  -  MemoryUsage of job (MB)
+	6600084  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 19:00:47 Image size of job updated: 9365876
+	6478  -  MemoryUsage of job (MB)
+	6633244  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 19:01:48 Image size of job updated: 9365876
+	6664  -  MemoryUsage of job (MB)
+	6823888  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 19:02:50 Image size of job updated: 9365876
+	6665  -  MemoryUsage of job (MB)
+	6824128  -  ResidentSetSize of job (KB)
+...
+006 (433494.006.000) 2023-09-13 19:13:53 Image size of job updated: 9390292
+	6665  -  MemoryUsage of job (MB)
+	6824128  -  ResidentSetSize of job (KB)
+...
+040 (433494.006.000) 2023-09-13 19:33:23 Started transferring output files
+...
+040 (433494.006.000) 2023-09-13 19:33:23 Finished transferring output files
+...
+005 (433494.006.000) 2023-09-13 19:33:23 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 10:04:25, Sys 0 00:24:07  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 10:04:25, Sys 0 00:24:07  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	8526  -  Run Bytes Sent By Job
+	217  -  Run Bytes Received By Job
+	8526  -  Total Bytes Sent By Job
+	217  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :    15.80        4         4 
+	   Disk (KB)            :    26           1    740162 
+	   Memory (MB)          :  6665           1       128 
+
+	Job terminated of its own accord at 2023-09-13T17:33:23Z.
+...

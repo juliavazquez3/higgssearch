@@ -1,0 +1,132 @@
+SL CHANNEL
+btagMM_chitest
+jet_bot1_chi
+the samples treated are ['ww2018', 'wjets_12018', 'wjets_22018', 'wjets_32018', 'wjets_42018', 'wjets_52018', 'wjets_62018', 'wjets_72018', 'wjets_82018', 'zjets_12018', 'zjets_22018', 'zjets_32018', 'zjets_42018', 'zjets_52018', 'zjets_62018', 'zjets_72018', 'zjets_82018', 'ttbar_sl2018', 'ttbar_dl2018', 'ttbar_dh2018', 'zz2018', 'wz2018', 'st_12018', 'st_22018', 'st_32018', 'st_42018']
+Number of files for ww2018 31
+Number of files for wjets_12018 97
+Number of files for wjets_22018 35
+Number of files for wjets_32018 101
+Number of files for wjets_42018 44
+Number of files for wjets_52018 33
+Number of files for wjets_62018 11
+Number of files for wjets_72018 8
+Number of files for wjets_82018 51
+Number of files for zjets_12018 13
+Number of files for zjets_22018 30
+Number of files for zjets_32018 21
+Number of files for zjets_42018 28
+Number of files for zjets_52018 11
+Number of files for zjets_62018 24
+Number of files for zjets_72018 13
+Number of files for zjets_82018 19
+Number of files for ttbar_sl2018 391
+Number of files for ttbar_dl2018 155
+Number of files for ttbar_dh2018 339
+Number of files for zz2018 6
+Number of files for wz2018 16
+Number of files for st_12018 23
+Number of files for st_22018 52
+Number of files for st_32018 37
+Number of files for st_42018 100
+Trigger scale factors
+Trigger scale factors
+Low pt muons scale factors
+BTAG scale factors
+D hadrons corrections
+Number of events after selection for ww2018 sample are 20
+Number of events after selection with weights for ww2018 sample are 20.62355225019717
+Number of muons in jet bot1 for ww2018 sample are 20.0
+Number of events after selection for wjets_12018 sample are 12
+Number of events after selection with weights for wjets_12018 sample are 19.681371503375924
+Number of muons in jet bot1 for wjets_12018 sample are 12.0
+Number of events after selection for wjets_22018 sample are 48
+Number of events after selection with weights for wjets_22018 sample are 51.811017287274105
+Number of muons in jet bot1 for wjets_22018 sample are 48.0
+Number of events after selection for wjets_32018 sample are 242
+Number of events after selection with weights for wjets_32018 sample are 223.28509334597243
+Number of muons in jet bot1 for wjets_32018 sample are 253.0
+Number of events after selection for wjets_42018 sample are 11
+Number of events after selection with weights for wjets_42018 sample are 11.012003571054638
+Number of muons in jet bot1 for wjets_42018 sample are 11.0
+Number of events after selection for wjets_52018 sample are 4
+Number of events after selection with weights for wjets_52018 sample are 3.963664335914149
+Number of muons in jet bot1 for wjets_52018 sample are 4.0
+Number of events after selection for wjets_62018 sample are 4
+Number of events after selection with weights for wjets_62018 sample are 3.952771010560943
+Number of muons in jet bot1 for wjets_62018 sample are 4.0
+Number of events after selection for wjets_72018 sample are 0
+Number of events after selection with weights for wjets_72018 sample are 0.0
+Number of muons in jet bot1 for wjets_72018 sample are 0.0
+Number of events after selection for wjets_82018 sample are 0
+Number of events after selection with weights for wjets_82018 sample are 0.0
+Number of muons in jet bot1 for wjets_82018 sample are 0.0
+Number of events after selection for zjets_12018 sample are 33
+Number of events after selection with weights for zjets_12018 sample are 49.022872402185556
+Number of muons in jet bot1 for zjets_12018 sample are 36.0
+Number of events after selection for zjets_22018 sample are 226
+Number of events after selection with weights for zjets_22018 sample are 253.80595042763693
+Number of muons in jet bot1 for zjets_22018 sample are 229.0
+Number of events after selection for zjets_32018 sample are 315
+Number of events after selection with weights for zjets_32018 sample are 330.7525476199825
+Number of muons in jet bot1 for zjets_32018 sample are 329.0
+Number of events after selection for zjets_42018 sample are 34
+Number of events after selection with weights for zjets_42018 sample are 35.432280093581134
+Number of muons in jet bot1 for zjets_42018 sample are 37.0
+Number of events after selection for zjets_52018 sample are 13
+Number of events after selection with weights for zjets_52018 sample are 15.765794154645125
+Number of muons in jet bot1 for zjets_52018 sample are 15.0
+Number of events after selection for zjets_62018 sample are 2
+Number of events after selection with weights for zjets_62018 sample are 1.9833927103748823
+Number of muons in jet bot1 for zjets_62018 sample are 2.0
+Number of events after selection for zjets_72018 sample are 0
+Number of events after selection with weights for zjets_72018 sample are 0.0
+Number of muons in jet bot1 for zjets_72018 sample are 0.0
+Number of events after selection for zjets_82018 sample are 0
+Number of events after selection with weights for zjets_82018 sample are 0.0
+Number of muons in jet bot1 for zjets_82018 sample are 0.0
+Number of events after selection for ttbar_dh2018 sample are 257
+Number of events after selection with weights for ttbar_dh2018 sample are 238.93845579113488
+Number of muons in jet bot1 for ttbar_dh2018 sample are 265.0
+Number of events after selection for zz2018 sample are 22
+Number of events after selection with weights for zz2018 sample are 24.770066828882953
+Number of muons in jet bot1 for zz2018 sample are 22.0
+Number of events after selection for wz2018 sample are 14
+Number of events after selection with weights for wz2018 sample are 13.059109721725221
+Number of muons in jet bot1 for wz2018 sample are 14.0
+Number of events after selection for st_12018 sample are 2324
+Number of events after selection with weights for st_12018 sample are 2104.741031895668
+Number of muons in jet bot1 for st_12018 sample are 2399.0
+Number of events after selection for st_22018 sample are 2367
+Number of events after selection with weights for st_22018 sample are 2162.3825345974096
+Number of muons in jet bot1 for st_22018 sample are 2451.0
+Number of events after selection for st_32018 sample are 910
+Number of events after selection with weights for st_32018 sample are 864.4583801176784
+Number of muons in jet bot1 for st_32018 sample are 942.0
+Number of events after selection for st_42018 sample are 1585
+Number of events after selection with weights for st_42018 sample are 1511.565685505047
+Number of muons in jet bot1 for st_42018 sample are 1627.0
+Number of events after selection for ttbar_sl2018_nomuon sample are 0
+Number of events after selection with weights for ttbar_sl2018_nomuon sample are 0.0
+Number of muons in jet bot1 for ttbar_sl2018_nomuon sample are 0.0
+Number of events after selection for ttbar_sl2018_muon_charm sample are 541246
+Number of events after selection with weights for ttbar_sl2018_muon_charm sample are 474787.49339350243
+Number of muons in jet bot1 for ttbar_sl2018_muon_charm sample are 558005.0
+Number of events after selection for ttbar_sl2018_muon_bottom sample are 702092
+Number of events after selection with weights for ttbar_sl2018_muon_bottom sample are 617101.8376420345
+Number of muons in jet bot1 for ttbar_sl2018_muon_bottom sample are 726530.0
+Number of events after selection for ttbar_sl2018_muon_else sample are 107388
+Number of events after selection with weights for ttbar_sl2018_muon_else sample are 94336.779147034
+Number of muons in jet bot1 for ttbar_sl2018_muon_else sample are 116079.0
+Number of events after selection for ttbar_dl2018_nomuon sample are 0
+Number of events after selection with weights for ttbar_dl2018_nomuon sample are 0.0
+Number of muons in jet bot1 for ttbar_dl2018_nomuon sample are 0.0
+Number of events after selection for ttbar_dl2018_muon_charm sample are 46112
+Number of events after selection with weights for ttbar_dl2018_muon_charm sample are 47956.24022142395
+Number of muons in jet bot1 for ttbar_dl2018_muon_charm sample are 47637.0
+Number of events after selection for ttbar_dl2018_muon_bottom sample are 61752
+Number of events after selection with weights for ttbar_dl2018_muon_bottom sample are 64202.90597258562
+Number of muons in jet bot1 for ttbar_dl2018_muon_bottom sample are 63989.0
+Number of events after selection for ttbar_dl2018_muon_else sample are 11288
+Number of events after selection with weights for ttbar_dl2018_muon_else sample are 11589.643478963466
+Number of muons in jet bot1 for ttbar_dl2018_muon_else sample are 12231.0
+Ended succesfully

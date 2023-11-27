@@ -9,8 +9,16 @@ Output = higgsbackgFromJF$(ClusterId).$(ProcId).out
 Error  = higgsbackgFromJF$(ClusterId).$(ProcId).err
 
 queue arguments from (
-  E 2016 data 
-  E 2018 data 
-  E 2016B data 
-  E 2017 data 
+  allMC 2016 mc btagMM_chitest
+  M 2016 data btagMM_chitest
+  E 2016 data btagMM_chitest
+  allMC 2018 mc btagMM_chitest
+  M 2018 data btagMM_chitest
+  E 2018 data btagMM_chitest
+  allMC 2016B mc btagMM_chitest
+  M 2016B data btagMM_chitest
+  E 2016B data btagMM_chitest
+  allMC 2017 mc btagMM_chitest
+  M 2017 data btagMM_chitest
+  E 2017 data btagMM_chitest
 )

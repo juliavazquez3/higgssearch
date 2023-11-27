@@ -1,0 +1,50 @@
+000 (433495.016.000) 2023-09-13 18:49:11 Job submitted from host: <172.17.47.42:9618?addrs=172.17.47.42-9618&alias=condorsc1.ciemat.es&noUDP&sock=schedd_1710_7f09>
+...
+040 (433495.016.000) 2023-09-13 20:01:05 Started transferring input files
+	Transferring to host: <172.17.36.205:9618?addrs=172.17.36.205-9618&alias=gaew0205.ciemat.es&noUDP&sock=slot1_5_18807_fb96_897>
+...
+040 (433495.016.000) 2023-09-13 20:01:05 Finished transferring input files
+...
+001 (433495.016.000) 2023-09-13 20:01:06 Job executing on host: <172.17.36.205:9618?addrs=172.17.36.205-9618&alias=gaew0205.ciemat.es&noUDP&sock=startd_2633_98f3>
+...
+006 (433495.016.000) 2023-09-13 20:01:14 Image size of job updated: 248736
+	127  -  MemoryUsage of job (MB)
+	129540  -  ResidentSetSize of job (KB)
+...
+006 (433495.016.000) 2023-09-13 20:02:14 Image size of job updated: 4447080
+	1887  -  MemoryUsage of job (MB)
+	1932184  -  ResidentSetSize of job (KB)
+...
+006 (433495.016.000) 2023-09-13 20:03:14 Image size of job updated: 4505672
+	2389  -  MemoryUsage of job (MB)
+	2445440  -  ResidentSetSize of job (KB)
+...
+006 (433495.016.000) 2023-09-13 20:04:14 Image size of job updated: 4549600
+	2471  -  MemoryUsage of job (MB)
+	2529508  -  ResidentSetSize of job (KB)
+...
+006 (433495.016.000) 2023-09-13 20:05:01 Image size of job updated: 4601156
+	2471  -  MemoryUsage of job (MB)
+	2529508  -  ResidentSetSize of job (KB)
+...
+040 (433495.016.000) 2023-09-13 20:05:01 Started transferring output files
+...
+040 (433495.016.000) 2023-09-13 20:05:01 Finished transferring output files
+...
+005 (433495.016.000) 2023-09-13 20:05:01 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:38:03, Sys 0 00:01:53  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:38:03, Sys 0 00:01:53  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	348  -  Run Bytes Sent By Job
+	217  -  Run Bytes Received By Job
+	348  -  Total Bytes Sent By Job
+	217  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.03        4         4 
+	   Disk (KB)            :    18           1    743597 
+	   Memory (MB)          :  2471           1       128 
+
+	Job terminated of its own accord at 2023-09-13T18:05:01Z.
+...
