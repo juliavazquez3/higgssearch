@@ -1482,18 +1482,15 @@ for s in samples:
                df[s] = df[s].Define('lep_trig_sf','nMuonGood>0 ? trigger_sf_mu_aux[MuonGoodInd[0]] : trigger_sf_el_aux[ElectronGoodInd[0]]')
                #df_M[s] = df_M[s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*puWeight*PUjetID_SF*lep_trig_sf*top_weight')
                #df_E[s] = df_E[s].Define('weightSSOS_final','weight_aux*lep_id_sf*btag_sf*puWeight*PUjetID_SF*lep_trig_sf*top_weight')
-               #if (channel[0:8]=="jet_bot1"):
-               #   df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso[bot1_muon_id]')
-               #if (channel[0:8]=="jet_bot2"):
-               #   df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso[bot2_muon_id]')
-               #if (channel[0:8]=="jet_both"):
-               #   df[s] = df[s].Define('lep_id_lowpt_sf','bot1_muon_id > -1 ? muon_from_bot_sf_iso[bot1_muon_id] : muon_from_bot_sf_iso[bot2_muon_id]')
                df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso_abs[0]')
-               #df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_z[0]')
+               df[s] = df[s].Define('lep_id_lowpt_sf_up','muon_from_bot_sf_iso_abs_up[0]')
+               df[s] = df[s].Define('lep_id_lowpt_sf_down','muon_from_bot_sf_iso_abs_down[0]')
                #df[s] = df[s].Define('lep_id_lowpt_sf','1.')
                df[s] = df[s].Define('frag_weight','1.')
                df[s] = df[s].Define('ssos_weight','1.')
                df[s] = df[s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
+               df[s] = df[s].Define('weightSSOS_final_seclepup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf_up*ssos_weight*frag_weight')
+               df[s] = df[s].Define('weightSSOS_final_seclepdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf_down*ssos_weight*frag_weight')
                df[s] = df[s].Define('weightSSOS_final_btaglightup','weight_aux*btag_sf_light_up*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
                df[s] = df[s].Define('weightSSOS_final_btaglightdown','weight_aux*btag_sf_light_down*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
                df[s] = df[s].Define('weightSSOS_final_btagheavyup','weight_aux*btag_sf_heavy_up*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
@@ -1515,6 +1512,8 @@ hist_sfbtag_light_up = {}
 hist_sfbtag_light_down = {}
 hist_sfbtag_heavy_up = {}
 hist_sfbtag_heavy_down = {}
+hist_seclepup = {}
+hist_seclepdown = {}
 
 observable_names = ["nJetGood", "jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt", "jet_2_eta", "jet_2_mass", "jet_2_qgl", "jet_2_nmu", "jet_1_qgl",
    "lepton_pt", "lepton_eta", "lepton_pt_detail", "lepton_eta_thick", "InvM_2jets", "InvM_bot_closer", "InvM_bot_farther", 
@@ -1620,6 +1619,8 @@ for name in observable_names:
         hist_sfbtag_light_down[name] = {}
         hist_sfbtag_heavy_up[name] = {}
         hist_sfbtag_heavy_down[name] = {}
+        hist_seclepup[name] = {}
+        hist_seclepdown[name] = {}
         if mode == "mc":
            if args.syst == "down":
               for s in samples:
@@ -1634,6 +1635,8 @@ for name in observable_names:
                  hist_sfbtag_light_down[name][s] = df[s].Histo1D((s+"_"+name+"_btaglightdown","",dict_binlim[name][0],dict_binlim[name][1],dict_binlim[name][2]),column_names[name],"weightSSOS_final_btaglightdown")
                  hist_sfbtag_heavy_up[name][s] = df[s].Histo1D((s+"_"+name+"_btagheavyup","",dict_binlim[name][0],dict_binlim[name][1],dict_binlim[name][2]),column_names[name],"weightSSOS_final_btagheavyup")
                  hist_sfbtag_heavy_down[name][s] = df[s].Histo1D((s+"_"+name+"_btagheavydown","",dict_binlim[name][0],dict_binlim[name][1],dict_binlim[name][2]),column_names[name],"weightSSOS_final_btagheavydown")
+                 hist_seclepup[name][s] = df[s].Histo1D((s+"_"+name+"_seclepup","",dict_binlim[name][0],dict_binlim[name][1],dict_binlim[name][2]),column_names[name],"weightSSOS_final_seclepup")
+                 hist_seclepdown[name][s] = df[s].Histo1D((s+"_"+name+"_seclepdown","",dict_binlim[name][0],dict_binlim[name][1],dict_binlim[name][2]),column_names[name],"weightSSOS_final_seclepdown")
         else:
            if (mode == "data" and samples[0][-1] == "M"):
               for s in samples:
@@ -1803,6 +1806,8 @@ if mode == "mc":
               hist_sfbtag_light_down[name][s].Write()
               hist_sfbtag_heavy_up[name][s].Write()
               hist_sfbtag_heavy_down[name][s].Write()
+              hist_seclepup[name][s].Write()
+              hist_seclepdown[name][s].Write()
 
            myfile.Close()
 

@@ -22,20 +22,20 @@ gStyle.SetCanvasDefH(800)
 parser = argparse.ArgumentParser()
 parser.add_argument("--stack", action="store_true", default=False,
                     help="Stack simulation or not")
-parser.add_argument("--ratio", action="store_true", default=False,
-                    help="Plot ratio or not")
-parser.add_argument("--linear", action="store_true", default=False,
-                    help="Plot linearly")
-parser.add_argument("--png", action="store_true", default=False,
-                    help="png format")
 parser.add_argument("--norm", action="store_true", default=False,
                     help="normalising test")
 parser.add_argument("--nodata", action="store_true", default=False,
                     help="Do not plot data")
+parser.add_argument("--wcs", action="store_true", default=False,
+                    help="MC classififcation")
+parser.add_argument("--mudhad", action="store_true", default=False,
+                    help="MC classififcation fot charm signal sample")
 parser.add_argument("--year", type=string, default="2016",
                     help="Select year of process to run")
 parser.add_argument("--channel", type=string, default="btagMM",
                     help="Select year of process to run")
+parser.add_argument("--sumEM", action="store_true", default=False,
+                    help="union of M and E channels")
 
 # Use like:
 # python higgssearch/fromJF/hist_fromJFwqq_syst_total.py --stack --ratio --png --norm --year="all" --channel="btagMM_chitest_sl"
@@ -45,17 +45,12 @@ args = parser.parse_args()
 #if (args.data == "No" or args.data == "2016" or args.data == "2017" or args.data == "2018"): data_op = str(args.data)
 #else: raise NameError('Incorrect data option')
 
-if (args.channel == "lepton50" or args.channel == "btagMM" or args.channel == "nobtag"): term_path = str(args.channel) 
-elif args.channel == "lepton50_chitest": term_path = "lepton50/chi_test"
-elif args.channel == "btagMM_chitest": term_path = "btagMM/chi_test"
-elif args.channel == "lepton50_chitest_sl": term_path = "lepton50/chi_test/sl"
-elif args.channel == "btagMM_chitest_sl": term_path = "btagMM/chi_test/sl"
-elif args.channel == "lepton50_chitest_slss": term_path = "lepton50/chi_test/sl/ss"
-elif args.channel == "btagMM_chitest_slss": term_path = "btagMM/chi_test/sl/ss"
-elif args.channel == "lepton50_chitest_slos": term_path = "lepton50/chi_test/sl/os"
-elif args.channel == "btagMM_chitest_slos": term_path = "btagMM/chi_test/sl/os"
-elif args.channel == "lepton50_chitest_slssos": term_path = "lepton50/chi_test/sl/ssos"
-elif args.channel == "btagMM_chitest_slssos": term_path = "btagMM/chi_test/sl/ssos"
+
+if args.channel == "btagMM_chitest": term_path = ""
+elif args.channel == "btagMM_chitest_sl": term_path = "/sl"
+elif args.channel == "btagMM_chitest_slss": term_path = "/sl/ss"
+elif args.channel == "btagMM_chitest_slos": term_path = "/sl/os"
+elif args.channel == "btagMM_chitest_slssos": term_path = "/sl/ssos"
 else: raise NameError('Incorrect data option')
 
 sl_channel = ["btagMM_chitest_sl","lepton50_chitest_sl","btagMM_chitest_slss","lepton50_chitest_slss",
@@ -117,7 +112,8 @@ not_rebin = ["nJetGood","InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","lepto
       "jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP","lepton_pt", "muon_jet_z","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1",
       "tau_discr_jetbot2","muon_jet_iso","InvM3_good_short"]
 
-observable_names = ["chi2_test_good"]
+#observable_names = ["chi2_test_good"]
+observable_names = ["jet_bot1_btagnumber"]
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
@@ -126,6 +122,13 @@ samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","w
         "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
         "ttbar_sl_charm","ttbar_sl_light","ttbar_sl_bottom","ttbar_dl","ttbar_dh","zz","wz",
         "st_1","st_2","st_3","st_4", "ttbar_sl_else", "ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
+
+if args.wcs:
+   samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+        "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
+        "ttbar_sl_charm","ttbar_sl_nocharm","ttbar_dl","ttbar_dh","zz","wz",
+        "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+        "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else"]
 
 samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
@@ -148,16 +151,32 @@ for data_op in samples_d:
                 #print(files[p]["type"])
                 lumi[data_op][p] = luminosity
         lumi[data_op]["ttbar_sl_charm"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_charm_mudhad"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_nocharm"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_light"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_bottom"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_else"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_charmgluon"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_bottomgluon"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["st_1_charm"] = lumi[data_op]["st_1"]
+        lumi[data_op]["st_2_charm"] = lumi[data_op]["st_2"]
+        lumi[data_op]["st_3_charm"] = lumi[data_op]["st_3"]
+        lumi[data_op]["st_4_charm"] = lumi[data_op]["st_4"]
+        lumi[data_op]["st_1_nocharm"] = lumi[data_op]["st_1"]
+        lumi[data_op]["st_2_nocharm"] = lumi[data_op]["st_2"]
+        lumi[data_op]["st_3_nocharm"] = lumi[data_op]["st_3"]
+        lumi[data_op]["st_4_nocharm"] = lumi[data_op]["st_4"]
+        lumi[data_op]["st_1_else"] = lumi[data_op]["st_1"]
+        lumi[data_op]["st_2_else"] = lumi[data_op]["st_2"]
+        lumi[data_op]["st_3_else"] = lumi[data_op]["st_3"]
+        lumi[data_op]["st_4_else"] = lumi[data_op]["st_4"]
 
 listsampl = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
         "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz", "ttbar_sl_charm", "ttbar_sl_charmgluon",
-        "ttbar_sl_bottom", "ttbar_sl_bottomgluon", "ttbar_sl_else", "ttbar_sl_light"]
+        "ttbar_sl_bottom", "ttbar_sl_bottomgluon", "ttbar_sl_else", "ttbar_sl_light", "ttbar_sl_nocharm",
+        "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+        "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else","ttbar_sl_charm_mudhad"]
 
 for s in listsampl:
    lumi["2016B"][s] = lumi["2016"][s]
@@ -183,9 +202,15 @@ histFileDE = {}
 myfile = {}
 path_histfile = "/nfs/cms/vazqueze/higgssearch/datacards/"
 
+#### Systematics to take into account
+list_syst = ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown", "seclepup", "seclepdown", "lepidup", "lepiddown", 
+      "lepisoup", "lepisodown", "leptrigup", "leptrigdown", "notoppt","puwup","puwdown"] 
+#list_syst = []
+
 for name in observable_names:
   ## Open hists files
-  filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/"+term_path+"/"
+  filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
+  if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
   term = "hist_wqqfromJF_"
   end_term = ".root"
   ## mc files
@@ -207,49 +232,52 @@ for name in observable_names:
         "ttbar_sl_charm","ttbar_sl_light","ttbar_sl_bottom","ttbar_dl","ttbar_dh","zz","wz",
         "st_1","st_2","st_3","st_4","ttbar_sl_else","ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
 
+  if args.wcs:
+    if args.mudhad:
+       samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+            "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
+            "ttbar_sl_charm_mudhad","ttbar_sl_nocharm","ttbar_dl","ttbar_dh","zz","wz",
+            "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+            "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else"]
+    else:
+       samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+            "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
+            "ttbar_sl_charm","ttbar_sl_nocharm","ttbar_dl","ttbar_dh","zz","wz",
+            "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+            "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else"]
+
   ## HISTS
   samples_foryear = {}
   hist_nom_M = {}
   hist_nom_E = {}
-  hist_btaglightup_M = {}
-  hist_btaglightup_E = {}
-  hist_btaglightdown_M = {}
-  hist_btaglightdown_E = {}
-  hist_btagheavyup_M = {}
-  hist_btagheavyup_E = {}
-  hist_btagheavydown_M = {}
-  hist_btagheavydown_E = {}
+  hist_syst_M = {}
+  hist_syst_E = {}
+  for syst_name in list_syst:
+     hist_syst_M[syst_name] = {}
+     hist_syst_E[syst_name] = {}
   histdata_M = {}
   histdata_E = {}
   for data_op in datayears:
     hist_nom_M[data_op] = {}
     hist_nom_E[data_op] = {}
-    hist_btaglightup_M[data_op] = {}
-    hist_btaglightup_E[data_op] = {}
-    hist_btaglightdown_M[data_op] = {}
-    hist_btaglightdown_E[data_op] = {}
-    hist_btagheavyup_M[data_op] = {}
-    hist_btagheavyup_E[data_op] = {}
-    hist_btagheavydown_M[data_op] = {}
-    hist_btagheavydown_E[data_op] = {}
+    for syst_name in list_syst:
+       hist_syst_M[syst_name][data_op] = {}
+       hist_syst_E[syst_name][data_op] = {}
     data_term = data_op
     #print(data_op+"M_"+name+"_M")
     #print(histFile[data_op][name].ls())
     for s in samples:
       if s[0:8] == "ttbar_sl": 
          s_term = s[0:8]+data_term+s[8:] 
+      elif s[0:2] == "st":
+         s_term = s[0:4]+data_term+s[4:]
       else:
          s_term = s+data_term
       hist_nom_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M")
       hist_nom_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E")
-      hist_btaglightup_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_btaglightup")
-      hist_btaglightup_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_btaglightup")
-      hist_btaglightdown_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_btaglightdown")
-      hist_btaglightdown_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_btaglightdown")
-      hist_btagheavyup_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_btagheavyup")
-      hist_btagheavyup_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_btagheavyup")
-      hist_btagheavydown_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_btagheavydown")
-      hist_btagheavydown_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_btagheavydown")
+      for syst_name in list_syst:
+         hist_syst_M[syst_name][data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_"+str(syst_name))
+         hist_syst_E[syst_name][data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_"+str(syst_name))
     if not args.nodata: histdata_M[data_op] = histFileDM[name][data_op].Get("data"+data_op+"M_"+name+"_M")
     if not args.nodata: histdata_E[data_op] = histFileDE[name][data_op].Get("data"+data_op+"E_"+name+"_E")
 
@@ -265,24 +293,16 @@ for name in observable_names:
       #print(data_op)
       hist_nom_M[data_op][s].Scale(lumi_data/lumi[data_op][s])
       hist_nom_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btaglightup_M[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btaglightup_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btaglightdown_M[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btaglightdown_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btagheavyup_M[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btagheavyup_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btagheavydown_M[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      hist_btagheavydown_E[data_op][s].Scale(lumi_data/lumi[data_op][s])
-      if args.norm: hist_nom_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-      if args.norm: hist_nom_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
-      if args.norm: hist_btaglightup_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-      if args.norm: hist_btaglightup_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
-      if args.norm: hist_btaglightdown_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-      if args.norm: hist_btaglightdown_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
-      if args.norm: hist_btagheavyup_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-      if args.norm: hist_btagheavyup_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
-      if args.norm: hist_btagheavydown_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-      if args.norm: hist_btagheavydown_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
+      for syst_name in list_syst:
+         hist_syst_M[syst_name][data_op][s].Scale(lumi_data/lumi[data_op][s])
+         hist_syst_E[syst_name][data_op][s].Scale(lumi_data/lumi[data_op][s])
+      if args.norm: 
+         hist_nom_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
+         hist_nom_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
+         for syst_name in list_syst:
+            hist_syst_M[syst_name][data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
+            hist_syst_E[syst_name][data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
+
     ## Fixing single top
     #print(samples_foryear[data_op]) 
     #### List of summing samples:
@@ -290,137 +310,89 @@ for name in observable_names:
     list_wjets = ["wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8"]
     list_zjets = ["zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8"]
     list_vv = ["ww","wz","zz"]
-    hist_nom_M[data_op]["st"] = hist_nom_M[data_op][list_st[0]]
-    hist_nom_E[data_op]["st"] = hist_nom_E[data_op][list_st[0]]
-    hist_btaglightup_M[data_op]["st"] = hist_btaglightup_M[data_op][list_st[0]]
-    hist_btaglightup_E[data_op]["st"] = hist_btaglightup_E[data_op][list_st[0]]
-    hist_btaglightdown_M[data_op]["st"] = hist_btaglightdown_M[data_op][list_st[0]]
-    hist_btaglightdown_E[data_op]["st"] = hist_btaglightdown_E[data_op][list_st[0]]
-    hist_btagheavyup_M[data_op]["st"] = hist_btagheavyup_M[data_op][list_st[0]]
-    hist_btagheavyup_E[data_op]["st"] = hist_btagheavyup_E[data_op][list_st[0]]
-    hist_btagheavydown_M[data_op]["st"] = hist_btagheavydown_M[data_op][list_st[0]]
-    hist_btagheavydown_E[data_op]["st"] = hist_btagheavydown_E[data_op][list_st[0]]
-    for l in list_st[1:]:
-      hist_nom_M[data_op]["st"].Add(hist_nom_M[data_op][l])
-      hist_nom_E[data_op]["st"].Add(hist_nom_E[data_op][l])
-      hist_btaglightup_M[data_op]["st"].Add(hist_btaglightup_M[data_op][l])
-      hist_btaglightup_E[data_op]["st"].Add(hist_btaglightup_E[data_op][l])
-      hist_btaglightdown_M[data_op]["st"].Add(hist_btaglightdown_M[data_op][l])
-      hist_btaglightdown_E[data_op]["st"].Add(hist_btaglightdown_E[data_op][l])
-      hist_btagheavyup_M[data_op]["st"].Add(hist_btagheavyup_M[data_op][l])
-      hist_btagheavyup_E[data_op]["st"].Add(hist_btagheavyup_E[data_op][l])
-      hist_btagheavydown_M[data_op]["st"].Add(hist_btagheavydown_M[data_op][l])
-      hist_btagheavydown_E[data_op]["st"].Add(hist_btagheavydown_E[data_op][l])
+    if args.wcs:
+       list_st_aux = ["_charm","_nocharm","_else"]
+    else:
+       list_st_aux = [""]
+    for apx in list_st_aux:
+      hist_nom_M[data_op]["st"+apx] = hist_nom_M[data_op][list_st[0]+apx]
+      hist_nom_E[data_op]["st"+apx] = hist_nom_E[data_op][list_st[0]+apx]
+      for syst_name in list_syst:
+         hist_syst_M[syst_name][data_op]["st"+apx] = hist_syst_M[syst_name][data_op][list_st[0]+apx]
+         hist_syst_E[syst_name][data_op]["st"+apx] = hist_syst_E[syst_name][data_op][list_st[0]+apx]
+      for l in list_st[1:]:
+        hist_nom_M[data_op]["st"+apx].Add(hist_nom_M[data_op][l+apx])
+        hist_nom_E[data_op]["st"+apx].Add(hist_nom_E[data_op][l+apx])
+        for syst_name in list_syst:
+           hist_syst_M[syst_name][data_op]["st"+apx].Add(hist_syst_M[syst_name][data_op][l+apx])
+           hist_syst_E[syst_name][data_op]["st"+apx].Add(hist_syst_E[syst_name][data_op][l+apx])
     hist_nom_M[data_op]["wjets"] = hist_nom_M[data_op][list_wjets[0]]
     hist_nom_E[data_op]["wjets"] = hist_nom_E[data_op][list_wjets[0]]
-    hist_btaglightup_M[data_op]["wjets"] = hist_btaglightup_M[data_op][list_wjets[0]]
-    hist_btaglightup_E[data_op]["wjets"] = hist_btaglightup_E[data_op][list_wjets[0]]
-    hist_btaglightdown_M[data_op]["wjets"] = hist_btaglightdown_M[data_op][list_wjets[0]]
-    hist_btaglightdown_E[data_op]["wjets"] = hist_btaglightdown_E[data_op][list_wjets[0]]
-    hist_btagheavyup_M[data_op]["wjets"] = hist_btagheavyup_M[data_op][list_wjets[0]]
-    hist_btagheavyup_E[data_op]["wjets"] = hist_btagheavyup_E[data_op][list_wjets[0]]
-    hist_btagheavydown_M[data_op]["wjets"] = hist_btagheavydown_M[data_op][list_wjets[0]]
-    hist_btagheavydown_E[data_op]["wjets"] = hist_btagheavydown_E[data_op][list_wjets[0]]
+    for syst_name in list_syst:
+       hist_syst_M[syst_name][data_op]["wjets"] = hist_syst_M[syst_name][data_op][list_wjets[0]]
+       hist_syst_E[syst_name][data_op]["wjets"] = hist_syst_E[syst_name][data_op][list_wjets[0]]
     for l in list_wjets[1:]:
       hist_nom_M[data_op]["wjets"].Add(hist_nom_M[data_op][l])
       hist_nom_E[data_op]["wjets"].Add(hist_nom_E[data_op][l])
-      hist_btaglightup_M[data_op]["wjets"].Add(hist_btaglightup_M[data_op][l])
-      hist_btaglightup_E[data_op]["wjets"].Add(hist_btaglightup_E[data_op][l])
-      hist_btaglightdown_M[data_op]["wjets"].Add(hist_btaglightdown_M[data_op][l])
-      hist_btaglightdown_E[data_op]["wjets"].Add(hist_btaglightdown_E[data_op][l])
-      hist_btagheavyup_M[data_op]["wjets"].Add(hist_btagheavyup_M[data_op][l])
-      hist_btagheavyup_E[data_op]["wjets"].Add(hist_btagheavyup_E[data_op][l])
-      hist_btagheavydown_M[data_op]["wjets"].Add(hist_btagheavydown_M[data_op][l])
-      hist_btagheavydown_E[data_op]["wjets"].Add(hist_btagheavydown_E[data_op][l])
+      for syst_name in list_syst:
+         hist_syst_M[syst_name][data_op]["wjets"].Add(hist_syst_M[syst_name][data_op][l])
+         hist_syst_E[syst_name][data_op]["wjets"].Add(hist_syst_E[syst_name][data_op][l])
     hist_nom_M[data_op]["zjets"] = hist_nom_M[data_op][list_zjets[0]]
     hist_nom_E[data_op]["zjets"] = hist_nom_E[data_op][list_zjets[0]]
-    hist_btaglightup_M[data_op]["zjets"] = hist_btaglightup_M[data_op][list_zjets[0]]
-    hist_btaglightup_E[data_op]["zjets"] = hist_btaglightup_E[data_op][list_zjets[0]]
-    hist_btaglightdown_M[data_op]["zjets"] = hist_btaglightdown_M[data_op][list_zjets[0]]
-    hist_btaglightdown_E[data_op]["zjets"] = hist_btaglightdown_E[data_op][list_zjets[0]]
-    hist_btagheavyup_M[data_op]["zjets"] = hist_btagheavyup_M[data_op][list_zjets[0]]
-    hist_btagheavyup_E[data_op]["zjets"] = hist_btagheavyup_E[data_op][list_zjets[0]]
-    hist_btagheavydown_M[data_op]["zjets"] = hist_btagheavydown_M[data_op][list_zjets[0]]
-    hist_btagheavydown_E[data_op]["zjets"] = hist_btagheavydown_E[data_op][list_zjets[0]]
+    for syst_name in list_syst:
+       hist_syst_M[syst_name][data_op]["zjets"] = hist_syst_M[syst_name][data_op][list_zjets[0]]
+       hist_syst_E[syst_name][data_op]["zjets"] = hist_syst_E[syst_name][data_op][list_zjets[0]]
     for l in list_zjets[1:]:
       hist_nom_M[data_op]["zjets"].Add(hist_nom_M[data_op][l])
       hist_nom_E[data_op]["zjets"].Add(hist_nom_E[data_op][l])
-      hist_btaglightup_M[data_op]["zjets"].Add(hist_btaglightup_M[data_op][l])
-      hist_btaglightup_E[data_op]["zjets"].Add(hist_btaglightup_E[data_op][l])
-      hist_btaglightdown_M[data_op]["zjets"].Add(hist_btaglightdown_M[data_op][l])
-      hist_btaglightdown_E[data_op]["zjets"].Add(hist_btaglightdown_E[data_op][l])
-      hist_btagheavyup_M[data_op]["zjets"].Add(hist_btagheavyup_M[data_op][l])
-      hist_btagheavyup_E[data_op]["zjets"].Add(hist_btagheavyup_E[data_op][l])
-      hist_btagheavydown_M[data_op]["zjets"].Add(hist_btagheavydown_M[data_op][l])
-      hist_btagheavydown_E[data_op]["zjets"].Add(hist_btagheavydown_E[data_op][l])
+      for syst_name in list_syst:
+         hist_syst_M[syst_name][data_op]["zjets"].Add(hist_syst_M[syst_name][data_op][l])
+         hist_syst_E[syst_name][data_op]["zjets"].Add(hist_syst_E[syst_name][data_op][l])
     hist_nom_M[data_op]["vv"] = hist_nom_M[data_op][list_vv[0]]
     hist_nom_E[data_op]["vv"] = hist_nom_E[data_op][list_vv[0]]
-    hist_btaglightup_M[data_op]["vv"] = hist_btaglightup_M[data_op][list_vv[0]]
-    hist_btaglightup_E[data_op]["vv"] = hist_btaglightup_E[data_op][list_vv[0]]
-    hist_btaglightdown_M[data_op]["vv"] = hist_btaglightdown_M[data_op][list_vv[0]]
-    hist_btaglightdown_E[data_op]["vv"] = hist_btaglightdown_E[data_op][list_vv[0]]
-    hist_btagheavyup_M[data_op]["vv"] = hist_btagheavyup_M[data_op][list_vv[0]]
-    hist_btagheavyup_E[data_op]["vv"] = hist_btagheavyup_E[data_op][list_vv[0]]
-    hist_btagheavydown_M[data_op]["vv"] = hist_btagheavydown_M[data_op][list_vv[0]]
-    hist_btagheavydown_E[data_op]["vv"] = hist_btagheavydown_E[data_op][list_vv[0]]
+    for syst_name in list_syst:
+       hist_syst_M[syst_name][data_op]["vv"] = hist_syst_M[syst_name][data_op][list_vv[0]]
+       hist_syst_E[syst_name][data_op]["vv"] = hist_syst_E[syst_name][data_op][list_vv[0]]
     for l in list_vv[1:]:
       hist_nom_M[data_op]["vv"].Add(hist_nom_M[data_op][l])
       hist_nom_E[data_op]["vv"].Add(hist_nom_E[data_op][l])
-      hist_btaglightup_M[data_op]["vv"].Add(hist_btaglightup_M[data_op][l])
-      hist_btaglightup_E[data_op]["vv"].Add(hist_btaglightup_E[data_op][l])
-      hist_btaglightdown_M[data_op]["vv"].Add(hist_btaglightdown_M[data_op][l])
-      hist_btaglightdown_E[data_op]["vv"].Add(hist_btaglightdown_E[data_op][l])
-      hist_btagheavyup_M[data_op]["vv"].Add(hist_btagheavyup_M[data_op][l])
-      hist_btagheavyup_E[data_op]["vv"].Add(hist_btagheavyup_E[data_op][l])
-      hist_btagheavydown_M[data_op]["vv"].Add(hist_btagheavydown_M[data_op][l])
-      hist_btagheavydown_E[data_op]["vv"].Add(hist_btagheavydown_E[data_op][l])
+      for syst_name in list_syst:
+         hist_syst_M[syst_name][data_op]["vv"].Add(hist_syst_M[syst_name][data_op][l])
+         hist_syst_E[syst_name][data_op]["vv"].Add(hist_syst_E[syst_name][data_op][l])
 
   samples = ["ttbar_sl_bottom","ttbar_sl_charm","ttbar_sl_else","ttbar_sl_light","ttbar_dl","ttbar_dh","zjets","vv","st","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon"]
+  if args.wcs: 
+     if args.mudhad:
+        samples = ["ttbar_sl_nocharm","ttbar_sl_charm_mudhad","ttbar_dl","ttbar_dh","zjets","vv","st_nocharm","st_charm","st_else","wjets"]
+     else:
+        samples = ["ttbar_sl_nocharm","ttbar_sl_charm","ttbar_dl","ttbar_dh","zjets","vv","st_nocharm","st_charm","st_else","wjets"]
 
   ## sumamos todos los anos para todos los histogramas
   histT_nom_M = {}
   histT_nom_E = {}
-  histT_btaglightup_M = {}
-  histT_btaglightup_E = {}
-  histT_btaglightdown_M = {}
-  histT_btaglightdown_E = {}
-  histT_btagheavyup_M = {}
-  histT_btagheavyup_E = {}
-  histT_btagheavydown_M = {}
-  histT_btagheavydown_E = {}
+  histT_syst_M = {}
+  histT_syst_E = {}
+  for syst_name in list_syst:
+     histT_syst_M[syst_name] = {}
+     histT_syst_E[syst_name] = {}
   for s in samples:
        histT_nom_M[s] = hist_nom_M[datayears[0]][s]
        histT_nom_E[s] = hist_nom_E[datayears[0]][s]
-       histT_btaglightup_M[s] = hist_btaglightup_M[datayears[0]][s]
-       histT_btaglightup_E[s] = hist_btaglightup_E[datayears[0]][s]
-       histT_btaglightdown_M[s] = hist_btaglightdown_M[datayears[0]][s]
-       histT_btaglightdown_E[s] = hist_btaglightdown_E[datayears[0]][s]
-       histT_btagheavyup_M[s] = hist_btagheavyup_M[datayears[0]][s]
-       histT_btagheavyup_E[s] = hist_btagheavyup_E[datayears[0]][s]
-       histT_btagheavydown_M[s] = hist_btagheavydown_M[datayears[0]][s]
-       histT_btagheavydown_E[s] = hist_btagheavydown_E[datayears[0]][s]
+       for syst_name in list_syst:
+         histT_syst_M[syst_name][s] = hist_syst_M[syst_name][datayears[0]][s]
+         histT_syst_E[syst_name][s] = hist_syst_E[syst_name][datayears[0]][s]
        for d in datayears[1:]:
           histT_nom_M[s].Add(hist_nom_M[d][s])
           histT_nom_E[s].Add(hist_nom_E[d][s])
-          histT_btaglightup_M[s].Add(hist_btaglightup_M[d][s])
-          histT_btaglightup_E[s].Add(hist_btaglightup_E[d][s])
-          histT_btaglightdown_M[s].Add(hist_btaglightdown_M[d][s])
-          histT_btaglightdown_E[s].Add(hist_btaglightdown_E[d][s])
-          histT_btagheavyup_M[s].Add(hist_btagheavyup_M[d][s])
-          histT_btagheavyup_E[s].Add(hist_btagheavyup_E[d][s])
-          histT_btagheavydown_M[s].Add(hist_btagheavydown_M[d][s])
-          histT_btagheavydown_E[s].Add(hist_btagheavydown_E[d][s])
+          for syst_name in list_syst:
+             histT_syst_M[syst_name][s].Add(hist_syst_M[syst_name][d][s])
+             histT_syst_E[syst_name][s].Add(hist_syst_E[syst_name][d][s])
        if (args.channel in sl_channel) and (name not in not_rebin):
           histT_nom_M[s].Rebin(2)
           histT_nom_E[s].Rebin(2)
-          histT_btaglightup_M[s].Rebin(2)
-          histT_btaglightup_E[s].Rebin(2)
-          histT_btaglightdown_M[s].Rebin(2)
-          histT_btaglightdown_E[s].Rebin(2)
-          histT_btagheavyup_M[s].Rebin(2)
-          histT_btagheavyup_E[s].Rebin(2)
-          histT_btagheavydown_M[s].Rebin(2)
-          histT_btagheavydown_E[s].Rebin(2)
+          for syst_name in list_syst:
+             histT_syst_M[syst_name][s].Rebin(2)
+             histT_syst_E[syst_name][s].Rebin(2)
 
   if not args.nodata:
     histD_M = histdata_M[datayears[0]]
@@ -432,81 +404,306 @@ for name in observable_names:
        histD_M.Rebin(2)
        histD_E.Rebin(2)
 
-  envHi_btaglight_T = {}
-  envLo_btaglight_T = {}
-  envHi_btagheavy_T = {}
-  envLo_btagheavy_T = {}
-  for s in samples:
-      envHi_btaglight_T[s] = histT_btaglightup_M[s]
-      envHi_btaglight_T[s].Add(histT_btaglightup_E[s])
-      envLo_btaglight_T[s] = histT_btaglightdown_M[s] 
-      envLo_btaglight_T[s].Add(histT_btaglightdown_E[s])
-      envHi_btagheavy_T[s] = histT_btagheavyup_M[s] 
-      envHi_btagheavy_T[s].Add(histT_btagheavyup_E[s])
-      envLo_btagheavy_T[s] = histT_btagheavydown_M[s] 
-      envLo_btagheavy_T[s].Add(histT_btagheavydown_E[s])
+  env_syst_T = {}
+  env_syst_M = {}
+  env_syst_E = {}
+  for syst_name in list_syst:
+     env_syst_T[syst_name] = {}
+     env_syst_M[syst_name] = {}
+     env_syst_E[syst_name] = {}
+  if args.sumEM:
+    for s in samples:
+       for syst_name in list_syst:
+          env_syst_T[syst_name][s] = histT_syst_M[syst_name][s]
+          env_syst_T[syst_name][s].Add(histT_syst_E[syst_name][s])
+  else:
+    for s in samples:
+       for syst_name in list_syst:
+         env_syst_M[syst_name][s] = histT_syst_M[syst_name][s]
+         env_syst_E[syst_name][s] = histT_syst_E[syst_name][s]
 
   ## Stack creation
   samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon","ttbar_sl_else","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
+  if args.wcs:
+     if args.mudhad: 
+        samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","st_else","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm_mudhad"]
+     else:
+        samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","st_else","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
 
-  histT_nom_T = {}
-  for s in samples:
-    histT_nom_T[s] = histT_nom_M[s]
-    histT_nom_T[s].Add(histT_nom_E[s])
-  stack_T = ROOT.THStack()
-  for s in samples:
-    stack_T.Add(histT_nom_T[s])
-  last_T = stack_T.GetStack().Last()
+  if args.sumEM:
+    histT_nom_T = {}
+    for s in samples:
+      histT_nom_T[s] = histT_nom_M[s]
+      histT_nom_T[s].Add(histT_nom_E[s])
+    if not args.nodata:
+      histD_T = histD_M
+      histD_T.Add(histD_E)
 
-  if not args.nodata:
-    histD_T = histD_M
-    histD_T.Add(histD_E)
+  if args.sumEM:
+    ###############################
+    ###### sumEM channel ##########
+    ###############################
+    #### syst from MC stat creation
+    env_syst_T["mcstat"] = {}
+    error_tot = {}
+    for s in samples:
+        env_syst_T["mcstat"][s] = histT_nom_T[s].Clone(str(s)+"mcstaterr")
+        error_tot[s] = 0
+        for bin in range(histT_nom_T[s].GetNbinsX()):
+            error_tot[s] = error_tot[s] + histT_nom_T[s].GetBinError(bin+1)**2
+            #env_syst_T["mcstat"][s].SetBinContent(bin+1,env_syst_T["mcstat"][s].GetBinContent(bin+1)+histT_nom_T[s].GetBinError(bin+1))
+        error_tot[s] = sqrt(error_tot[s])
+        env_syst_T["mcstat"][s].Scale((histT_nom_T[s].Integral()+error_tot[s])/histT_nom_T[s].Integral())
+        print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_T[s].Integral(),3)))
+
+    list_syst = list_syst+["mcstat"]
+    ### hist renamings
+    data_obs = histD_T.Clone("data_obs")
+    mchists = {}
+    mchists_syst = {}
+    for syst_name in list_syst:
+       mchists_syst[syst_name] = {}
+    for s in samples:
+      if (s == "ttbar_sl_charm" or s == "ttbar_sl_charm_mudhad"):
+         mchists[s] = histT_nom_T[s].Clone("signal")
+         for syst_name in list_syst:
+            mchists_syst[syst_name][s] = env_syst_T[syst_name][s].Clone("signal_"+syst_name)
+      else:
+         mchists[s] = histT_nom_T[s].Clone(str(s))
+         for syst_name in list_syst:
+            mchists_syst[syst_name][s] = env_syst_T[syst_name][s].Clone(s+"_"+syst_name)
+
+    print("Integral of data is "+str(data_obs.Integral()))
+    if args.wcs:
+      if args.mudhad:
+         aux_list = ["vv","ttbar_dl","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm_mudhad"]
+      else:
+         aux_list = ["vv","ttbar_dl","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
+      for s in aux_list:
+        print("-------------------------------------------------------")
+        if s == "vv":
+          number_nom = mchists["vv"].Integral()+mchists["ttbar_dh"].Integral()+mchists["zjets"].Integral()+mchists["wjets"].Integral()+mchists["st_else"].Integral()
+          print("Integral of backgrounds is %s" %str(number_nom))
+          for syst_name in list_syst:
+             number = mchists_syst[syst_name]["vv"].Integral()+mchists_syst[syst_name]["ttbar_dh"].Integral()+mchists_syst[syst_name]["zjets"].Integral()+mchists_syst[syst_name]["wjets"].Integral()+mchists_syst[syst_name]["st_else"].Integral()
+             print(syst_name+" effect is %s with effect of %s percent" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2)))) 
+        else:
+          number_nom = mchists[s].Integral()
+          print("Integral of "+str(s)+" MC process is "+str(mchists[s].Integral()))
+          for syst_name	in list_syst:
+             number = mchists_syst[syst_name][s].Integral()
+             print(syst_name+" effect is %s with effect of %s percent" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2)))) 
+      print("-------------------------------------------------------")
+      print("-------------------------------------------------------")
+      quant = 0
+      quant_syst = {}
+      for syst_name in list_syst:
+         quant_syst[syst_name] = 0
+      for s in samples:
+        quant = quant + mchists[s].Integral()
+        for syst_name in list_syst:
+           quant_syst[syst_name] = quant_syst[syst_name] + mchists_syst[syst_name][s].Integral()
+      print("Integral of all MC processes is "+str(round(quant,2)))
+      for syst_name in list_syst:
+        print(syst_name+" effect is %s with effect of %s percent" %(str(quant_syst[syst_name]),str(round(100*abs(quant-quant_syst[syst_name])/quant,2)))) 
+    else:
+      for s in samples:
+        print("Integral of "+str(s)+" MC process is "+str(mchists[s].Integral()))
+
+    ### file saving
+    if args.wcs:
+      termfile = "mydatacard_"+str(args.channel)+"_"+str(name)+"_wcs.root"
+    else:
+      termfile = "mydatacard_"+str(args.channel)+"_"+str(name)+".root"
+    myfile[name] = TFile( path_histfile+termfile, 'RECREATE' )
+    data_obs.Write()
+    for s in samples:
+      mchists[s].Write()
+      for syst_name in list_syst:
+         mchists_syst[syst_name][s].Write()
+    myfile[name].Close()
 
   ## Samples reminder
   ## samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_bottomgluon",
   ## "ttbar_sl_charmgluon","ttbar_sl_else","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
+  ## if wcs: samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","st_else","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
 
-  ### hist renamings
-  data_obs = histD_T.Clone("data_obs")
-  mchists = {}
-  mchists_lightup = {}
-  mchists_lightdown = {}
-  mchists_heavyup = {}
-  mchists_heavydown = {}
-  for s in samples:
-      if s == "ttbar_sl_charm":
-         mchists[s] = histT_nom_T[s].Clone("signal")
-         mchists_lightup[s] = envHi_btaglight_T[s].Clone("signal_lightUp")
-         mchists_lightdown[s] = envLo_btaglight_T[s].Clone("signal_lightDown")
-         mchists_heavyup[s] = envHi_btagheavy_T[s].Clone("signal_heavyUp")
-         mchists_heavydown[s] = envLo_btagheavy_T[s].Clone("signal_heavyDown")
+  else:
+    ###############################
+    ###### M channel ##############
+    ###############################
+    #### syst from MC stat creation
+    env_syst_M["mcstat"] = {}
+    error_tot = {}
+    for s in samples:
+        env_syst_M["mcstat"][s] = histT_nom_M[s].Clone(str(s)+"mcstaterr")
+        error_tot[s] = 0
+        for bin in range(histT_nom_M[s].GetNbinsX()):
+            error_tot[s] = error_tot[s] + histT_nom_M[s].GetBinError(bin+1)**2
+            #env_syst_M["mcstat"][s].SetBinContent(bin+1,env_syst_M["mcstat"][s].GetBinContent(bin+1)+histT_nom_M[s].GetBinError(bin+1))
+        error_tot[s] = sqrt(error_tot[s])
+        env_syst_M["mcstat"][s].Scale((histT_nom_M[s].Integral()+error_tot[s])/histT_nom_M[s].Integral())
+        print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_M[s].Integral(),3)))
+
+    list_syst = list_syst+["mcstat"]
+    ### hist renamings
+    data_obs = histD_M.Clone("data_obs")
+    mchists = {}
+    mchists_syst = {}
+    for syst_name in list_syst:
+       mchists_syst[syst_name] = {}
+    for s in samples:
+      if (s == "ttbar_sl_charm" or s == "ttbar_sl_charm_mudhad"):
+         mchists[s] = histT_nom_M[s].Clone("signal")
+         for syst_name in list_syst:
+            mchists_syst[syst_name][s] = env_syst_M[syst_name][s].Clone("signal_"+syst_name)
       else:
-         mchists[s] = histT_nom_T[s].Clone(str(s))
-         mchists_lightup[s] = envHi_btaglight_T[s].Clone(s+"_lightUp")
-         mchists_lightdown[s] = envLo_btaglight_T[s].Clone(s+"_lightDown")
-         mchists_heavyup[s] = envHi_btagheavy_T[s].Clone(s+"_heavyUp")
-         mchists_heavydown[s] = envLo_btagheavy_T[s].Clone(s+"_heavyDown")
+         mchists[s] = histT_nom_M[s].Clone(str(s))
+         for syst_name in list_syst:
+            mchists_syst[syst_name][s] = env_syst_M[syst_name][s].Clone(s+"_"+syst_name)
 
-  print("Integral of data is "+str(data_obs.Integral()))
-  for s in samples:
-     print("Integral of "+str(s)+" MC process is "+str(mchists[s].Integral()))
+    print("-------------------------------------------------------------------------------------------------------------------------")
+    print("Integral of M data is "+str(data_obs.Integral()))
+    print("-------------------------------------------------------------------------------------------------------------------------")
+    if args.wcs:
+      if args.mudhad:
+         aux_list = ["vv","ttbar_dl","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm_mudhad"]
+      else:
+         aux_list = ["vv","ttbar_dl","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
+      for s in aux_list:
+        print("-------------------------------------------------------")
+        if s == "vv":
+          number_nom = mchists["vv"].Integral()+mchists["ttbar_dh"].Integral()+mchists["zjets"].Integral()+mchists["wjets"].Integral()+mchists["st_else"].Integral()
+          print("Integral of M channel backgrounds is %s" %str(round(number_nom,2)))
+          for syst_name in list_syst:
+             number = mchists_syst[syst_name]["vv"].Integral()+mchists_syst[syst_name]["ttbar_dh"].Integral()+mchists_syst[syst_name]["zjets"].Integral()+mchists_syst[syst_name]["wjets"].Integral()+mchists_syst[syst_name]["st_else"].Integral()
+             print(syst_name+" effect is %s with effect of %s percent for M channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
+        else:
+          number_nom = mchists[s].Integral()
+          print("Integral of "+str(s)+" MC in M channel process is "+str(round(number_nom,2)))
+          for syst_name in list_syst:
+             number = mchists_syst[syst_name][s].Integral()
+             print(syst_name+" effect is %s with effect of %s percent for M channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
+      print("-------------------------------------------------------")
+      print("-------------------------------------------------------")
+      quant = 0
+      quant_syst = {}
+      for syst_name in list_syst:
+         quant_syst[syst_name] = 0
+      for s in samples:
+        quant = quant + mchists[s].Integral()
+        for syst_name in list_syst:
+           quant_syst[syst_name] = quant_syst[syst_name] + mchists_syst[syst_name][s].Integral()
+      print("Integral of all MC processes in M channel is "+str(round(quant,2)) + " for M cahnnel")
+      for syst_name in list_syst:
+        print(syst_name+" effect is %s with effect of %s percent for M channel" %(str(quant_syst[syst_name]),str(round(100*abs(quant-quant_syst[syst_name])/quant,2))))
+    else:
+      for s in samples:
+        print("Integral of "+str(s)+" MC process is "+str(mchists[s].Integral()) + " for M channel")
 
-  ### file saving
-  termfile = "mydatacard_"+str(args.channel)+"_"+str(name)+".root"
-  myfile[name] = TFile( path_histfile+termfile, 'RECREATE' )
-  data_obs.Write()
-  for s in samples:
+    ### file saving
+    if args.wcs:
+      termfile = "mydatacard_leptonM_"+str(args.channel)+"_"+str(name)+"_wcs.root"
+    else:
+      termfile = "mydatacard_leptonM_"+str(args.channel)+"_"+str(name)+".root"
+    myfile[name] = TFile( path_histfile+termfile, 'RECREATE' )
+    data_obs.Write()
+    for s in samples:
       mchists[s].Write()
-      mchists_lightup[s].Write()
-      mchists_lightdown[s].Write()
-      mchists_heavyup[s].Write()
-      mchists_heavydown[s].Write()
-  myfile[name].Close()
+      for syst_name in list_syst:
+         mchists_syst[syst_name][s].Write()
+    myfile[name].Close()
+
+    ###############################
+    ###### E channel ##############
+    ###############################
+    #### syst from MC stat creation
+    env_syst_E["mcstat"] = {}
+    error_tot = {}
+    for s in samples:
+        env_syst_E["mcstat"][s] = histT_nom_E[s].Clone(str(s)+"mcstaterr")
+        error_tot[s] = 0
+        for bin in range(histT_nom_E[s].GetNbinsX()):
+            error_tot[s] = error_tot[s] + histT_nom_E[s].GetBinError(bin+1)**2
+            #env_syst_E["mcstat"][s].SetBinContent(bin+1,env_syst_E["mcstat"][s].GetBinContent(bin+1)+histT_nom_E[s].GetBinError(bin+1))
+        error_tot[s] = sqrt(error_tot[s])
+        env_syst_E["mcstat"][s].Scale((histT_nom_E[s].Integral()+error_tot[s])/histT_nom_E[s].Integral())
+        print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_E[s].Integral(),3)))
+
+    #list_syst = list_syst+["mcstat"]
+    ### hist renamings
+    data_obs = histD_E.Clone("data_obs")
+    mchists = {}
+    mchists_syst = {}
+    for syst_name in list_syst:
+       mchists_syst[syst_name] = {}
+    for s in samples:
+      if (s == "ttbar_sl_charm" or s == "ttbar_sl_charm_mudhad"):
+         mchists[s] = histT_nom_E[s].Clone("signal")
+         for syst_name in list_syst:
+            mchists_syst[syst_name][s] = env_syst_E[syst_name][s].Clone("signal_"+syst_name)
+      else:
+         mchists[s] = histT_nom_E[s].Clone(str(s))
+         for syst_name in list_syst:
+            mchists_syst[syst_name][s] = env_syst_E[syst_name][s].Clone(s+"_"+syst_name)
+
+    print("-------------------------------------------------------------------------------------------------------------------------")
+    print("Integral of E data is "+str(data_obs.Integral()))
+    print("-------------------------------------------------------------------------------------------------------------------------")
+    if args.wcs:
+      if args.mudhad:
+         aux_list = ["vv","ttbar_dl","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm_mudhad"]
+      else:
+         aux_list = ["vv","ttbar_dl","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
+      for s in aux_list:
+        print("-------------------------------------------------------")
+        if s == "vv":
+          number_nom = mchists["vv"].Integral()+mchists["ttbar_dh"].Integral()+mchists["zjets"].Integral()+mchists["wjets"].Integral()+mchists["st_else"].Integral()
+          print("Integral of E channel backgrounds is %s" %str(round(number_nom,2)))
+          for syst_name in list_syst:
+             number = mchists_syst[syst_name]["vv"].Integral()+mchists_syst[syst_name]["ttbar_dh"].Integral()+mchists_syst[syst_name]["zjets"].Integral()+mchists_syst[syst_name]["wjets"].Integral()+mchists_syst[syst_name]["st_else"].Integral()
+             print(syst_name+" effect is %s with effect of %s percent for E channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
+        else:
+          number_nom = mchists[s].Integral()
+          print("Integral of "+str(s)+" MC in E channel process is "+str(round(number_nom,2)))
+          for syst_name in list_syst:
+             number = mchists_syst[syst_name][s].Integral()
+             print(syst_name+" effect is %s with effect of %s percent for E channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
+      print("-------------------------------------------------------")
+      print("-------------------------------------------------------")
+      quant = 0
+      quant_syst = {}
+      for syst_name in list_syst:
+         quant_syst[syst_name] = 0
+      for s in samples:
+        quant = quant + mchists[s].Integral()
+        for syst_name in list_syst:
+           quant_syst[syst_name] = quant_syst[syst_name] + mchists_syst[syst_name][s].Integral()
+      print("Integral of all MC processes in E channel is "+str(round(quant,2)))
+      for syst_name in list_syst:
+        print(syst_name+" effect is %s with effect of %s percent for E channel" %(str(quant_syst[syst_name]),str(round(100*abs(quant-quant_syst[syst_name])/quant,2))))
+    else:
+      for s in samples:
+        print("Integral of "+str(s)+" MC process is "+str(mchists[s].Integral()))
+
+    ### file saving
+    if args.wcs:
+      termfile = "mydatacard_leptonE_"+str(args.channel)+"_"+str(name)+"_wcs.root"
+    else:
+      termfile = "mydatacard_leptonE_"+str(args.channel)+"_"+str(name)+".root"
+    myfile[name] = TFile( path_histfile+termfile, 'RECREATE' )
+    data_obs.Write()
+    for s in samples:
+      mchists[s].Write()
+      for syst_name in list_syst:
+         mchists_syst[syst_name][s].Write()
+    myfile[name].Close()
 
   for data_op in datayears:
          histFile[name][data_op].Close()
          if not args.nodata:
             histFileDM[name][data_op].Close()
             histFileDE[name][data_op].Close()
+
 
 

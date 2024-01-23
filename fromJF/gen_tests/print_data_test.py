@@ -10,6 +10,7 @@ import urllib.request
 
 
 df_init = ROOT.RDataFrame("Events","/pnfs/ciemat.es/data/cms/store/user/juvazque/PreprocessRDF_nojetID_aux/myconfig2018/ttbar_dl/cat_base/prod_test/data_38.root")
+df_init = ROOT.RDataFrame("Events","/pnfs/ciemat.es/data/cms/store/user/juvazque/PreprocessRDF_nojetID_aux/myconfig2018/ttbar_sl/cat_base/prod_test/data_38.root")
 
 gInterpreter.Declare("""
       #include <bitset>
@@ -103,10 +104,22 @@ print(isHardP[1271][15:27])
 print(fromHardP[1271][15:27])
 
 print('--------------------------------')
+print(pdgID[1581][0:15])
+print(motherID[1581][0:15])
+print(isHardP[1581][0:15])
+print(fromHardP[1581][0:15])
+
+print('--------------------------------')
 print(pdgID[1581][15:27])
 print(motherID[1581][15:27])
 print(isHardP[1581][15:27])
 print(fromHardP[1581][15:27])
+
+print('--------------------------------')
+print(pdgID[11201][0:15])
+print(motherID[11201][0:15])
+print(isHardP[11201][0:15])
+print(fromHardP[11201][0:15])
 
 print('--------------------------------')
 print(pdgID[11201][15:27])

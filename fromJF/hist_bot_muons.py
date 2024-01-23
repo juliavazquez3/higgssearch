@@ -54,8 +54,8 @@ plotdir = '/nfs/cms/vazqueze/higgssearch/plotspng/'
 if not os.path.exists(plotdir):
     os.makedirs(plotdir)
 
-c_rat = 1.5
-c_rat2 = 0.5
+c_rat = 1.2
+c_rat2 = 0.8
 
 if args.etabin == "none": eta_bin = "none"
 elif args.etabin == "one": eta_bin = "one"
@@ -271,6 +271,8 @@ for name in observable_names:
   hist_btaglightdown = {}
   hist_btagheavyup = {}
   hist_btagheavydown = {}
+  hist_seclepup = {}
+  hist_seclepdown = {}
   histdata_M = {}
   histdata_E = {}
   histdata = {}
@@ -280,6 +282,8 @@ for name in observable_names:
     hist_btaglightdown[data_op] = {}
     hist_btagheavyup[data_op] = {}
     hist_btagheavydown[data_op] = {}
+    hist_seclepup[data_op] = {}
+    hist_seclepdown[data_op] = {}
     data_term = data_op
     #print(name)
     for s in samples:
@@ -293,6 +297,8 @@ for name in observable_names:
          hist_btaglightdown[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_btaglightdown")
          hist_btagheavyup[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_btagheavyup")
          hist_btagheavydown[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_btagheavydown")
+         hist_seclepup[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_seclepup")
+         hist_seclepdown[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_seclepdown")
     #print(histFileDM[name][data_op].ls())
     if not args.nodata: histdata[data_op] = histFileDM[name][data_op].Get("data"+data_op+"M_"+name)
     if not args.nodata: histdata_E[data_op] = histFileDE[name][data_op].Get("data"+data_op+"E_"+name)
@@ -314,12 +320,16 @@ for name in observable_names:
          hist_btaglightdown[data_op][s].Scale(lumi_data/lumi[data_op][s])
          hist_btagheavyup[data_op][s].Scale(lumi_data/lumi[data_op][s])
          hist_btagheavydown[data_op][s].Scale(lumi_data/lumi[data_op][s])
+         hist_seclepup[data_op][s].Scale(lumi_data/lumi[data_op][s])
+         hist_seclepdown[data_op][s].Scale(lumi_data/lumi[data_op][s])
       if args.norm: hist_nom[data_op][s].Scale(norm_factor[str(args.year)])
       if not args.nosyst:
          if args.norm: hist_btaglightup[data_op][s].Scale(norm_factor[str(args.year)])
          if args.norm: hist_btaglightdown[data_op][s].Scale(norm_factor[str(args.year)])
          if args.norm: hist_btagheavyup[data_op][s].Scale(norm_factor[str(args.year)])
          if args.norm: hist_btagheavydown[data_op][s].Scale(norm_factor[str(args.year)])
+         if args.norm: hist_seclepup[data_op][s].Scale(norm_factor[str(args.year)])
+         if args.norm: hist_seclepdown[data_op][s].Scale(norm_factor[str(args.year)])
     ## Fixing single top
     #print(samples_foryear[data_op]) 
     #### List of summing samples:
@@ -337,6 +347,8 @@ for name in observable_names:
       hist_btaglightdown[data_op]["ttbar_nomuon"] = hist_btaglightdown[data_op][list_ttbar_nomuon[0]]
       hist_btagheavyup[data_op]["ttbar_nomuon"] = hist_btagheavyup[data_op][list_ttbar_nomuon[0]]
       hist_btagheavydown[data_op]["ttbar_nomuon"] = hist_btagheavydown[data_op][list_ttbar_nomuon[0]]
+      hist_seclepup[data_op]["ttbar_nomuon"] = hist_seclepup[data_op][list_ttbar_nomuon[0]]
+      hist_seclepdown[data_op]["ttbar_nomuon"] = hist_seclepdown[data_op][list_ttbar_nomuon[0]]
     for l in list_ttbar_nomuon[1:]:
       hist_nom[data_op]["ttbar_nomuon"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -344,12 +356,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["ttbar_nomuon"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["ttbar_nomuon"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["ttbar_nomuon"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["ttbar_nomuon"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["ttbar_nomuon"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["ttbar_muon_charm"] = hist_nom[data_op][list_ttbar_muon_charm[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["ttbar_muon_charm"] = hist_btaglightup[data_op][list_ttbar_muon_charm[0]]
       hist_btaglightdown[data_op]["ttbar_muon_charm"] = hist_btaglightdown[data_op][list_ttbar_muon_charm[0]]
       hist_btagheavyup[data_op]["ttbar_muon_charm"] = hist_btagheavyup[data_op][list_ttbar_muon_charm[0]]
       hist_btagheavydown[data_op]["ttbar_muon_charm"] = hist_btagheavydown[data_op][list_ttbar_muon_charm[0]]
+      hist_seclepup[data_op]["ttbar_muon_charm"] = hist_seclepup[data_op][list_ttbar_muon_charm[0]]
+      hist_seclepdown[data_op]["ttbar_muon_charm"] = hist_seclepdown[data_op][list_ttbar_muon_charm[0]]
     for l in list_ttbar_muon_charm[1:]:
       hist_nom[data_op]["ttbar_muon_charm"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -357,12 +373,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["ttbar_muon_charm"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["ttbar_muon_charm"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["ttbar_muon_charm"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["ttbar_muon_charm"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["ttbar_muon_charm"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["ttbar_muon_bottom"] = hist_nom[data_op][list_ttbar_muon_bottom[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["ttbar_muon_bottom"] = hist_btaglightup[data_op][list_ttbar_muon_bottom[0]]
       hist_btaglightdown[data_op]["ttbar_muon_bottom"] = hist_btaglightdown[data_op][list_ttbar_muon_bottom[0]]
       hist_btagheavyup[data_op]["ttbar_muon_bottom"] = hist_btagheavyup[data_op][list_ttbar_muon_bottom[0]]
       hist_btagheavydown[data_op]["ttbar_muon_bottom"] = hist_btagheavydown[data_op][list_ttbar_muon_bottom[0]]
+      hist_seclepup[data_op]["ttbar_muon_bottom"] = hist_seclepup[data_op][list_ttbar_muon_bottom[0]]
+      hist_seclepdown[data_op]["ttbar_muon_bottom"] = hist_seclepdown[data_op][list_ttbar_muon_bottom[0]]
     for l in list_ttbar_muon_bottom[1:]:
       hist_nom[data_op]["ttbar_muon_bottom"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -370,12 +390,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["ttbar_muon_bottom"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["ttbar_muon_bottom"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["ttbar_muon_bottom"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["ttbar_muon_bottom"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["ttbar_muon_bottom"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["ttbar_muon_else"] = hist_nom[data_op][list_ttbar_muon_else[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["ttbar_muon_else"] = hist_btaglightup[data_op][list_ttbar_muon_else[0]]
       hist_btaglightdown[data_op]["ttbar_muon_else"] = hist_btaglightdown[data_op][list_ttbar_muon_else[0]]
       hist_btagheavyup[data_op]["ttbar_muon_else"] = hist_btagheavyup[data_op][list_ttbar_muon_else[0]]
       hist_btagheavydown[data_op]["ttbar_muon_else"] = hist_btagheavydown[data_op][list_ttbar_muon_else[0]]
+      hist_seclepup[data_op]["ttbar_muon_else"] = hist_seclepup[data_op][list_ttbar_muon_else[0]]
+      hist_seclepdown[data_op]["ttbar_muon_else"] = hist_seclepdown[data_op][list_ttbar_muon_else[0]]
     for l in list_ttbar_muon_else[1:]:
       hist_nom[data_op]["ttbar_muon_else"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -383,12 +407,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["ttbar_muon_else"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["ttbar_muon_else"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["ttbar_muon_else"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["ttbar_muon_else"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["ttbar_muon_else"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["st"] = hist_nom[data_op][list_st[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["st"] = hist_btaglightup[data_op][list_st[0]]
       hist_btaglightdown[data_op]["st"] = hist_btaglightdown[data_op][list_st[0]]
       hist_btagheavyup[data_op]["st"] = hist_btagheavyup[data_op][list_st[0]]
       hist_btagheavydown[data_op]["st"] = hist_btagheavydown[data_op][list_st[0]]
+      hist_seclepup[data_op]["st"] = hist_seclepup[data_op][list_st[0]]
+      hist_seclepdown[data_op]["st"] = hist_seclepdown[data_op][list_st[0]]
     for l in list_st[1:]:
       hist_nom[data_op]["st"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -396,12 +424,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["st"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["st"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["st"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["st"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["st"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["wjets"] = hist_nom[data_op][list_wjets[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["wjets"] = hist_btaglightup[data_op][list_wjets[0]]
       hist_btaglightdown[data_op]["wjets"] = hist_btaglightdown[data_op][list_wjets[0]]
       hist_btagheavyup[data_op]["wjets"] = hist_btagheavyup[data_op][list_wjets[0]]
       hist_btagheavydown[data_op]["wjets"] = hist_btagheavydown[data_op][list_wjets[0]]
+      hist_seclepup[data_op]["wjets"] = hist_seclepup[data_op][list_wjets[0]]
+      hist_seclepdown[data_op]["wjets"] = hist_seclepdown[data_op][list_wjets[0]]
     for l in list_wjets[1:]:
       hist_nom[data_op]["wjets"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -409,12 +441,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["wjets"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["wjets"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["wjets"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["wjets"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["wjets"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["zjets"] = hist_nom[data_op][list_zjets[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["zjets"] = hist_btaglightup[data_op][list_zjets[0]]
       hist_btaglightdown[data_op]["zjets"] = hist_btaglightdown[data_op][list_zjets[0]]
       hist_btagheavyup[data_op]["zjets"] = hist_btagheavyup[data_op][list_zjets[0]]
       hist_btagheavydown[data_op]["zjets"] = hist_btagheavydown[data_op][list_zjets[0]]
+      hist_seclepup[data_op]["zjets"] = hist_seclepup[data_op][list_zjets[0]]
+      hist_seclepdown[data_op]["zjets"] = hist_seclepdown[data_op][list_zjets[0]]
     for l in list_zjets[1:]:
       hist_nom[data_op]["zjets"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -422,12 +458,16 @@ for name in observable_names:
         hist_btaglightdown[data_op]["zjets"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["zjets"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["zjets"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["zjets"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["zjets"].Add(hist_seclepdown[data_op][l])
     hist_nom[data_op]["vv"] = hist_nom[data_op][list_vv[0]]
     if not args.nosyst:
       hist_btaglightup[data_op]["vv"] = hist_btaglightup[data_op][list_vv[0]]
       hist_btaglightdown[data_op]["vv"] = hist_btaglightdown[data_op][list_vv[0]]
       hist_btagheavyup[data_op]["vv"] = hist_btagheavyup[data_op][list_vv[0]]
       hist_btagheavydown[data_op]["vv"] = hist_btagheavydown[data_op][list_vv[0]]
+      hist_seclepup[data_op]["vv"] = hist_seclepup[data_op][list_vv[0]]
+      hist_seclepdown[data_op]["vv"] = hist_seclepdown[data_op][list_vv[0]]
     for l in list_vv[1:]:
       hist_nom[data_op]["vv"].Add(hist_nom[data_op][l])
       if not args.nosyst:
@@ -435,6 +475,8 @@ for name in observable_names:
         hist_btaglightdown[data_op]["vv"].Add(hist_btaglightdown[data_op][l])
         hist_btagheavyup[data_op]["vv"].Add(hist_btagheavyup[data_op][l])
         hist_btagheavydown[data_op]["vv"].Add(hist_btagheavydown[data_op][l])
+        hist_seclepup[data_op]["vv"].Add(hist_seclepup[data_op][l])
+        hist_seclepdown[data_op]["vv"].Add(hist_seclepdown[data_op][l])
 
   samples = ["ttbar_muon_bottom","ttbar_muon_charm","ttbar_muon_else","ttbar_nomuon","zjets","vv","st","wjets"]
 
@@ -444,6 +486,8 @@ for name in observable_names:
   histT_btaglightdown = {}
   histT_btagheavyup = {}
   histT_btagheavydown = {}
+  histT_seclepup = {}
+  histT_seclepdown = {}
   for s in samples:
        histT_nom[s] = hist_nom[datayears[0]][s]
        if not args.nosyst:
@@ -451,6 +495,8 @@ for name in observable_names:
          histT_btaglightdown[s] = hist_btaglightdown[datayears[0]][s]
          histT_btagheavyup[s] = hist_btagheavyup[datayears[0]][s]
          histT_btagheavydown[s] = hist_btagheavydown[datayears[0]][s]
+         histT_seclepup[s] = hist_seclepup[datayears[0]][s]
+         histT_seclepdown[s] = hist_seclepdown[datayears[0]][s]
        for d in datayears[1:]:
           histT_nom[s].Add(hist_nom[d][s])
           if not args.nosyst:
@@ -458,6 +504,8 @@ for name in observable_names:
             histT_btaglightdown[s].Add(hist_btaglightdown[d][s])
             histT_btagheavyup[s].Add(hist_btagheavyup[d][s])
             histT_btagheavydown[s].Add(hist_btagheavydown[d][s])
+            histT_seclepup[s].Add(hist_seclepup[d][s])
+            histT_seclepdown[s].Add(hist_seclepdown[d][s])
 
   if not args.nodata:
     histD = histdata[datayears[0]]
@@ -470,11 +518,15 @@ for name in observable_names:
     histT_sT_btaglightdown = histT_btaglightdown[samples[0]]
     histT_sT_btagheavyup = histT_btagheavyup[samples[0]]
     histT_sT_btagheavydown = histT_btagheavydown[samples[0]]
+    histT_sT_seclepup = histT_seclepup[samples[0]]
+    histT_sT_seclepdown = histT_seclepdown[samples[0]]
     for s in samples[1:]:
       histT_sT_btaglightup.Add(histT_btaglightup[s])
       histT_sT_btaglightdown.Add(histT_btaglightdown[s])
       histT_sT_btagheavyup.Add(histT_btagheavyup[s])
       histT_sT_btagheavydown.Add(histT_btagheavydown[s])
+      histT_sT_seclepup.Add(histT_seclepup[s])
+      histT_sT_seclepdown.Add(histT_seclepdown[s])
 
   gStyle.SetOptStat(kFALSE);  ## remove statistics box in histos
 
@@ -528,6 +580,8 @@ for name in observable_names:
       envLo_btaglight = histT_sT_btaglightdown;
       envHi_btagheavy = histT_sT_btagheavyup;
       envLo_btagheavy = histT_sT_btagheavydown;
+      envHi_seclep = histT_sT_seclepup;
+      envLo_seclep = histT_sT_seclepdown;
 
       graph_err = TGraphAsymmErrors();
       ratio_graph_err = TGraphAsymmErrors();
@@ -540,28 +594,34 @@ for name in observable_names:
         bin_btaglightdown = float(envLo_btaglight.GetBinContent(bin+1));
         bin_btagheavyup = float(envHi_btagheavy.GetBinContent(bin+1));
         bin_btagheavydown = float(envLo_btagheavy.GetBinContent(bin+1));
+        bin_seclepup = float(envHi_seclep.GetBinContent(bin+1));
+        bin_seclepdown = float(envLo_seclep.GetBinContent(bin+1));
 
         sysup_btaglight = abs(bin_nom-bin_btaglightup);
         sysdown_btaglight = abs(bin_nom-bin_btaglightdown);
-
         sysup_btagheavy = abs(bin_nom-bin_btagheavyup);
         sysdown_btagheavy = abs(bin_nom-bin_btagheavydown);
-
+        sysup_seclep = abs(bin_nom-bin_seclepup);
+        sysdown_seclep = abs(bin_nom-bin_seclepdown);
         sysup_total = sqrt(sysup_btaglight**2 + sysup_btagheavy**2);
         sysdown_total = sqrt(sysdown_btaglight**2 + sysdown_btagheavy**2);
 
         graph_err.SetPointEXhigh(bin,last.GetBinWidth(bin+1)/2);
         graph_err.SetPointEXlow(bin,last.GetBinWidth(bin+1)/2);
         graph_err.SetPoint(bin,last.GetBinCenter(bin+1),last.GetBinContent(bin+1));
-        graph_err.SetPointEYhigh(bin,sysup_total);
-        graph_err.SetPointEYlow(bin,sysdown_total);
+        #graph_err.SetPointEYhigh(bin,sysup_total);
+        #graph_err.SetPointEYlow(bin,sysdown_total);
+        graph_err.SetPointEYhigh(bin,sysup_seclep);
+        graph_err.SetPointEYlow(bin,sysdown_seclep);
 
         ratio_graph_err.SetPointEXhigh(bin,last.GetBinWidth(bin+1)/2);
         ratio_graph_err.SetPointEXlow(bin,last.GetBinWidth(bin+1)/2);
         ratio_graph_err.SetPoint(bin,last.GetBinCenter(bin+1),1.);
         if (last.GetBinContent(bin+1)>0.01):
-           ratio_graph_err.SetPointEYhigh(bin,abs(sysup_total/bin_nom));
-           ratio_graph_err.SetPointEYlow(bin,abs(sysdown_total/bin_nom));
+           #ratio_graph_err.SetPointEYhigh(bin,abs(sysup_total/bin_nom));
+           #ratio_graph_err.SetPointEYlow(bin,abs(sysdown_total/bin_nom));
+           ratio_graph_err.SetPointEYhigh(bin,abs(sysup_seclep/bin_nom));
+           ratio_graph_err.SetPointEYlow(bin,abs(sysdown_seclep/bin_nom));
         else:
            ratio_graph_err.SetPointEYhigh(bin,0.);
            ratio_graph_err.SetPointEYlow(bin,0.);

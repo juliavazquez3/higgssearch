@@ -32,6 +32,8 @@ parser.add_argument("--norm", action="store_true", default=False,
                     help="normalising test")
 parser.add_argument("--nodata", action="store_true", default=False,
                     help="Do not plot data")
+parser.add_argument("--wcs", action="store_true", default=False,
+                    help="classification for ttbar and st")
 parser.add_argument("--year", type=string, default="2016",
                     help="Select year of process to run")
 parser.add_argument("--channel", type=string, default="btagMM",
@@ -49,17 +51,11 @@ args = parser.parse_args()
 #if (args.data == "No" or args.data == "2016" or args.data == "2017" or args.data == "2018"): data_op = str(args.data)
 #else: raise NameError('Incorrect data option')
 
-if (args.channel == "lepton50" or args.channel == "btagMM" or args.channel == "nobtag"): term_path = str(args.channel) 
-elif args.channel == "lepton50_chitest": term_path = "lepton50/chi_test"
-elif args.channel == "btagMM_chitest": term_path = "btagMM/chi_test"
-elif args.channel == "lepton50_chitest_sl": term_path = "lepton50/chi_test/sl"
-elif args.channel == "btagMM_chitest_sl": term_path = "btagMM/chi_test/sl"
-elif args.channel == "lepton50_chitest_slss": term_path = "lepton50/chi_test/sl/ss"
-elif args.channel == "btagMM_chitest_slss": term_path = "btagMM/chi_test/sl/ss"
-elif args.channel == "lepton50_chitest_slos": term_path = "lepton50/chi_test/sl/os"
-elif args.channel == "btagMM_chitest_slos": term_path = "btagMM/chi_test/sl/os"
-elif args.channel == "lepton50_chitest_slssos": term_path = "lepton50/chi_test/sl/ssos"
-elif args.channel == "btagMM_chitest_slssos": term_path = "btagMM/chi_test/sl/ssos"
+if args.channel == "btagMM_chitest": term_path = ""
+elif args.channel == "btagMM_chitest_sl": term_path = "/sl"
+elif args.channel == "btagMM_chitest_slss": term_path = "/sl/ss"
+elif args.channel == "btagMM_chitest_slos": term_path = "/sl/os"
+elif args.channel == "btagMM_chitest_slssos": term_path = "/sl/ssos"
 else: raise NameError('Incorrect data option')
 
 sl_channel = ["btagMM_chitest_sl","lepton50_chitest_sl","btagMM_chitest_slss","lepton50_chitest_slss",
@@ -70,8 +66,8 @@ plotdir = '/nfs/cms/vazqueze/higgssearch/plotspng/'
 if not os.path.exists(plotdir):
     os.makedirs(plotdir)
 
-c_rat = 1.5
-c_rat2 = 0.5
+c_rat = 1.2
+c_rat2 = 0.8
 
 norm_factorM = {}
 norm_factorE = {}
@@ -129,10 +125,12 @@ samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","w
         "ttbar_sl_charm","ttbar_sl_light","ttbar_sl_bottom","ttbar_dl","ttbar_dh","zz","wz",
         "st_1","st_2","st_3","st_4", "ttbar_sl_else", "ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
 
-#samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
-#        "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
-#        "ttbar_sl_charm","ttbar_sl_nocharm","ttbar_dl","ttbar_dh","zz","wz",
-#        "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm","st_4_nocharm"]
+if args.wcs:
+   samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+        "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
+        "ttbar_sl_charm","ttbar_sl_nocharm","ttbar_dl","ttbar_dh","zz","wz",
+        "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+        "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else"]
 
 samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
@@ -155,16 +153,31 @@ for data_op in samples_d:
                 #print(files[p]["type"])
                 lumi[data_op][p] = luminosity
         lumi[data_op]["ttbar_sl_charm"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["ttbar_sl_nocharm"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_light"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_bottom"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_else"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_charmgluon"] = lumi[data_op]["ttbar_sl"]
         lumi[data_op]["ttbar_sl_bottomgluon"] = lumi[data_op]["ttbar_sl"]
+        lumi[data_op]["st_1_charm"] = lumi[data_op]["st_1"]
+        lumi[data_op]["st_2_charm"] = lumi[data_op]["st_2"]
+        lumi[data_op]["st_3_charm"] = lumi[data_op]["st_3"]
+        lumi[data_op]["st_4_charm"] = lumi[data_op]["st_4"]
+        lumi[data_op]["st_1_nocharm"] = lumi[data_op]["st_1"]
+        lumi[data_op]["st_2_nocharm"] = lumi[data_op]["st_2"]
+        lumi[data_op]["st_3_nocharm"] = lumi[data_op]["st_3"]
+        lumi[data_op]["st_4_nocharm"] = lumi[data_op]["st_4"]
+        lumi[data_op]["st_1_else"] = lumi[data_op]["st_1"]
+        lumi[data_op]["st_2_else"] = lumi[data_op]["st_2"]
+        lumi[data_op]["st_3_else"] = lumi[data_op]["st_3"]
+        lumi[data_op]["st_4_else"] = lumi[data_op]["st_4"]
 
 listsampl = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "ttbar_sl","ttbar_dl","ttbar_dh","zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6",
         "zjets_7","zjets_8","st_1","st_2","st_3","st_4","zz","wz", "ttbar_sl_charm", "ttbar_sl_charmgluon",
-        "ttbar_sl_bottom", "ttbar_sl_bottomgluon", "ttbar_sl_else", "ttbar_sl_light"]
+        "ttbar_sl_bottom", "ttbar_sl_bottomgluon", "ttbar_sl_else", "ttbar_sl_light", "ttbar_sl_nocharm",
+        "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+        "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else"]
 
 for s in listsampl:
    lumi["2016B"][s] = lumi["2016"][s]
@@ -189,7 +202,8 @@ histFileDE = {}
 
 for name in observable_names:
   ## Open hists files
-  filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/"+term_path+"/"
+  filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
+  if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
   term = "hist_wqqfromJF_"
   end_term = ".root"
   ## mc files
@@ -231,6 +245,13 @@ for name in observable_names:
         "ttbar_sl_charm","ttbar_sl_light","ttbar_sl_bottom","ttbar_dl","ttbar_dh","zz","wz",
         "st_1","st_2","st_3","st_4","ttbar_sl_else","ttbar_sl_charmgluon","ttbar_sl_bottomgluon"]
 
+  if args.wcs: 
+    samples = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
+            "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
+            "ttbar_sl_charm","ttbar_sl_nocharm","ttbar_dl","ttbar_dh","zz","wz",
+            "st_1_charm","st_2_charm","st_3_charm","st_4_charm","st_1_nocharm","st_2_nocharm","st_3_nocharm",
+            "st_4_nocharm","st_1_else","st_2_else","st_3_else","st_4_else"]
+
   ## HISTS
   samples_foryear = {}
   hist_nom_M = {}
@@ -270,6 +291,8 @@ for name in observable_names:
     for s in samples:
       if s[0:8] == "ttbar_sl": 
          s_term = s[0:8]+data_term+s[8:] 
+      elif s[0:2] == "st":
+         s_term = s[0:4]+data_term+s[4:] 
       else:
          s_term = s+data_term
       hist_nom_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M")
@@ -337,37 +360,42 @@ for name in observable_names:
     list_wjets = ["wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8"]
     list_zjets = ["zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8"]
     list_vv = ["ww","wz","zz"]
-    hist_nom_M[data_op]["st"] = hist_nom_M[data_op][list_st[0]]
-    hist_nom_E[data_op]["st"] = hist_nom_E[data_op][list_st[0]]
-    if not args.nosyst:
-      hist_btaglightup_M[data_op]["st"] = hist_btaglightup_M[data_op][list_st[0]]
-      hist_btaglightup_E[data_op]["st"] = hist_btaglightup_E[data_op][list_st[0]]
-      hist_btaglightdown_M[data_op]["st"] = hist_btaglightdown_M[data_op][list_st[0]]
-      hist_btaglightdown_E[data_op]["st"] = hist_btaglightdown_E[data_op][list_st[0]]
-      hist_btagheavyup_M[data_op]["st"] = hist_btagheavyup_M[data_op][list_st[0]]
-      hist_btagheavyup_E[data_op]["st"] = hist_btagheavyup_E[data_op][list_st[0]]
-      hist_btagheavydown_M[data_op]["st"] = hist_btagheavydown_M[data_op][list_st[0]]
-      hist_btagheavydown_E[data_op]["st"] = hist_btagheavydown_E[data_op][list_st[0]]
-      hist_seclepup_M[data_op]["st"] = hist_seclepup_M[data_op][list_st[0]]
-      hist_seclepup_E[data_op]["st"] = hist_seclepup_E[data_op][list_st[0]]
-      hist_seclepdown_M[data_op]["st"] = hist_seclepdown_M[data_op][list_st[0]]
-      hist_seclepdown_E[data_op]["st"] = hist_seclepdown_E[data_op][list_st[0]]
-    for l in list_st[1:]:
-      hist_nom_M[data_op]["st"].Add(hist_nom_M[data_op][l])
-      hist_nom_E[data_op]["st"].Add(hist_nom_E[data_op][l])
+    if args.wcs:
+       list_st_aux = ["_charm","_nocharm","_else"]
+    else:
+       list_st_aux = [""]
+    for apx in list_st_aux:
+      hist_nom_M[data_op]["st"+apx] = hist_nom_M[data_op][list_st[0]+apx]
+      hist_nom_E[data_op]["st"+apx] = hist_nom_E[data_op][list_st[0]+apx]
       if not args.nosyst:
-        hist_btaglightup_M[data_op]["st"].Add(hist_btaglightup_M[data_op][l])
-        hist_btaglightup_E[data_op]["st"].Add(hist_btaglightup_E[data_op][l])
-        hist_btaglightdown_M[data_op]["st"].Add(hist_btaglightdown_M[data_op][l])
-        hist_btaglightdown_E[data_op]["st"].Add(hist_btaglightdown_E[data_op][l])
-        hist_btagheavyup_M[data_op]["st"].Add(hist_btagheavyup_M[data_op][l])
-        hist_btagheavyup_E[data_op]["st"].Add(hist_btagheavyup_E[data_op][l])
-        hist_btagheavydown_M[data_op]["st"].Add(hist_btagheavydown_M[data_op][l])
-        hist_btagheavydown_E[data_op]["st"].Add(hist_btagheavydown_E[data_op][l])
-        hist_seclepup_M[data_op]["st"].Add(hist_seclepup_M[data_op][l])
-        hist_seclepup_E[data_op]["st"].Add(hist_seclepup_E[data_op][l])
-        hist_seclepdown_M[data_op]["st"].Add(hist_seclepdown_M[data_op][l])
-        hist_seclepdown_E[data_op]["st"].Add(hist_seclepdown_E[data_op][l])
+        hist_btaglightup_M[data_op]["st"+apx] = hist_btaglightup_M[data_op][list_st[0]+apx]
+        hist_btaglightup_E[data_op]["st"+apx] = hist_btaglightup_E[data_op][list_st[0]+apx]
+        hist_btaglightdown_M[data_op]["st"+apx] = hist_btaglightdown_M[data_op][list_st[0]+apx]
+        hist_btaglightdown_E[data_op]["st"+apx] = hist_btaglightdown_E[data_op][list_st[0]+apx]
+        hist_btagheavyup_M[data_op]["st"+apx] = hist_btagheavyup_M[data_op][list_st[0]+apx]
+        hist_btagheavyup_E[data_op]["st"+apx] = hist_btagheavyup_E[data_op][list_st[0]+apx]
+        hist_btagheavydown_M[data_op]["st"+apx] = hist_btagheavydown_M[data_op][list_st[0]+apx]
+        hist_btagheavydown_E[data_op]["st"+apx] = hist_btagheavydown_E[data_op][list_st[0]+apx]
+        hist_seclepup_M[data_op]["st"+apx] = hist_seclepup_M[data_op][list_st[0]+apx]
+        hist_seclepup_E[data_op]["st"+apx] = hist_seclepup_E[data_op][list_st[0]+apx]
+        hist_seclepdown_M[data_op]["st"+apx] = hist_seclepdown_M[data_op][list_st[0]+apx]
+        hist_seclepdown_E[data_op]["st"+apx] = hist_seclepdown_E[data_op][list_st[0]+apx]
+      for l in list_st[1:]:
+        hist_nom_M[data_op]["st"+apx].Add(hist_nom_M[data_op][l+apx])
+        hist_nom_E[data_op]["st"+apx].Add(hist_nom_E[data_op][l+apx])
+        if not args.nosyst:
+          hist_btaglightup_M[data_op]["st"+apx].Add(hist_btaglightup_M[data_op][l+apx])
+          hist_btaglightup_E[data_op]["st"+apx].Add(hist_btaglightup_E[data_op][l+apx])
+          hist_btaglightdown_M[data_op]["st"+apx].Add(hist_btaglightdown_M[data_op][l+apx])
+          hist_btaglightdown_E[data_op]["st"+apx].Add(hist_btaglightdown_E[data_op][l+apx])
+          hist_btagheavyup_M[data_op]["st"+apx].Add(hist_btagheavyup_M[data_op][l+apx])
+          hist_btagheavyup_E[data_op]["st"+apx].Add(hist_btagheavyup_E[data_op][l+apx])
+          hist_btagheavydown_M[data_op]["st"+apx].Add(hist_btagheavydown_M[data_op][l+apx])
+          hist_btagheavydown_E[data_op]["st"+apx].Add(hist_btagheavydown_E[data_op][l+apx])
+          hist_seclepup_M[data_op]["st"+apx].Add(hist_seclepup_M[data_op][l+apx])
+          hist_seclepup_E[data_op]["st"+apx].Add(hist_seclepup_E[data_op][l+apx])
+          hist_seclepdown_M[data_op]["st"+apx].Add(hist_seclepdown_M[data_op][l+apx])
+          hist_seclepdown_E[data_op]["st"+apx].Add(hist_seclepdown_E[data_op][l+apx])
     hist_nom_M[data_op]["wjets"] = hist_nom_M[data_op][list_wjets[0]]
     hist_nom_E[data_op]["wjets"] = hist_nom_E[data_op][list_wjets[0]]
     if not args.nosyst:
@@ -463,6 +491,7 @@ for name in observable_names:
         hist_seclepdown_E[data_op]["vv"].Add(hist_seclepdown_E[data_op][l])
 
   samples = ["ttbar_sl_bottom","ttbar_sl_charm","ttbar_sl_else","ttbar_sl_light","ttbar_dl","ttbar_dh","zjets","vv","st","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon"]
+  if args.wcs: samples = ["ttbar_sl_nocharm","ttbar_sl_charm","ttbar_dl","ttbar_dh","zjets","vv","st_nocharm","st_charm","st_else","wjets"]
 
   ## sumamos todos los anos para todos los histogramas
   histT_nom_M = {}
@@ -574,6 +603,7 @@ for name in observable_names:
   colors["ttbar_sl_bottomgluon"] = (236,164,207)
   colors["ttbar_sl_charm"] = (204,255,153)
   colors["ttbar_sl_light"] = (120,154,86)
+  colors["ttbar_sl_nocharm"] = (120,154,86)
   colors["ttbar_sl_bottom"] = (201,79,152)
   colors["ttbar_sl_else"] = (242,193,121)
   colors["ttbar_sl_charmgluon"] = (222,212,74)
@@ -581,6 +611,9 @@ for name in observable_names:
   colors["ttbar_dh"] = (204,204,0)
   colors["zjets"] = (113,209,223)
   colors["st"] = (153,51,255)
+  colors["st_charm"] = (102,0,204)
+  colors["st_nocharm"] = (198,101,222)
+  colors["st_else"] = (207,176,235)
 
   if args.stack:
     ymax_M = 0
@@ -625,6 +658,7 @@ for name in observable_names:
 
     ## Stack creation
     samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon","ttbar_sl_else","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
+    if args.wcs: samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","st_else","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
 
     if args.ratio and not args.nodata: upper_pad.cd()
 
@@ -878,19 +912,26 @@ for name in observable_names:
       leg = TLegend(0.78,0.4,0.95,0.95)
       leg.SetBorderSize(1)
       #leg.AddEntry(histT_nom_T["vv"],"VV","f")
-      leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
-      leg.AddEntry(histT_nom_T["ttbar_sl_light"],"t#bar{t} uq","f")
-      leg.AddEntry(histT_nom_T["st"],"Single top","f")
-      leg.AddEntry(histT_nom_T["ttbar_sl_bottom"],"t#bar{t} bq","f")
-      leg.AddEntry(histT_nom_T["ttbar_sl_else"],"t#bar{t} qg,gg","f")
-      leg.AddEntry(histT_nom_T["ttbar_sl_charmgluon"],"t#bar{t} cg","f")
-      leg.AddEntry(histT_nom_T["ttbar_sl_bottomgluon"],"t#bar{t} bg","f")
+      if args.wcs:
+        leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_nocharm"],"t#bar{t} qq'","f")
+        leg.AddEntry(histT_nom_T["st_charm"],"Single top charm","f")
+        leg.AddEntry(histT_nom_T["st_nocharm"],"Single top light","f")
+        leg.AddEntry(histT_nom_T["st_else"],"Single top no had W","f")
+      else:
+        leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_light"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_T["st"],"Single top","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_bottom"],"t#bar{t} bq","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_else"],"t#bar{t} qg,gg","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_charmgluon"],"t#bar{t} cg","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_bottomgluon"],"t#bar{t} bg","f")
       leg.AddEntry(histT_nom_T["zjets"],"Z+jets","f")
       leg.AddEntry(histT_nom_T["wjets"],"W+jets","f")
       leg.AddEntry(histT_nom_T["ttbar_dl"],"Dileptonic t#bar{t}","f")
       #leg.AddEntry(histT_nom_T["ttbar_dh"],"Hadronic t#bar{t}","f")
       if args.stack and not args.nodata: leg.AddEntry(histD_T, "Data" ,"lep")
-      #leg.Draw()
+      leg.Draw()
       termp= "totalHT_wqq"
       if args.ratio:
         notation = "_ratio_"
@@ -979,13 +1020,20 @@ for name in observable_names:
       leg = TLegend(0.78,0.4,0.95,0.95)
       leg.SetBorderSize(1)
       #leg.AddEntry(histT_nom_M["vv"],"VV","f")
-      leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
-      leg.AddEntry(histT_nom_M["ttbar_sl_light"],"t#bar{t} qq'","f")
-      leg.AddEntry(histT_nom_M["st"],"Single top","f")
-      leg.AddEntry(histT_nom_M["ttbar_sl_bottom"],"t#bar{t} bq","f")
-      leg.AddEntry(histT_nom_M["ttbar_sl_else"],"t#bar{t} qg,gg","f")
-      leg.AddEntry(histT_nom_M["ttbar_sl_charmgluon"],"t#bar{t} cg","f")
-      leg.AddEntry(histT_nom_M["ttbar_sl_bottomgluon"],"t#bar{t} bg","f")
+      if args.wcs:
+        leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_nocharm"],"t#bar{t} qq'","f")
+        leg.AddEntry(histT_nom_M["st_charm"],"Single top charm","f")
+        leg.AddEntry(histT_nom_M["st_nocharm"],"Single top light","f")
+        leg.AddEntry(histT_nom_M["st_else"],"Single top no had W","f")
+      else:
+        leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_light"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_M["st"],"Single top","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_bottom"],"t#bar{t} bq","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_else"],"t#bar{t} qg,gg","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_charmgluon"],"t#bar{t} cg","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_bottomgluon"],"t#bar{t} bg","f")
       leg.AddEntry(histT_nom_M["zjets"],"Z+jets","f")
       leg.AddEntry(histT_nom_M["wjets"],"W+jets","f")
       leg.AddEntry(histT_nom_M["ttbar_dl"],"Dileptonic t#bar{t}","f")
@@ -1061,17 +1109,23 @@ for name in observable_names:
       leg = TLegend(0.7,0.6,0.89,0.89)
       leg.SetBorderSize(1)
       #leg.AddEntry(histT_nom_E["vv"],"VV","f")
+      if args.wcs:
+        leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_nocharm"],"t#bar{t} qq'","f")
+        leg.AddEntry(histT_nom_E["st_charm"],"Single top charm","f")
+        leg.AddEntry(histT_nom_E["st_nocharm"],"Single top light","f")
+        leg.AddEntry(histT_nom_E["st_else"],"Single top no had W","f")
+      else:
+        leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_light"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_E["st"],"Single top","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_bottom"],"t#bar{t} bq","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_else"],"t#bar{t} qg,gg","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_charmgluon"],"t#bar{t} cg","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_bottomgluon"],"t#bar{t} bg","f")
       leg.AddEntry(histT_nom_E["ttbar_dl"],"Dileptonic top antitop","f")
       leg.AddEntry(histT_nom_E["zjets"],"Z plus jets","f")
       leg.AddEntry(histT_nom_E["wjets"],"W plus jets","f")
-      leg.AddEntry(histT_nom_E["st"],"Single top","f")
-      #leg.AddEntry(histT_nom_E["ttbar_dh"],"Hadronic top antitop","f")
-      leg.AddEntry(histT_nom_E["ttbar_sl_bottom"],"Top antitop, bottom","f")
-      leg.AddEntry(histT_nom_E["ttbar_sl_light"],"Top antitop, light","f")
-      leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"Top antitop, charm","f")
-      leg.AddEntry(histT_nom_E["ttbar_sl_bottomgluon"],"Top antitop, bottom gluon","f")
-      leg.AddEntry(histT_nom_E["ttbar_sl_charmgluon"],"Top antitop, charm gluon","f")
-      leg.AddEntry(histT_nom_E["ttbar_sl_else"],"Top antitop, gluon gluon","f")
       if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"lep")
       #leg.Draw()
       termp= "totalHT_wqq_E"
