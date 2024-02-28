@@ -20,16 +20,4 @@ queue arguments from (
   allMC 2017 mc btagMM_chitest full
   M 2017 data btagMM_chitest full
   E 2017 data btagMM_chitest full
-  allMC 2016 mc btagMM_chitest no
-  M 2016 data btagMM_chitest no
-  E 2016 data btagMM_chitest no
-  allMC 2018 mc btagMM_chitest no
-  M 2018 data btagMM_chitest no
-  E 2018 data btagMM_chitest no
-  allMC 2016B mc btagMM_chitest no
-  M 2016B data btagMM_chitest no
-  E 2016B data btagMM_chitest no
-  allMC 2017 mc btagMM_chitest no
-  M 2017 data btagMM_chitest no
-  E 2017 data btagMM_chitest no
 )

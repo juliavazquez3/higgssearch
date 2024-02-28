@@ -81,12 +81,8 @@ if args.type == "data": mode = "data"
 elif args.type == "mc": mode = "mc"
 else: raise NameError('Incorrect type')
 
-if args.charmtag == "full": channel = "sl_full"
-elif args.charmtag == "ss": channel = "sl_ss"
-elif args.charmtag == "os": channel = "sl_os"
-elif args.charmtag == "ssos": channel = "sl_ssos"
-elif args.charmtag == "csv": channel = "csv"
-elif args.charmtag == "no": channel = "wqq"
+if args.charmtag == "ctag": channel = "ctag"
+elif args.charmtag == "noctag": channel = "noctag"
 else: raise NameError('Incorrect channel')
 print(channel)
 
@@ -128,9 +124,9 @@ else: files = json.load(open("/nfs/cms/vazqueze/higgssearch/datainfo.json"))
 processes = files.keys()
 
 #list_jetsyst = ["nom","smearup","smeardown","jecup","jecdown"]
-#list_jetsyst = ["nom"]
+list_jetsyst = ["nom"]
 #list_jetsyst = ["nom","smearup","smeardown"]
-list_jetsyst = ["nom","jecup","jecdown"]
+#list_jetsyst = ["nom","jecup","jecdown"]
 
 df = {}
 xsecs = {}
@@ -220,10 +216,16 @@ cuts_btag["2016"]=[0.0614, 0.3093, 0.7221];cuts_btag["2016B"]=[0.0614, 0.3093, 0
 cuts_cvl_csv = {}
 cuts_cvl_csv["2016"]=[0.088,0.181,0.417];cuts_cvl_csv["2016B"]=[0.088,0.180,0.407];
 cuts_cvl_csv["2017"]=[0.040,0.144,0.730];cuts_cvl_csv["2018"]=[0.064,0.153,0.405];
-
 cuts_cvb_csv = {}
 cuts_cvb_csv["2016"]=[0.214,0.228,0.138];cuts_cvb_csv["2016B"]=[0.204,0.221,0.136];
 cuts_cvb_csv["2017"]=[0.345,0.290,0.100];cuts_cvb_csv["2018"]=[0.313,0.363,0.288];
+
+cuts_cvl_deepj = {}
+cuts_cvl_deepj["2016"]=[0.039,0.098,0.270];cuts_cvl_deepj["2016B"]=[0.039,0.099,0.269];
+cuts_cvl_deepj["2017"]=[0.030,0.085,0.520];cuts_cvl_deepj["2018"]=[0.038,0.099,0.282];
+cuts_cvb_deepj = {}
+cuts_cvb_deepj["2016"]=[0.327,0.370,0.256];cuts_cvb_deepj["2016B"]=[0.305,0.353,0.247];
+cuts_cvb_deepj["2017"]=[0.400,0.340,0.050];cuts_cvb_deepj["2018"]=[0.246,0.325,0.267];
 
 ## Muon and Electron pT cuts per year, not relevant here, we use them in the preprocessing
 
@@ -1054,12 +1056,8 @@ if mode == "mc":
            df[syst][s] = df[syst][s].Define('MET_phi_aux','MET_smeared_phi')
            df[syst][s] = df[syst][s].Define('Jet_pt_aux','0.99*Jet_pt_nom')
        else:
-           #df[syst][s] = df[syst][s].Define('Jet_pt_aux','Jet_pt_FJ')
-           if syst[-2:] == "up":
-              df[syst][s] = df[syst][s].Define('Jet_pt_aux','1.04*Jet_pt_nom')
-           else:
-              df[syst][s] = df[syst][s].Define('Jet_pt_aux','0.96*Jet_pt_nom')
-           df[syst][s] = df[syst][s].Define('aux4met','metrecalculation(MET_smeared_pt, MET_smeared_phi, Jet_pt_aux, Jet_pt_nom, Jet_phi)')
+           df[syst][s] = df[syst][s].Define('Jet_pt_aux','Jet_pt_FJ')
+           df[syst][s] = df[syst][s].Define('aux4met','metrecalculation(MET_smeared_pt, MET_smeared_phi, Jet_pt_FJ, Jet_pt_nom, Jet_phi)')
            df[syst][s] = df[syst][s].Define('MET_pt_aux','aux4met[0]')
            df[syst][s] = df[syst][s].Define('MET_phi_aux','aux4met[1]')
 
@@ -1086,32 +1084,7 @@ for s in samples:
         df[syst][s] = df[syst][s].Define('JetnotMuonInd','Jetauxmuon == JetQInd[0] ? JetQInd[1] : JetQInd[0]')
         df[syst][s] = df[syst][s].Define('JetSLInd','vector2mu(Jetauxmuon, JetnotMuonInd)')
         df[syst][s] = df[syst][s].Define('nJetSLInd','JetSLInd.size()')
-        if (channel[0:2]=="sl"):
-           df[syst][s] = df[syst][s].Filter('sl_selection_aux[0] > -1')
-           df[syst][s] = df[syst][s].Define('muon_jet_charge','Muon_charge[MuonSLInd]')
-           df[syst][s] = df[syst][s].Define('muon_ssos','lepton_charge*muon_jet_charge')
-           df[syst][s] = df[syst][s].Define('muon_jet_eta','Muon_eta[MuonSLInd]')
-           df[syst][s] = df[syst][s].Define('muon_jet_pt','Muon_pt[MuonSLInd]')
-           df[syst][s] = df[syst][s].Define('muon_jet_z','Jet_pt[Jetauxmuon] > 0. ? muon_jet_pt/Jet_pt[Jetauxmuon] : -10.')
-           df[syst][s] = df[syst][s].Define('muon_jet_iso','Muon_pfRelIso04_all[MuonSLInd]')
-           df[syst][s] = df[syst][s].Define('muon_jet_iso_abs','muon_jet_iso*muon_jet_pt')
-           df[syst][s] = df[syst][s].Define('muon_jet_pt_rel','Muon_pt[MuonSLInd]*ROOT::VecOps::DeltaR(Muon_eta[MuonSLInd],Jet_eta[Jetauxmuon],Muon_phi[MuonSLInd],Jet_phi[Jetauxmuon])')
-           df[syst][s] = df[syst][s].Define('muon_jet_iso_log','std::log(Muon_pfRelIso04_all[MuonSLInd]+1)')
-           df[syst][s] = df[syst][s].Define('JetXInd','JetSLInd')
-           df[syst][s] = df[syst][s].Define('deltaR_jet1_muon','ROOT::VecOps::DeltaR(Muon_eta[MuonSLInd],Jet_eta[JetSLInd[0]],Muon_phi[MuonSLInd],Jet_phi[JetSLInd[0]])')
-           df[syst][s] = df[syst][s].Define('muon_jet_sigxy','Muon_dxyErr[MuonSLInd]>0 ? Muon_dxy[MuonSLInd]/Muon_dxyErr[MuonSLInd] : -10')
-           df[syst][s] = df[syst][s].Define('muon_jet_sigdz','Muon_dzErr[MuonSLInd]>0 ? Muon_dz[MuonSLInd]/Muon_dzErr[MuonSLInd] : -10')
-           df[syst][s] = df[syst][s].Define('muon_jet_xy','Muon_dxy[MuonSLInd]')
-           df[syst][s] = df[syst][s].Define('muon_jet_dz','Muon_dz[MuonSLInd]')
-           df[syst][s] = df[syst][s].Define('muon_jet_r','pow(pow(Muon_dz[MuonSLInd],2) + pow(Muon_dxy[MuonSLInd],2),0.5)')
-           df[syst][s] = df[syst][s].Define('muon_jet_Err','muon_jet_r > 0 ? pow(pow(Muon_dz[MuonSLInd]*Muon_dzErr[MuonSLInd],2)+pow(Muon_dxy[MuonSLInd]*Muon_dxyErr[MuonSLInd],2),0.5)/muon_jet_r : -10')
-           df[syst][s] = df[syst][s].Define('muon_jet_sigr','(muon_jet_Err>0) ? muon_jet_r/muon_jet_Err : -10')
-           df[syst][s] = df[syst][s].Define('aux_muons','muons_zvals(Muon_pfRelIso04_all, Muon_pt, Muon_eta, Muon_phi, Muon_mass, Jet_pt, Jet_eta, Jet_phi, Jet_mass, MuonSLInd, Jetauxmuon)')
-           df[syst][s] = df[syst][s].Define('muon_jet_z2','aux_muons[0]')
-           df[syst][s] = df[syst][s].Define('muon_jet_z3','aux_muons[1]')
-           df[syst][s] = df[syst][s].Define('muon_jet_z2_v2','aux_muons[2]')
-        else:
-           df[syst][s] = df[syst][s].Define('JetXInd','JetQInd')
+        df[syst][s] = df[syst][s].Define('JetXInd','JetQInd')
         ### hists definitions
         df[syst][s] = df[syst][s].Define('jet_1_pt','Jet_pt_aux[JetXInd[0]]')
         df[syst][s] = df[syst][s].Define('jet_1_nmu','Jet_nMuons[JetXInd[0]]')
@@ -1195,10 +1168,13 @@ for s in samples:
         df[syst][s] = df[syst][s].Define('jet_2_cvbtag','Jet_btagDeepFlavCvB[JetXInd[1]]')
         df[syst][s] = df[syst][s].Define('jet_1_cvbtag_csv','Jet_btagDeepCvB[JetXInd[0]]')
         df[syst][s] = df[syst][s].Define('jet_2_cvbtag_csv','Jet_btagDeepCvB[JetXInd[1]]')
+        df[syst][s] = df[syst][s].Define('jet_max_ctag_indx','jet_1_cvltag > jet_2_cvltag ? JetXInd[0] : JetXInd[1]')
         df[syst][s] = df[syst][s].Define('jet_max_cvltag','jet_1_cvltag > jet_2_cvltag ? jet_1_cvltag : jet_2_cvltag')
         df[syst][s] = df[syst][s].Define('jet_min_cvltag','jet_1_cvltag > jet_2_cvltag ? jet_2_cvltag : jet_1_cvltag')
         df[syst][s] = df[syst][s].Define('jet_max_cvbtag','jet_1_cvbtag > jet_2_cvbtag ? jet_1_cvbtag : jet_2_cvbtag')
         df[syst][s] = df[syst][s].Define('jet_min_cvbtag','jet_1_cvbtag > jet_2_cvbtag ? jet_2_cvbtag : jet_1_cvbtag')
+        df[syst][s] = df[syst][s].Define('jet_int_cvltag','Jet_btagDeepFlavCvL[jet_max_ctag_indx]')
+        df[syst][s] = df[syst][s].Define('jet_int_cvbtag','Jet_btagDeepFlavCvB[jet_max_ctag_indx]')
         df[syst][s] = df[syst][s].Define('chi2_test0','chi2calc(InvM_2jets, InvM30)')
         df[syst][s] = df[syst][s].Define('chi2_test1','chi2calc(InvM_2jets, InvM31)')
         df[syst][s] = df[syst][s].Define('nJetMuonInd','JetMuonInd.size()')
@@ -1220,8 +1196,6 @@ for s in samples:
         df[syst][s] = df[syst][s].Define('tau_discr_jetbot1','tau_indx[2] > -1 ? Tau_rawDeepTau2017v2p1VSjet[tau_indx[2]] : -1')
         df[syst][s] = df[syst][s].Define('tau_discr_jetbot2','tau_indx[3] > -1 ? Tau_rawDeepTau2017v2p1VSjet[tau_indx[3]] : -1')
         df[syst][s] = df[syst][s].Define('deltaR_jet1_tau','tau_indx[0] > -1 ? ROOT::VecOps::DeltaR(Tau_eta[tau_indx[0]],Jet_eta[JetXInd[0]],Tau_phi[tau_indx[0]],Jet_phi[JetXInd[0]]) : -1.')
-        if (channel[0:2]=="sl"):
-            df[syst][s] = df[syst][s].Define('deltaR_muon_tau','tau_indx[0] > -1 ? ROOT::VecOps::DeltaR(Tau_eta[tau_indx[0]],Muon_eta[MuonSLInd],Tau_phi[tau_indx[0]],Muon_phi[MuonSLInd]) : -1.')
         df[syst][s] = df[syst][s].Define('bot_mu_aux','bottomMuons(JetGoodInd[JetBotInd[0]], JetGoodInd[JetBotInd[1]] ,Jet_pt, Jet_eta, Jet_phi, Muon_pt, Muon_eta, Muon_phi, MuonGoodInd, Muon_tightId)')
         df[syst][s] = df[syst][s].Define('bot1_muons','bot_mu_aux[0]')
         df[syst][s] = df[syst][s].Define('bot2_muons','bot_mu_aux[2]')
@@ -1256,6 +1230,11 @@ for s in samples:
         df[syst][s] = df[syst][s].Filter('transverse_mass > 20.')
         df[syst][s] = df[syst][s].Filter('MET_pt_aux > 20.')
         df[syst][s] = df[syst][s].Filter('nMuonGood>0 ? lepton_pt > 30. : lepton_pt > 35.')
+        ### Jet pT filters
+        #df[syst][s] = df[syst][s].Filter('jet_bot1_pt > 25.')
+        #df[syst][s] = df[syst][s].Filter('jet_bot2_pt > 25.')
+        #df[syst][s] = df[syst][s].Filter('jet_1_pt > 25.')
+        #df[syst][s] = df[syst][s].Filter('jet_2_pt > 25.')
         ## Invariant mass filter
         df[syst][s] = df[syst][s].Filter('InvM_2jets > 30. && InvM_2jets < 300.')
         ### Cur based for electron, EL ID tests
@@ -1278,25 +1257,11 @@ for s in samples:
            df[syst][s] = df[syst][s].Filter('jet_bot2_btag >'+str(cuts_btag[years[0]][0]))
            df[syst][s] = df[syst][s].Filter('lepton_pt > 50.')
            df[syst][s] = df[syst][s].Filter('kinfittest(InvM_2jets, InvM30, InvM31, InvMl0, InvMl1)')
-        ####### SL stuff
-        if channel[0:2] == "sl": df[syst][s] = df[syst][s].Filter('muon_jet_z < 0.5')
-        if channel == "sl_ss": df[syst][s] = df[syst][s].Filter('muon_ssos > 0')
-        elif channel == "sl_os": df[syst][s] = df[syst][s].Filter('muon_ssos < 0')
-        # isolation test
-        if channel[0:2] == "sl": df[syst][s] = df[syst][s].Filter('muon_jet_iso_abs > 2.5')
-        # pt test
-        if channel[0:2] == "sl": df[syst][s] = df[syst][s].Filter('muon_jet_pt > 5.')
-        ####### anti-SL cut
-        if not (channel[0:2] == "sl"): 
-           df[syst][s] = df[syst][s].Define('muon_jet_pt','sl_selection_aux[0] > -1 ?  Muon_pt[MuonSLInd] : -10.')
-           df[syst][s] = df[syst][s].Define('muon_jet_iso_abs','sl_selection_aux[0] > -1 ? Muon_pfRelIso04_all[MuonSLInd]*muon_jet_pt : -10.')
-           df[syst][s] = df[syst][s].Define('muon_jet_z','sl_selection_aux[0] > -1 ?  (Jet_pt[Jetauxmuon] > 0. ? muon_jet_pt/Jet_pt[Jetauxmuon] : -10.) : -10.')
-           df[syst][s] = df[syst][s].Filter('sl_selection_aux[0] > -1 ? !(muon_jet_z < 0.5 && muon_jet_iso_abs > 2.5 && muon_jet_pt > 5.) : true')
-        ### Jet pT filters
-        df[syst][s] = df[syst][s].Filter('jet_bot1_pt > 27.')
-        df[syst][s] = df[syst][s].Filter('jet_bot2_pt > 27.')
-        df[syst][s] = df[syst][s].Filter('jet_1_pt > 27.')
-        df[syst][s] = df[syst][s].Filter('jet_2_pt > 27.')
+        #### Charm cuts
+        if channel == "ctag":
+           df[syst][s] = df[syst][s].Filter('(jet_int_cvltag >'+str(cuts_cvl_deepj[years[0]][2])+') && (jet_int_cvbtag >'+str(cuts_cvb_deepj[years[0]][2])+')')
+        if channel == "noctag":
+           df[syst][s] = df[syst][s].Filter('!((jet_int_cvltag >'+str(cuts_cvl_deepj[years[0]][2])+') && (jet_int_cvbtag >'+str(cuts_cvb_deepj[years[0]][2])+'))')
 
 ########### XSEC vars ############
 
@@ -1400,6 +1365,34 @@ if (mode=="mc" and channel[0:2]=="sl"):
                        kwargs = {"year":s[-4:],"isMC":True, "isUL":True, "canal":"selection_sl"}
                        #print(kwargs)
                 b= muon_frombot_sfRDF(**kwargs)
+                df[syst][s] = b().run(df[syst][s])
+
+########### ctag SF
+
+from ctag_sf import *
+
+if mode == "mc":
+   for syst in list_jetsyst:
+        for s in samples:
+                if s[-1]=="B":
+                       kwargs = {"year":s[-5:],"isMC":True, "isUL":True}
+                else:
+                       kwargs = {"year":s[-4:],"isMC":True, "isUL":True}
+                       #print(kwargs)
+                b= ctag_weights_totRDF(**kwargs)
+                df[syst][s] = b().run(df[syst][s])
+
+from vetoctag_sf import *
+
+if mode == "mc":
+   for syst in list_jetsyst:
+        for s in samples:
+                if s[-1]=="B":
+                       kwargs = {"year":s[-5:],"isMC":True, "isUL":True}
+                else:
+                       kwargs = {"year":s[-4:],"isMC":True, "isUL":True}
+                       #print(kwargs)
+                b= vetoctag_weights_totRDF(**kwargs)
                 df[syst][s] = b().run(df[syst][s])
 
 ############ Gen level definitions
@@ -1522,41 +1515,33 @@ if args.type == "mc":
                df[syst][s] = df[syst][s].Define('lep_trig_sf_aux','nMuonGood>0 ? std::sqrt(trigger_sf_mu_aux_syst[MuonGoodInd[0]]*trigger_sf_mu_aux_syst[MuonGoodInd[0]]+trigger_sf_mu_aux_stat[MuonGoodInd[0]]*trigger_sf_mu_aux_stat[MuonGoodInd[0]]): trigger_sf_el_aux_err[ElectronGoodInd[0]]')
                df[syst][s] = df[syst][s].Define('lep_trig_sf_up','lep_trig_sf+lep_trig_sf_aux')
                df[syst][s] = df[syst][s].Define('lep_trig_sf_down','lep_trig_sf-lep_trig_sf_aux')
-               if (channel[0:2]=="sl"):
-                  #df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','displaced_muon_low_id_sf[MuonSLInd]')
-                  df[syst][s] = df[syst][s].Define('frag_weight','Br_weight_sl*Frag_weight_sl')
-                  #df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso[MuonSLInd]')
-                  df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso_abs[0]')
-                  df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf_up','muon_from_bot_sf_iso_abs_up[0]')
-                  df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf_down','muon_from_bot_sf_iso_abs_down[0]')
-                  #df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','muon_from_bot_sf_z[0]')
-                  #df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','1.')
-                  #df[syst][s] = df[syst][s].Define('frag_weight','1.')
+               df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','1.')
+               df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf_up','1.')
+               df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf_down','1.')
+               df[syst][s] = df[syst][s].Define('frag_weight','1.')
+               if channel == "ctag":
+                  #df[syst][s] = df[syst][s].Define('ctag_cmistag','ctag_weight*cmistag_weight')
+                  df[syst][s] = df[syst][s].Define('ctag_cmistag','1.')
                else:
-                  df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf','1.')
-                  df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf_up','1.')
-                  df[syst][s] = df[syst][s].Define('lep_id_lowpt_sf_down','1.')
-                  df[syst][s] = df[syst][s].Define('frag_weight','1.')
-               if (channel=="sl_ssos"):
-                  df[syst][s] = df[syst][s].Define('ssos_weight','muon_ssos<0 ? 1. : -1.')
-               else:
-                  df[syst][s] = df[syst][s].Define('ssos_weight','1.')
-               df[syst][s] = df[syst][s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_seclepup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf_up*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_seclepdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf_down*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btaglightup','weight_aux*btag_sf_light_up*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btaglightdown','weight_aux*btag_sf_light_down*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btagheavyup','weight_aux*btag_sf_heavy_up*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btagheavydown','weight_aux*btag_sf_heavy_down*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepidup','weight_aux*btag_sf*lep_id_sf_up*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepiddown','weight_aux*btag_sf*lep_id_sf_down*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepisoup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf_up*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepisodown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf_down*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_leptrigup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf_up*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_leptrigdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf_down*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_notoppt','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_puwup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeightUp*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
-        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_puwdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeightDown*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
+                  #df[syst][s] = df[syst][s].Define('ctag_cmistag','vetoctag_weight')
+                  df[syst][s] = df[syst][s].Define('ctag_cmistag','1.')
+               df[syst][s] = df[syst][s].Define('ssos_weight','1.')
+               df[syst][s] = df[syst][s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_seclepup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf_up*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_seclepdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf_down*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btaglightup','weight_aux*btag_sf_light_up*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btaglightdown','weight_aux*btag_sf_light_down*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btagheavyup','weight_aux*btag_sf_heavy_up*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_btagheavydown','weight_aux*btag_sf_heavy_down*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepidup','weight_aux*btag_sf*lep_id_sf_up*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepiddown','weight_aux*btag_sf*lep_id_sf_down*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepisoup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf_up*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_lepisodown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf_down*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_leptrigup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf_up*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_leptrigdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf_down*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_notoppt','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_puwup','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeightUp*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
+        df["nom"][s] = df["nom"][s].Define('weightSSOS_final_puwdown','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeightDown*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight*ctag_cmistag')
 
 else:
      for syst in list_jetsyst:
@@ -1931,18 +1916,14 @@ elif chan == "btagMM": term1 = "btagMM/"
 elif chan == "lepton50": term1 = "lepton50/"
 elif chan == "btagMM_chitest": 
   if args.wcs:
-     term1 = "btagMM/chi_test/wcs_classes/test_pt27/"
+     term1 = "btagMM/chi_test/wcs_classes/"
      #term1 = "btagMM/chi_test/wcs_classes_aux/test_aux/"
   else:
      term1 = "btagMM/chi_test/"
 elif chan == "lepton50_chitest": term1 = "lepton50/chi_test/"
 
-termm = ""
-if channel == "sl_full": termm = "sl/"
-elif channel == "sl_ss": termm = "sl/ss/"
-elif channel == "sl_os": termm = "sl/os/"
-elif channel == "sl_ssos": termm = "sl/ssos/"
-elif channel == "csv": termm = "ctag/"
+if (channel=="ctag"): termm = "ctag/"
+if (channel=="noctag"): termm = "noctag/"
 
 #observable_names = ["transverse_mass","MET_pt_aux"]
 

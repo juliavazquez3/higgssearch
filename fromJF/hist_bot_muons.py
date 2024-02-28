@@ -54,8 +54,8 @@ plotdir = '/nfs/cms/vazqueze/higgssearch/plotspng/'
 if not os.path.exists(plotdir):
     os.makedirs(plotdir)
 
-c_rat = 1.2
-c_rat2 = 0.8
+c_rat = 1.5
+c_rat2 = 0.5
 
 if args.etabin == "none": eta_bin = "none"
 elif args.etabin == "one": eta_bin = "one"
@@ -71,6 +71,7 @@ elif args.channel == "two": channel = "jet_bot2_nochi"
 elif args.channel == "one_chi": channel = "jet_bot1_chi"
 elif args.channel == "two_chi": channel = "jet_bot2_chi"
 elif args.channel == "both_chi": channel = "jet_both_chi"
+elif args.channel == "both": channel = "jet_both_nochi"
 else: raise NameError('Incorrect channel')
 print(channel)
 
@@ -102,9 +103,9 @@ not_rebin = ["nJetGood","InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","lepto
 
 #observable_names = ["jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP", "btag_sf", "lep_id_sf", "lep_trig_sf", "lep_iso_sf",
 #     "puWeight", "PUjetID_SF", "top_weight","Frag_weight_sl","Br_weight_sl","muon_bot1_mother","muon_bot2_mother","muon_bot1_mother_mine","muon_bot2_mother_mine",
-#     "muon_bot1_mother_detail","muon_bot2_mother_detail","muon_from_bot_sf_z"]
+#     "muon_bot1_mother_detail","muon_bot2_mother_detail","muon_from_bot_sf_z","muon_both_z_short"]
 
-#observable_names = ["muon_bot1_iso_abs","muon_bot2_iso_abs"]
+#observable_names = ["muon_both_z_short"]
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
@@ -164,6 +165,7 @@ else: raise NameError('Incorrect year')
 if channel == "jet_bot1_chi": term1 = 'botjets_muons_corr/muon_bot1/'
 elif channel == "jet_bot2_chi": term1 = "botjets_muons_corr/muon_bot2/"
 elif channel == "jet_both_chi": term1 = "botjets_muons_corr/muon_both/"
+elif channel == "jet_both_nochi": term1 = "botjets_muons_corr/muon_both/nochitest/"
 elif channel == "jet_bot1_nochi": term1 = "botjets_muons_corr/muon_bot1/nochitest/"
 elif channel == "jet_bot2_nochi": term1 = "botjets_muons_corr/muon_bot2/nochitest/"
 else: raise NameError('Incorrect channel option')

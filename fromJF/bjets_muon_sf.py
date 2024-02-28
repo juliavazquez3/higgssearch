@@ -96,6 +96,7 @@ elif args.jetbot == "two": channel = "jet_bot2"
 elif args.jetbot == "one_chi": channel = "jet_bot1_chi"
 elif args.jetbot == "two_chi": channel = "jet_bot2_chi"
 elif args.jetbot == "both_chi": channel = "jet_both_chi"
+elif args.jetbot == "both": channel = "jet_both"
 else: raise NameError('Incorrect channel')
 print(channel)
 
@@ -1218,7 +1219,7 @@ for s in samples:
         elif channel[0:8] == "jet_both":
            df[s] = df[s].Filter('bot1_muon_id > -1 || (bot2_muon_id > -1 && bot1_muon_id < 0)')
            #df[s] = df[s].Filter('bot1_muon_id > -1 || bot2_muon_id > -1')
-           #df[s] = df[s].Filter('muon_both_z < 0.5')
+           df[s] = df[s].Filter('muon_both_z < 0.5')
            #df[s] = df[s].Filter('muon_both_iso_abs > 2.5')
         if eta_bin == "one":
            if channel[0:8] == "jet_bot1":

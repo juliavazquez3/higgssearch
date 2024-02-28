@@ -52,6 +52,8 @@ args = parser.parse_args()
 #else: raise NameError('Incorrect data option')
 
 if args.channel == "btagMM_chitest": term_path = ""
+elif args.channel == "btagMM_chitest_ctag": term_path = "/ctag"
+elif args.channel == "btagMM_chitest_noctag": term_path = "/noctag"
 elif args.channel == "btagMM_chitest_sl": term_path = "/sl"
 elif args.channel == "btagMM_chitest_slss": term_path = "/sl/ss"
 elif args.channel == "btagMM_chitest_slos": term_path = "/sl/os"
@@ -68,6 +70,7 @@ if not os.path.exists(plotdir):
 
 c_rat = 1.2
 c_rat2 = 0.8
+nrebin = 2
 
 norm_factorM = {}
 norm_factorE = {}
@@ -94,6 +97,9 @@ norm_factorM["all"]["btagMM_chitest_slos"] = 0.92; norm_factorM["all"]["btagMM_c
 norm_factorE["all"]["btagMM_chitest_sl"] = 0.90; norm_factorE["all"]["btagMM_chitest_slss"] = 0.90; 
 norm_factorE["all"]["btagMM_chitest_slos"] = 0.90; norm_factorE["all"]["btagMM_chitest_slssos"] = 0.90;
 
+norm_factorM["all"]["btagMM_chitest_ctag"] = 0.92; norm_factorE["all"]["btagMM_chitest_ctag"] = 0.9; 
+norm_factorM["all"]["btagMM_chitest_noctag"] = 0.92; norm_factorE["all"]["btagMM_chitest_noctag"] = 0.9; 
+
 observable_names = ["InvM_2jets","jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt", "jet_2_eta", "jet_2_mass", "jet_2_qgl","jet_2_nmu","jet_1_qgl",
    "lepton_pt", "lepton_eta", "lepton_pt_detail", "lepton_eta_thick", "InvM_bot_closer", "InvM_bot_farther",
    "deltaR_jet1_jet2", "deltaphi_jet1_jet2", "deltaeta_jet1_jet2", "MET_pt_aux", "MET_sig", "MET_my_sig",
@@ -108,14 +114,17 @@ observable_names = ["InvM_2jets","jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt
    "InvM_2jets_thick","InvM_2jets_short","bot1_muons","bot2_muons","muon_bot1_eta","muon_bot2_eta","muon_bot1_pt","muon_bot2_pt","nJetGood",
    "jet_bot1_tracks","jet_bot2_tracks","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1","tau_discr_jetbot2"]
 
+
 if "sl" in str(args.channel): observable_names = observable_names + ["muon_jet_pt","muon_jet_z","muon_jet_eta","muon_jet_pt_rel","muon_jet_iso",
          "muon_jet_iso_log","muon_jet_z_short","InvM3_good_short","muon_jet_sigr","muon_jet_sigxy","muon_jet_sigdz","muon_jet_r","deltaR_jet1_muon",
          "muon_jet_z2_v2","muon_jet_z3","muon_jet_iso_abs"]
 
-not_rebin = ["nJetGood","InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","lepton_eta_thick","jet_bot1_btagnumber", "jet_bot2_btagnumber", 
+not_rebin = ["nJetGood","InvM3_bad","InvMl_good","InvMl_bad","lepton_eta_thick","jet_bot1_btagnumber", "jet_bot2_btagnumber", 
       "jet_1_btagnumber", "jet_2_btagnumber","muon_jet_pt","muon_jet_relpt","muon_jet_eta","tau_discr","transverse_mass",
       "jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP","lepton_pt", "muon_jet_z","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1",
-      "tau_discr_jetbot2","muon_jet_iso","InvM3_good_short"]
+      "tau_discr_jetbot2","muon_jet_iso","muon_jet_iso_abs","InvM3_good_short"]
+
+#observable_names = ["jet_max_cvltag","InvM_2jets"]
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
@@ -203,7 +212,9 @@ histFileDE = {}
 for name in observable_names:
   ## Open hists files
   filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
-  if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
+  if args.wcs: 
+     #filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes_aux/test_aux"+term_path+"/"
+     filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
   term = "hist_wqqfromJF_"
   end_term = ".root"
   ## mc files
@@ -306,10 +317,10 @@ for name in observable_names:
          hist_btagheavyup_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_btagheavyup")
          hist_btagheavydown_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_btagheavydown")
          hist_btagheavydown_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_btagheavydown")
-         hist_seclepup_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_seclepup")
-         hist_seclepup_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_seclepup")
-         hist_seclepdown_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_seclepdown")
-         hist_seclepdown_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_seclepdown")
+         hist_seclepup_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_jecup")
+         hist_seclepup_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_jecup")
+         hist_seclepdown_M[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_jecdown")
+         hist_seclepdown_E[data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_jecdown")
     if not args.nodata: histdata_M[data_op] = histFileDM[name][data_op].Get("data"+data_op+"M_"+name+"_M")
     if not args.nodata: histdata_E[data_op] = histFileDE[name][data_op].Get("data"+data_op+"E_"+name+"_E")
 
@@ -541,21 +552,21 @@ for name in observable_names:
             histT_seclepdown_M[s].Add(hist_seclepdown_M[d][s])
             histT_seclepdown_E[s].Add(hist_seclepdown_E[d][s])
        if (args.channel in sl_channel) and (name not in not_rebin):
-          histT_nom_M[s].Rebin(2)
-          histT_nom_E[s].Rebin(2)
+          histT_nom_M[s].Rebin(nrebin)
+          histT_nom_E[s].Rebin(nrebin)
           if not args.nosyst:
-            histT_btaglightup_M[s].Rebin(2)
-            histT_btaglightup_E[s].Rebin(2)
-            histT_btaglightdown_M[s].Rebin(2)
-            histT_btaglightdown_E[s].Rebin(2)
-            histT_btagheavyup_M[s].Rebin(2)
-            histT_btagheavyup_E[s].Rebin(2)
-            histT_btagheavydown_M[s].Rebin(2)
-            histT_btagheavydown_E[s].Rebin(2)
-            histT_seclepup_M[s].Rebin(2)
-            histT_seclepup_E[s].Rebin(2)
-            histT_seclepdown_M[s].Rebin(2)
-            histT_seclepdown_E[s].Rebin(2)
+            histT_btaglightup_M[s].Rebin(nrebin)
+            histT_btaglightup_E[s].Rebin(nrebin)
+            histT_btaglightdown_M[s].Rebin(nrebin)
+            histT_btaglightdown_E[s].Rebin(nrebin)
+            histT_btagheavyup_M[s].Rebin(nrebin)
+            histT_btagheavyup_E[s].Rebin(nrebin)
+            histT_btagheavydown_M[s].Rebin(nrebin)
+            histT_btagheavydown_E[s].Rebin(nrebin)
+            histT_seclepup_M[s].Rebin(nrebin)
+            histT_seclepup_E[s].Rebin(nrebin)
+            histT_seclepdown_M[s].Rebin(nrebin)
+            histT_seclepdown_E[s].Rebin(nrebin)
 
   if not args.nodata:
     histD_M = histdata_M[datayears[0]]
@@ -564,8 +575,8 @@ for name in observable_names:
        histD_M.Add(histdata_M[d])
        histD_E.Add(histdata_E[d])
     if (args.channel in sl_channel) and (name not in not_rebin): 
-       histD_M.Rebin(2)
-       histD_E.Rebin(2)
+       histD_M.Rebin(nrebin)
+       histD_E.Rebin(nrebin)
 
   if not args.nosyst:
     ### Para los histogramas de sistemática up y down sumamos todas las contribuciones
@@ -843,6 +854,9 @@ for name in observable_names:
         ratio_graph_err_E.SetFillStyle(3001);
 
     if args.sumEM:
+      #####################################
+      ########## sumEM channel ############
+      #####################################
       ymax_T = ymax_E+ymax_M
       y_T = stack_T.GetMaximum()
       if y_T>ymax_T: ymax_T=y_T
@@ -891,6 +905,17 @@ for name in observable_names:
         ratio.Draw("ep")
         if not args.nosyst: ratio_graph_err_T.Draw("same 2")
 
+      if name == "jet_max_cvltag" and (not args.nodata):
+        print("charm tag")
+        print("Integral of data is "+str(histD_T.Integral()))
+        print("Integral of MC is "+str(hTotal.Integral()))
+        for s in samples:
+            print("Integral of "+str(s)+" MC is "+str(histT_nom_T[s].Integral()))
+        print("Integral of data from 0.3 is "+str(histD_T.Integral(16,51)))
+        print("Integral of MC from 0.3 is "+str(hTotal.Integral(16,51)))
+       	for s in samples:
+            print("Integral of "+str(s)+" MC from 0.3 is "+str(histT_nom_T[s].Integral(16,51)))
+
       if name == "InvM_2jets" and (not args.nodata):
         print("Integral of data is "+str(histD_T.Integral()))
         print("Integral of MC is "+str(hTotal.Integral()))
@@ -909,15 +934,15 @@ for name in observable_names:
 
       ## Legends
       if args.ratio and not args.nodata: upper_pad.cd()
-      leg = TLegend(0.78,0.4,0.95,0.95)
+      leg = TLegend(0.7,0.38,0.95,0.95)
       leg.SetBorderSize(1)
       #leg.AddEntry(histT_nom_T["vv"],"VV","f")
       if args.wcs:
         leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
-        leg.AddEntry(histT_nom_T["ttbar_sl_nocharm"],"t#bar{t} qq'","f")
-        leg.AddEntry(histT_nom_T["st_charm"],"Single top charm","f")
-        leg.AddEntry(histT_nom_T["st_nocharm"],"Single top light","f")
-        leg.AddEntry(histT_nom_T["st_else"],"Single top no had W","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_nocharm"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_T["st_charm"],"Single top tW cq","f")
+        leg.AddEntry(histT_nom_T["st_nocharm"],"Single top tW uq","f")
+        leg.AddEntry(histT_nom_T["st_else"],"Single top s/t channel","f")
       else:
         leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
         leg.AddEntry(histT_nom_T["ttbar_sl_light"],"t#bar{t} uq","f")
@@ -931,7 +956,7 @@ for name in observable_names:
       leg.AddEntry(histT_nom_T["ttbar_dl"],"Dileptonic t#bar{t}","f")
       #leg.AddEntry(histT_nom_T["ttbar_dh"],"Hadronic t#bar{t}","f")
       if args.stack and not args.nodata: leg.AddEntry(histD_T, "Data" ,"lep")
-      leg.Draw()
+      #leg.Draw()
       termp= "totalHT_wqq"
       if args.ratio:
         notation = "_ratio_"
@@ -950,6 +975,9 @@ for name in observable_names:
          c1.Close(); gSystem.ProcessEvents();
 
     else:
+      #####################################
+      ############ M channel ##############
+      #####################################
       y_M = stack_M.GetMaximum()
       if y_M>ymax_M: ymax_M=y_M
       #stack_M.SetMinimum(1000.)
@@ -1054,6 +1082,9 @@ for name in observable_names:
       if args.png: c1.Print(plotdir+termp+notation+ term_d+name + ".png")
       else: c1.Print(plotdir+termp+notation + term_d+name + ".root")
 
+      #####################################
+      ############ E channel ##############
+      #####################################
       stack_E.Draw("HIST")
       if not args.nodata:
         histD_E.SetMarkerStyle(20)
