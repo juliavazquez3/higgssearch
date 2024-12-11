@@ -6,17 +6,27 @@ import json
 import argparse
 import numpy as np
 from os.path import isfile, join, isdir
+import CMS_lumi, tdrstyle
 
 #if not sys.flags.interactive: ROOT.EnableImplicitMT()
 
 # Some defaults
 gROOT.SetStyle("Plain")
 gStyle.SetOptStat(1111111)
+gStyle.SetCanvasDefW(1600)
+gStyle.SetCanvasDefH(800)
+
+#set the tdr style
+#tdrstyle.setTDRStyle()
 gStyle.SetPadGridX(True)
 gStyle.SetPadGridY(True)
 gStyle.SetGridStyle(3)
-gStyle.SetCanvasDefW(1600)
-gStyle.SetCanvasDefH(800)
+
+#change the CMS_lumi variables (see CMS_lumi.py)
+CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
+CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
+CMS_lumi.writeExtraText = 1
+CMS_lumi.extraText = "Preliminary"
 
 # Argument parsing
 parser = argparse.ArgumentParser()
@@ -54,8 +64,19 @@ plotdir = '/nfs/cms/vazqueze/higgssearch/plotspng/'
 if not os.path.exists(plotdir):
     os.makedirs(plotdir)
 
+##### some settings ######
+
+iPeriod = 0
+iPos = 11
+if( iPos==0 ): CMS_lumi.relPosX = 0.12
+
 c_rat = 1.5
 c_rat2 = 0.5
+nrebin = 2
+mrk_size = 5; titY_off = 0.3; tit_size = 0.14; titX_off = 0.8;
+leg1 = 0.67; leg2 = 0.6; leg3 = 0.96; leg4 = 0.92;
+
+##########################
 
 if args.etabin == "none": eta_bin = "none"
 elif args.etabin == "one": eta_bin = "one"
@@ -105,7 +126,20 @@ not_rebin = ["nJetGood","InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","lepto
 #     "puWeight", "PUjetID_SF", "top_weight","Frag_weight_sl","Br_weight_sl","muon_bot1_mother","muon_bot2_mother","muon_bot1_mother_mine","muon_bot2_mother_mine",
 #     "muon_bot1_mother_detail","muon_bot2_mother_detail","muon_from_bot_sf_z","muon_both_z_short"]
 
-#observable_names = ["muon_both_z_short"]
+observable_names = ["jet_bot1_flavourP", "jet_bot2_flavourP"]
+observable_names = ["muon_both_pt","muon_both_eta","muon_both_z","muon_both_iso","muon_both_iso_log","muon_both_z_short","muon_both_iso_abs"]
+
+cosmetic_names = {}
+
+for name in observable_names:
+    cosmetic_names[name] = name
+
+cosmetic_names["InvM_2jets"] = "m_{jj} [GeV]"; cosmetic_names["InvM3_good"] = "m_{jjb} [GeV]"; cosmetic_names["InvMl_good"] = "m_{lb} [GeV]";
+cosmetic_names["jet_1_pt"] = "jet 1 p_{T} [GeV]";cosmetic_names["jet_2_pt"] = "jet 2 p_{T} [GeV]";cosmetic_names["jet_bot1_pt"] = "b-jet 1 p_{T} [GeV]";cosmetic_names["jet_bot2_pt"] = "b-jet 2 p_{T} [GeV]";
+cosmetic_names["jet_1_eta"] = "jet 1 #eta";cosmetic_names["jet_2_eta"] = "jet 2 #eta";cosmetic_names["jet_bot1_eta"] = "b-jet 1 #eta";cosmetic_names["jet_bot2_eta"] = "b-jet 2 #eta";
+cosmetic_names["muon_both_pt"] = "#mu p_{T} [GeV]"; cosmetic_names["muon_both_eta"] = "#mu #eta"; cosmetic_names["muon_both_iso_abs"] = "I_{PF} [GeV]"; 
+cosmetic_names["muon_both_z_short"] = "p_{T}^{#mu}/p_{T}^{jet}";
+cosmetic_names["muon_both_iso"] = "I_{PF}/p_{T}^{#mu}";
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
@@ -162,12 +196,12 @@ if args.year == "all": datayears = ["2016","2016B","2017","2018"]
 elif (args.year == "2016" or args.year == "2016B" or args.year == "2017" or args.year == "2018"): datayears = [str(args.year)]
 else: raise NameError('Incorrect year')
 
-if channel == "jet_bot1_chi": term1 = 'botjets_muons_corr/muon_bot1/'
-elif channel == "jet_bot2_chi": term1 = "botjets_muons_corr/muon_bot2/"
-elif channel == "jet_both_chi": term1 = "botjets_muons_corr/muon_both/"
-elif channel == "jet_both_nochi": term1 = "botjets_muons_corr/muon_both/nochitest/"
-elif channel == "jet_bot1_nochi": term1 = "botjets_muons_corr/muon_bot1/nochitest/"
-elif channel == "jet_bot2_nochi": term1 = "botjets_muons_corr/muon_bot2/nochitest/"
+if channel == "jet_bot1_chi": term1 = 'botjets_muons/muon_bot1/'
+elif channel == "jet_bot2_chi": term1 = "botjets_muons/muon_bot2/"
+elif channel == "jet_both_chi": term1 = "botjets_muons_corr_reliso/muon_both/"
+elif channel == "jet_both_nochi": term1 = "botjets_muons_corr_reliso/muon_both/nochitest/"
+elif channel == "jet_bot1_nochi": term1 = "botjets_muons/muon_bot1/nochitest/"
+elif channel == "jet_bot2_nochi": term1 = "botjets_muons/muon_bot2/nochitest/"
 else: raise NameError('Incorrect channel option')
 
 if eta_bin == "one":
@@ -240,22 +274,25 @@ for name in observable_names:
        #print(histFile[name].keys())
        #print(histFileDM[name].keys())
 
-  if args.png: c1 = TCanvas("c1","",1200,800)
-  else: c1 = TCanvas("c1","",600,400)
+  if args.png: 
+     c1 = TCanvas("c1","",1200,1000)
+  else: 
+     c1 = TCanvas("c1","",600,400)
 
   if args.ratio and not args.nodata:
     ## In case of ratio plot
     upper_pad = ROOT.TPad("upper_pad", "", 0, 0.35, 1, 1)
     lower_pad = ROOT.TPad("lower_pad", "", 0, 0, 1, 0.35)
     for p in [upper_pad, lower_pad]:
-        p.SetLeftMargin(0.14)
-        p.SetRightMargin(0.05)
+        p.SetLeftMargin(0.095)
+        p.SetRightMargin(0.04)
         p.SetTickx(False)
         p.SetTicky(False)
     upper_pad.SetBottomMargin(0)
+    upper_pad.SetTopMargin(0.075)
     lower_pad.SetTopMargin(0)
-    lower_pad.SetBottomMargin(0.3)
- 
+    lower_pad.SetBottomMargin(0.25)
+
     if not args.linear: upper_pad.SetLogy()
     upper_pad.Draw()
     lower_pad.Draw()
@@ -514,8 +551,16 @@ for name in observable_names:
     for d in datayears[1:]:
        histD.Add(histdata[d])
 
+  if not args.nodata:
+     if name == "muon_both_pt":
+       histD.SetBinContent(4,0.)
+       histD.SetBinContent(5,0.)
+       for s in samples:
+         histT_nom[s].SetBinContent(4,0.)
+         histT_nom[s].SetBinContent(5,0.)
+
   if not args.nosyst:
-    ### Para los histogramas de sistemática up y down sumamos todas las contribuciones
+    ### Para los histogramas de sistematica up y down sumamos todas las contribuciones
     histT_sT_btaglightup = histT_btaglightup[samples[0]]
     histT_sT_btaglightdown = histT_btaglightdown[samples[0]]
     histT_sT_btagheavyup = histT_btagheavyup[samples[0]]
@@ -570,7 +615,7 @@ for name in observable_names:
     samples = ["vv","zjets","wjets","ttbar_nomuon","st","ttbar_muon_else","ttbar_muon_charm","ttbar_muon_bottom"]
 
     if args.ratio and not args.nodata: upper_pad.cd()
-    stack = ROOT.THStack()
+    stack = ROOT.THStack("hs", ";;Events")
     for s in samples:
       stack.Add(histT_nom[s])
 
@@ -653,6 +698,14 @@ for name in observable_names:
       histD.Draw("E SAME")
     if not args.nosyst: graph_err.Draw("SAME 2")
 
+    if not args.nodata:
+      CMS_lumi.CMS_lumi(upper_pad, iPeriod, iPos)
+      upper_pad.cd()
+      upper_pad.Update()
+      upper_pad.RedrawAxis()
+      frame = upper_pad.GetFrame()
+      #frame.Draw()
+
     if args.ratio and not args.nodata:
       lower_pad.cd()
       ratio = histD.Clone("ratio")
@@ -662,14 +715,15 @@ for name in observable_names:
       ratio.SetMinimum(c_rat2)
       ratio.SetMaximum(c_rat)
       ratio.GetYaxis().SetTitle("Data/MC")
-      ratio.GetXaxis().SetTitle(name)
+      ratio.GetXaxis().SetTitle(cosmetic_names[name])
       ratio.GetXaxis().SetLabelSize(0.08)
-      ratio.GetXaxis().SetTitleSize(0.12)
-      ratio.GetXaxis().SetTitleOffset(1.0)
+      ratio.GetXaxis().SetTitleSize(tit_size)
+      ratio.GetXaxis().SetTitleOffset(titX_off)
       ratio.GetYaxis().SetLabelSize(0.05)
-      ratio.GetYaxis().SetTitleSize(0.09)
-      ratio.GetYaxis().CenterTitle()
-      ratio.GetYaxis().SetTitleOffset(0.5)
+      ratio.GetYaxis().SetTitleSize(0.12)
+      ratio.GetYaxis().CenterTitle(False)
+      ratio.GetYaxis().ChangeLabel(11,-1,-1,-1,-1,-1,"  ");
+      ratio.GetYaxis().SetTitleOffset(titY_off)
       # Set up plot for markers and errors
       ratio.Sumw2()
       ratio.SetStats(0)
@@ -684,6 +738,15 @@ for name in observable_names:
       ratio.Divide(hTotal)
       ratio.Draw("ep")
       if not args.nosyst: ratio_graph_err.Draw("same 2")
+
+    if "flavourP" in str(name):
+      for s in samples:
+          print(s)
+          qaux1 = histT_nom[s].Integral()
+          print("Integral of "+str(s)+" MC process is "+str(qaux1))
+          for i in [2,3,11,12,28]:
+            print("Content of bin "+str(i)+" is "+str(histT_nom[s].GetBinContent(i)))
+            print("Percentage over total is "+str(histT_nom[s].GetBinContent(i)/qaux1))
 
     if name == "InvM_2jets" and (not args.nodata):
       print("Integral of data is "+str(histD.Integral()))
@@ -703,8 +766,8 @@ for name in observable_names:
 
     ## Legends
     if args.ratio and not args.nodata: upper_pad.cd()
-    leg = TLegend(0.68,0.59,0.95,0.95)
-    leg.SetBorderSize(1)
+    leg = TLegend(leg1, leg2, leg3, leg4)
+    leg.SetBorderSize(0)
     #leg.AddEntry(histT_nom["vv"],"VV","f")
     leg.AddEntry(histT_nom["ttbar_muon_charm"],"t#bar{t}, muon from D hadron","f")
     leg.AddEntry(histT_nom["ttbar_muon_bottom"],"t#bar{t}, muon from B hadron","f")
@@ -715,7 +778,7 @@ for name in observable_names:
     leg.AddEntry(histT_nom["wjets"],"W+jets","f")
     #leg.AddEntry(histT_nom["ttbar_dh"],"Hadronic t#bar{t}","f")
     if args.stack and not args.nodata: leg.AddEntry(histD, "Data" ,"lep")
-    #leg.Draw()
+    leg.Draw()
     termp= "totalHT_wqq"
     if args.ratio: 
       notation = "_ratio_"
@@ -727,8 +790,11 @@ for name in observable_names:
     if args.year == "all": term_d = ""
     elif (args.year == "2016" or args.year == "2016B" or args.year == "2017" or args.year == "2018"): term_d = str(args.year)
 
-    if args.png: c1.Print(plotdir+termp+notation+ term_d+name + ".png")
-    else: c1.Print(plotdir+termp+notation + term_d+name + ".root")
+    if args.png: 
+       c1.Print(plotdir+termp+notation+ term_d+name + ".pdf")
+       c1.Print(plotdir+termp+notation+ term_d+name + ".png")
+    else: 
+       c1.Print(plotdir+termp+notation + term_d+name + ".root")
 
     if c1: 
        c1.Close(); gSystem.ProcessEvents();

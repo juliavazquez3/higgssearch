@@ -208,17 +208,18 @@ histFileDE = {}
 
 myfile = {}
 #path_histfile = "/nfs/cms/vazqueze/higgssearch/datacards/"
-path_histfile = "/nfs/cms/vazqueze/CMSSW_11_3_4/src/HiggsAnalysis/CombinedLimit/data/tutorials/longexercise/shape_analysis/"
+path_histfile = "/nfs/cms/vazqueze/CMSSW_11_3_4/src/HiggsAnalysis/CombinedLimit/data/tutorials/longexercise/jec_syst/"
 
 for name in observable_names:
   #### Systematics to take into account
   #list_syst = ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown", "seclepup", "seclepdown", "lepidup", "lepiddown", 
   #    "lepisoup", "lepisodown", "leptrigup", "leptrigdown", "notoppt","puwup","puwdown"] 
-  #list_syst = ["jecup","jecdown"]
-  list_syst = ["ctagup","ctagdown","btaglightup", "btaglightdown","btagheavyup", "btagheavydown"] 
+  list_syst = ["jecup","jecdown"]
+  #list_syst = ["ctagup","ctagdown"] 
   ## Open hists files
   filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
-  if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
+  if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes_jec"+term_path+"/"
+  #if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
   term = "hist_wqqfromJF_"
   end_term = ".root"
   ## mc files
@@ -453,6 +454,7 @@ for name in observable_names:
      sysName[syst] = syst;
   sysName["btaglightup"] = "Bot_mistagUp"; sysName["btaglightdown"] = "Bot_mistagDown"; sysName["btagheavyup"] = "Bot_tagUp"; sysName["btagheavydown"] = "Bot_tagDown";
   sysName["puwup"] = "PU_weightUp"; sysName["puwdown"] = "PU_weightDown"; sysName["seclepup"] = "muonBjet_SFUp"; sysName["seclepdown"] = "muonBjet_SFDown"; 
+  sysName["jecup"] = "jecUp";sysName["jecdown"] = "jecDown";
   dataCname = {};
   if args.wcs:
       dataCname["vv"] = "bck";dataCname["wjets"] = "vjets";dataCname["ttbar_dl"] = "ttdl";dataCname["ttbar_sl_nocharm"] = "ttWuq";dataCname["ttbar_sl_charm"] = "ttWcq"; 
@@ -572,21 +574,7 @@ for name in observable_names:
     list_syst = list_syst+["mcstat"]
     print(list_syst)
     ### hist renamings
-    #data_obs = histD_M.Clone("data_obs")
-    if args.channel == "btagMM_chitest_slss":
-       data_obs = histT_nom_M[samples[0]].Clone("mcss")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_M[s])
-    elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
-       data_obs = histT_nom_M[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_M[s])
-       aux_mcss = histT_nom_M[samples[0]].Clone("mcss")
-       aux_mcss.Scale(0.)
-    else:
-       data_obs = histT_nom_M[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_M[s])
+    data_obs = histD_M.Clone("data_obs")
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -656,41 +644,12 @@ for name in observable_names:
     else:
       termfile = "mydatacard_leptonM_"+str(args.channel)+"_"+str(name)+".root"
     myfile[name] = TFile( path_histfile+termfile, 'RECREATE' )
-    if args.channel == "btagMM_chitest_slss" or args.channel == "btagMM_chitest_slos":
-       data_obs.Write()
-    elif args.channel == "btagMM_chitest_slssos":
-       for s in aux_list:
-         mchists[s].Write()
-         for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
-            if syst_name in list_syst:
-               mchists_syst[syst_name][s].Write()
-         if s == "st_charm" or s == "ttbar_sl_charm":
-            if ("seclepup" in list_syst and "seclepdown" in list_syst):
-               mchists_syst["seclepup"][s].Write()
-               mchists_syst["seclepdown"][s].Write()
-    elif (args.channel == "btagMM_chitest" or args.channel=="btagMM_chitest_antisl"):
-       aux_mcss.Write()
-       data_obs.Write()
-       for s in aux_list:
-         mchists[s].Write()
-         for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
-            if syst_name in list_syst:
-               mchists_syst[syst_name][s].Write()
-         if s == "st_charm" or s == "ttbar_sl_charm":
-       	    if ("seclepup" in list_syst and "seclepdown" in list_syst):
-               mchists_syst["seclepup"][s].Write()
-               mchists_syst["seclepdown"][s].Write()
-    else:
-       data_obs.Write()
-       for s in aux_list:
-         mchists[s].Write()
-         for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
-       	    if syst_name in list_syst:
-               mchists_syst[syst_name][s].Write()
-         if s == "st_charm" or s == "ttbar_sl_charm":
-       	    if ("seclepup" in list_syst and "seclepdown" in list_syst):
-               mchists_syst["seclepup"][s].Write()
-               mchists_syst["seclepdown"][s].Write()
+    data_obs.Write()
+    for s in aux_list:
+       mchists[s].Write()
+       for syst_name in ["jecup", "jecdown"]:
+         if syst_name in list_syst:
+           mchists_syst[syst_name][s].Write()
     myfile[name].Close()
     ###############################
     ###### E channel ##############
@@ -710,21 +669,7 @@ for name in observable_names:
 
     #list_syst = list_syst+["mcstat"]
     ### hist renamings
-    #data_obs = histD_E.Clone("data_obs")
-    if args.channel == "btagMM_chitest_slss":
-       data_obs = histT_nom_E[samples[0]].Clone("mcss")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_E[s])
-    elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
-       data_obs = histT_nom_E[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_E[s])
-       aux_mcss = histT_nom_E[samples[0]].Clone("mcss")
-       aux_mcss.Scale(0.)
-    else:
-       data_obs = histT_nom_E[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_E[s])
+    data_obs = histD_E.Clone("data_obs")
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -795,41 +740,12 @@ for name in observable_names:
     else:
       termfile = "mydatacard_leptonE_"+str(args.channel)+"_"+str(name)+".root"
     myfile[name] = TFile( path_histfile+termfile, 'RECREATE' )
-    if args.channel == "btagMM_chitest_slss":
-       data_obs.Write()
-    elif args.channel == "btagMM_chitest_slssos":
-       for s in aux_list:
+    data_obs.Write()
+    for s in aux_list:
          mchists[s].Write()
-         for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
+         for syst_name in ["jecup", "jecdown"]:
             if syst_name in list_syst:
                mchists_syst[syst_name][s].Write()
-         if s == "st_charm" or s == "ttbar_sl_charm":
-            if ("seclepup" in list_syst and "seclepdown" in list_syst):
-               mchists_syst["seclepup"][s].Write()
-               mchists_syst["seclepdown"][s].Write()
-    elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
-       aux_mcss.Write()
-       data_obs.Write()
-       for s in aux_list:
-         mchists[s].Write()
-         for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
-            if syst_name in list_syst:
-               mchists_syst[syst_name][s].Write()
-         if s == "st_charm" or s == "ttbar_sl_charm":
-            if ("seclepup" in list_syst and "seclepdown" in list_syst):
-               mchists_syst["seclepup"][s].Write()
-               mchists_syst["seclepdown"][s].Write()
-    else:
-       data_obs.Write()
-       for s in aux_list:
-         mchists[s].Write()
-         for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
-            if syst_name in list_syst:
-               mchists_syst[syst_name][s].Write()
-         if s == "st_charm" or s == "ttbar_sl_charm":
-            if ("seclepup" in list_syst and "seclepdown" in list_syst):
-               mchists_syst["seclepup"][s].Write()
-               mchists_syst["seclepdown"][s].Write()
     myfile[name].Close()
 
   for data_op in datayears:

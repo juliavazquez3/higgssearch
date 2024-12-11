@@ -241,53 +241,191 @@ gInterpreter.Declare("""
 """)
 
 
+## Funciones para seleccionar JETS
+gInterpreter.Declare("""
+      using Vbool = const ROOT::RVec<bool>&;
+      using Vfloat = const ROOT::RVec<float>&;
+      using Vint = const ROOT::RVec<int>&;
+      auto InvariantM(const float pt, const float eta, const float phi, const float mass, const float pt1, const float eta1, const float phi1, const float mass1) {
+            auto x = pt*std::cos(phi);
+            auto x1 = pt1*std::cos(phi1);
+            auto y = pt*std::sin(phi);
+            auto y1 = pt1*std::sin(phi1);
+            auto z = pt*std::sinh(eta);
+            auto z1 = pt1*std::sinh(eta1);
+            auto e = std::sqrt(x*x+y*y+z*z+mass*mass);
+            auto e1 = std::sqrt(x1*x1+y1*y1+z1*z1+mass1*mass1);
+
+            auto mJet = std::sqrt((e+e1)*(e+e1)-(x+x1)*(x+x1)-(y+y1)*(y+y1)-(z+z1)*(z+z1));
+            return mJet;
+      };
+      auto InvariantM3(const float pt, const float eta, const float phi, const float pt1, const float eta1, const float phi1, const float pt2, const float eta2, const float phi2) {
+            auto x = pt*std::cos(phi);
+            auto x1 = pt1*std::cos(phi1);
+            auto x2 = pt2*std::cos(phi2);
+            auto y = pt*std::sin(phi);
+            auto y1 = pt1*std::sin(phi1);
+            auto y2 = pt2*std::sin(phi2);
+            auto z = pt*std::sinh(eta);
+            auto z1 = pt1*std::sinh(eta1);
+            auto z2 = pt2*std::sinh(eta2);
+            auto e = pt*std::cosh(eta);
+            auto e1 =  pt1*std::cosh(eta1);
+            auto e2 = pt2*std::cosh(eta2);
+
+            auto mJet = std::sqrt((e+e1+e2)*(e+e1+e2)-(x+x1+x2)*(x+x1+x2)-(y+y1+y2)*(y+y1+y2)-(z+z1+z2)*(z+z1+z2));
+            return mJet;
+      };
+""")
+
+gInterpreter.Declare("""
+      using Vbool = const ROOT::RVec<bool>&;
+      using Vfloat = const ROOT::RVec<float>&;
+      using Vint = const ROOT::RVec<int>&;
+      auto chi2calcver2(const float mw, const float mt){
+        Double_t xx2 = 0.;
+        float mwval = 0.;
+        float mtopval = 0.;
+        float sigw = 0.;
+        float sigtop = 0.;
+        mwval = 77.5;
+        mtopval = 161;
+        sigw = 11.5;
+        sigtop = 20;
+	xx2  = (mw-mwval)*(mw-mwval)/sigw/sigw;
+        xx2 += (mt-mtopval)*(mt-mtopval)/sigtop/sigtop;
+        xx2 += -0.6*2.*(mw-mwval)*(mt-mtopval)/sigw/sigtop;
+        xx2 = xx2/(1-0.6*0.6);
+
+        if (xx2<0) return -999.;
+
+        return xx2;
+      };
+      auto JetInds(UInt_t njet, Vint good, Vfloat pt, Vfloat eta, Vfloat phi, Vint jetbotind) {
+            vector<int> vb;
+            bool condb = true;
+            int ind1 = -1;
+            int ind2 = -1;
+            float ptJ{-10.};
+            for (unsigned int j=0; j<4; ++j){
+                        if (good.size() > 2) condb = (good[j] != good[jetbotind[0]] && good[j] != good[jetbotind[1]]);
+                        if(pt[good[j]]>ptJ && condb){
+                                ind1 = good[j];
+                                ptJ = pt[good[j]];
+                        }
+            }
+            if (ind1 > -1) {
+                vb.push_back(ind1);
+            }
+            ptJ = -10.;
+            for (unsigned int j=0; j<4; ++j){
+                        if (good.size() > 2) condb = (good[j] != good[jetbotind[0]] && good[j] != good[jetbotind[1]]);
+                        if(pt[good[j]]>ptJ && condb && good[j] != ind1){
+                                ind2 = good[j];
+                                ptJ = pt[good[j]];
+                        }
+            }
+            if (ind2 > -1) {
+                vb.push_back(ind2);
+            }
+            return vb;
+      };
+      auto InvMhad(Vint good, Vint bgood, Vfloat pt, Vfloat eta, Vfloat phi)  {
+           vector<float> vb;
+           auto vec = JetInds(4,good,pt,eta,phi,bgood);
+           auto jet1 = vec[0];
+           auto jet2 = vec[1];
+           auto m30 = InvariantM3(pt[good[bgood[0]]],eta[good[bgood[0]]],phi[good[bgood[0]]],pt[jet1],eta[jet1],phi[jet1],pt[jet2],eta[jet2],phi[jet2]);
+           auto m31 = InvariantM3(pt[good[bgood[1]]],eta[good[bgood[1]]],phi[good[bgood[1]]],pt[jet1],eta[jet1],phi[jet1],pt[jet2],eta[jet2],phi[jet2]);
+           auto mw = InvariantM(pt[jet1],eta[jet1],phi[jet1],0.,pt[jet2],eta[jet2],phi[jet2],0.);
+           vb.push_back(m30);
+           vb.push_back(m31);
+           vb.push_back(mw);
+           vb.push_back(chi2calcver2(mw,m30));
+           vb.push_back(chi2calcver2(mw,m31));
+           return vb;
+      };
+""")
+
+
+gInterpreter.Declare("""
+      using Vbool = const ROOT::RVec<bool>&;
+      using Vfloat = const ROOT::RVec<float>&;
+      using Vint = const ROOT::RVec<int>&;
+      auto InvMasslep(Vint jetbot, Vint jetgood, Vfloat Jet_pt, Vfloat Jet_eta, Vfloat Jet_phi, Vint muongood, Vint elgood, Vfloat muon_pt, Vfloat muon_eta, Vfloat muon_phi, Vfloat muon_mass, Vfloat el_pt, Vfloat el_eta, Vfloat el_phi, Vfloat el_mass) {
+            vector<float> vb;
+            if (muongood.size() > 0) {
+               vb.push_back(InvariantM(Jet_pt[jetgood[jetbot[0]]],Jet_eta[jetgood[jetbot[0]]],Jet_phi[jetgood[jetbot[0]]],0., muon_pt[muongood[0]], muon_eta[muongood[0]], muon_phi[muongood[0]], muon_mass[muongood[0]]));
+               vb.push_back(InvariantM(Jet_pt[jetgood[jetbot[1]]],Jet_eta[jetgood[jetbot[1]]],Jet_phi[jetgood[jetbot[1]]],0., muon_pt[muongood[0]], muon_eta[muongood[0]], muon_phi[muongood[0]], muon_mass[muongood[0]]));
+            } else {
+               vb.push_back(InvariantM(Jet_pt[jetgood[jetbot[0]]],Jet_eta[jetgood[jetbot[0]]],Jet_phi[jetgood[jetbot[0]]],0., el_pt[elgood[0]], el_eta[elgood[0]], el_phi[elgood[0]], el_mass[elgood[0]]));
+               vb.push_back(InvariantM(Jet_pt[jetgood[jetbot[1]]],Jet_eta[jetgood[jetbot[1]]],Jet_phi[jetgood[jetbot[1]]],0., el_pt[elgood[0]], el_eta[elgood[0]], el_phi[elgood[0]], el_mass[elgood[0]]));
+            }
+            return vb;
+      };
+      auto bjetschoose(Vint partonF, Vint jetbot, Vint jetgood, Vfloat pt, Vfloat eta, Vfloat phi, Vint muongood, Vint elgood, Vfloat muon_pt, Vfloat muon_eta, Vfloat muon_phi, Vfloat muon_mass, Vfloat el_pt, Vfloat el_eta, Vfloat el_phi, Vfloat el_mass, Vint muon_charge, Vint el_charge) {
+            vector<float> vb;
+            int indM = -1;
+            float ptM = -10.;
+            bool condgen = false;
+            auto vec_had = InvMhad(jetgood, jetbot, pt,eta,phi);
+            auto vec_aux = InvMasslep(jetbot,jetgood,pt,eta,phi,muongood,elgood,muon_pt,muon_eta,muon_phi,muon_mass,el_pt,el_eta,el_phi,el_mass);
+            if (muongood.size() > 0) {
+               if (partonF[jetgood[jetbot[0]]]*muon_charge[muongood[0]] > 0) {
+                   vb.push_back(vec_aux[0]);
+                   vb.push_back(vec_aux[1]);
+                   vb.push_back(vec_had[4]);
+                   vb.push_back(vec_had[3]);
+               } else {
+                   vb.push_back(vec_aux[1]);
+                   vb.push_back(vec_aux[0]);
+                   vb.push_back(vec_had[3]);
+                   vb.push_back(vec_had[4]);
+               }
+            } else {
+               if (partonF[jetgood[jetbot[0]]]*el_charge[elgood[0]] > 0) {
+                   vb.push_back(vec_aux[0]);
+                   vb.push_back(vec_aux[1]);
+                   vb.push_back(vec_had[4]);
+                   vb.push_back(vec_had[3]);
+               } else {
+                   vb.push_back(vec_aux[1]);
+                   vb.push_back(vec_aux[0]);
+                   vb.push_back(vec_had[3]);
+                   vb.push_back(vec_had[4]);
+               }
+            }
+            return vb;
+      };
+""")
+
+
 #############################################################
 ######################## Definitions ########################
 #############################################################
 
-gInterpreter.Declare("""
-   Double_t xbins[10] = {0.,3.,4.,5.,7.,10.,15.,20.,25.,40.};
-""")
+df_test = df_test.Define('vec_aux','bjetschoose(Jet_partonFlavour, JetBotInd, JetGoodInd, Jet_pt, Jet_eta, Jet_phi, MuonGoodInd, ElectronGoodInd, Muon_pt, Muon_eta, Muon_phi, Muon_mass, Electron_pt, Electron_eta, Electron_phi, Electron_mass, Muon_charge, Electron_charge)')
+df_test = df_test.Define('InvMl_good','vec_aux[0]')
+df_test = df_test.Define('InvMl_bad','vec_aux[1]')
+df_test = df_test.Define('chi2_good','vec_aux[2]')
+df_test = df_test.Define('chi2_bad','vec_aux[3]')
 
-
-df_test = df_test.Define('vec_bool','muongenreco(nGenPart, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_eta, GenPart_phi, GenPart_pt, Muon_pt, Muon_eta, Muon_phi, Muon_tightId)')
-df_test = df_test.Define('muongenpt','muongenrecopt(nGenPart, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_pt)')
-df_gen = df_test.Filter('vec_bool[0]')
-df_reco = df_gen.Filter('vec_bool[1]')
-
-histgen1 = df_gen.Histo1D(("histgen1","",9,xbins),"muongenpt")
-histgen2 = df_reco.Histo1D(("histgen2","",9,xbins),"muongenpt")
-
-#ratio_hist = histgen2.Clone("ratio_hist")
-#ratio_hist.Divide(histgen1)
-
-df_test = {}
-df_gen = {}
-df_reco = {}
-histgen1 = {}
-histgen1_aux = {}
-histgen2 = {}
-for dyear in ["2016","2016B","2017","2018"]:
-    df_test[dyear] = df_2[dyear].Define('vec_bool','muongenreco(nGenPart, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_eta, GenPart_phi, GenPart_pt, Muon_pt, Muon_eta, Muon_phi, Muon_tightId)')
-    df_test[dyear] = df_test[dyear].Define('muongenpt','muongenrecopt(nGenPart, GenPart_pdgId, GenPart_genPartIdxMother, GenPart_pt)')
-    df_gen[dyear] = df_test[dyear].Filter('vec_bool[0]')
-    df_reco[dyear] = df_gen[dyear].Filter('vec_bool[1]')
-    histgen1_aux[dyear] = df_gen[dyear].Histo1D(("histgen1_aux"+str(dyear),"",30,0,30),"muongenpt")
-    histgen1[dyear] = df_gen[dyear].Histo1D(("histgen1"+str(dyear),"",9,xbins),"muongenpt")
-    histgen2[dyear] = df_reco[dyear].Histo1D(("histgen2"+str(dyear),"",9,xbins),"muongenpt")
+hist_InvMl_good = df_test.Histo1D(("hist_InvMl_good","",100,0,600),"InvMl_good")
+hist_InvMl_bad = df_test.Histo1D(("hist_InvMl_bad","",100,0,600),"InvMl_bad")
+hist_chi2_good = df_test.Histo1D(("hist_chi2_good","",100,0,10),"chi2_good")
+hist_chi2_bad = df_test.Histo1D(("hist_chi2_bad","",100,0,10),"chi2_bad")
 
 #############################
 ####     DATA SAVING     ####
 #############################
 
-path_hist = "/nfs/cms/vazqueze/higgssearch/fromJF/ratios_muons_botjet/muon_eff_files_ver3.root"
+path_hist = "/nfs/cms/vazqueze/higgssearch/fromJF/chi_invMl_test.root"
 myfile = TFile( path_hist, 'RECREATE' )
 
-for dyear in ["2016","2016B","2017","2018"]:
-    histgen1_aux[dyear].Write()
-    histgen1[dyear].Write()
-    histgen2[dyear].Write()
-    #ratio_hist.Write()
+hist_InvMl_good.Write()
+hist_InvMl_bad.Write()
+hist_chi2_good.Write()
+hist_chi2_bad.Write()
 
 myfile.Close()
 

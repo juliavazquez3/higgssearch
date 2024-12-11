@@ -18,15 +18,16 @@ gStyle.SetCanvasDefH(800)
 
 #set the tdr style
 #tdrstyle.setTDRStyle()
-gStyle.SetPadGridX(True)
-gStyle.SetPadGridY(True)
-gStyle.SetGridStyle(3)
+gStyle.SetPadGridX(False)
+gStyle.SetPadGridY(False)
+#gStyle.SetGridStyle(3)
 
 #change the CMS_lumi variables (see CMS_lumi.py)
 CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
 CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
+#CMS_lumi.extraText = ""
 
 # Argument parsing
 parser = argparse.ArgumentParser()
@@ -34,8 +35,6 @@ parser.add_argument("--stack", action="store_true", default=False,
                     help="Stack simulation or not")
 parser.add_argument("--ratio", action="store_true", default=False,
                     help="Plot ratio or not")
-parser.add_argument("--hem", action="store_true", default=False,
-                    help="2018 data treatment")
 parser.add_argument("--postfit", action="store_true", default=False,
                     help="Plots normalization of signal")
 parser.add_argument("--linear", action="store_true", default=False,
@@ -52,8 +51,10 @@ parser.add_argument("--year", type=string, default="2016",
                     help="Select year of process to run")
 parser.add_argument("--folder", type=string, default="",
                     help="folder to grab files from")
-parser.add_argument("--channel", type=string, default="btagMM",
-                    help="Select year of process to run")
+parser.add_argument("--charmtag", type=string, default="no",
+                    help="Perform ssos substraction")
+parser.add_argument("--presel", type=string, default="btagMM_chitest",
+                    help="preselection")
 parser.add_argument("--nosyst", action="store_true", default=False,
                     help="systematics inclusion")
 parser.add_argument("--sumEM", action="store_true", default=False,
@@ -67,25 +68,47 @@ args = parser.parse_args()
 #if (args.data == "No" or args.data == "2016" or args.data == "2017" or args.data == "2018"): data_op = str(args.data)
 #else: raise NameError('Incorrect data option')
 
-if args.channel == "btagMM_chitest": term_path = ""
-elif args.channel == "btagMM_nochitest": term_path = "/nochitest"
-elif args.channel == "btagMM_chitest_auxctag": term_path = "/aux_ctag"
-elif args.channel == "btagMM_chitest_ctag": term_path = "/ctag"
-elif args.channel == "btagMM_chitest_noctag": term_path = "/noctag"
-elif args.channel == "btagMM_chitest_antisl": term_path = "/antisl"
-elif args.channel == "btagMM_chitest_sl": term_path = "/sl"
-elif args.channel == "btagMM_chitest_slss": term_path = "/sl/ss"
-elif args.channel == "btagMM_chitest_slos": term_path = "/sl/os"
-elif args.channel == "btagMM_chitest_slssos": term_path = "/sl/ssos"
-else: raise NameError('Incorrect data option')
+if args.charmtag == "full": channel = "sl_full"
+elif args.charmtag == "ss": channel = "sl_ss"
+elif args.charmtag == "os": channel = "sl_os"
+elif args.charmtag == "ssos": channel = "sl_ssos"
+elif args.charmtag == "csv": channel = "csv"
+elif args.charmtag == "no": channel = "wqq"
+elif args.charmtag == "antisl": channel = "antisl"
+else: raise NameError('Incorrect channel')
+print(channel)
 
-sl_channel = ["btagMM_chitest_sl","lepton50_chitest_sl","btagMM_chitest_slss","lepton50_chitest_slss",
-      "btagMM_chitest_slos","lepton50_chitest_slos","btagMM_chitest_slssos","lepton50_chitest_slssos"]
+if args.presel == "nobtag": chan = "nobtag"
+elif args.presel == "btagMM": chan = "btagMM"
+elif args.presel == "lepton50": chan = "lepton50"
+elif args.presel == "btagMM_chitest": chan = "btagMM_chitest"
+elif args.presel == "lepton50_chitest": chan = "lepton50_chitest"
+else: raise NameError('Incorrect channel')
+print(chan)
 
-plotdir = '/nfs/cms/vazqueze/higgssearch/plotspng/'
+# Get the directory where the script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+###### if you want to specify the folder in /nfs or any other location
+#### script_dir = ''
 
-if not os.path.exists(plotdir):
-    os.makedirs(plotdir)
+######### folder name
+term1 = ""
+if args.wcs:
+   term1 = "hists_wcs_"+str(chan)
+else:
+   term1 = "hists_jetflav_"+str(chan)
+
+path1 = os.path.join(script_dir, term1)
+
+if "sl" in channel:
+   termm = str(channel)
+   folder_path = os.path.join(path1,termm)
+else:
+   folder_path = path1
+
+sl_channel = ["sl_full","sl_ss","sl_os","sl_ssos"]
+
+plotdir = script_dir
 
 ##### some settings ######
 
@@ -96,22 +119,30 @@ if( iPos==0 ): CMS_lumi.relPosX = 0.12
 c_rat = 1.5
 c_rat2 = 0.5
 nrebin = 2; nrat = 11;
-mrk_size = 6; titY_off = 0.3; tit_size = 0.14; titX_off = 0.7; titY_size=0.11;
-titY_off2 = 1.0; titY_size2=0.05;
+mrk_size = 6; 
+############## titY_off2 = 0.6; titY_size2=0.07;
+titY_off2 = 0.9; titY_size2=0.055;
+titY_off = titY_off2/1.857; titY_size=titY_size2*1.857;
+############## tit_size = titY_size/0.99; titX_off = titY_off2*1.4;
+tit_size = titY_size/0.99; titX_off = titY_off2*1.1;
+titY_lab=0.055; titY2_lab=titY_lab*1.857;titX_lab=titY_lab*1.857;
 if not args.nodata:
-   leg1 = 0.4; leg2 = 0.7; leg3 = 0.96; leg4 = 0.92;
+   leg1 = 0.48; leg2 = 0.7; leg3 = 0.94; leg4 = 0.9;
 else:
-   leg1 = 0.4; leg2 = 0.76; leg3 = 0.92; leg4 = 0.9;
+   leg1 = 0.4; leg2 = 0.76; leg3 = 0.88; leg4 = 0.89;
 
-if not args.ratio: titY_size2=0.03; titY_off2 = 1.6;
 if args.nodata: titY_size = 0.07;titY_off=0.5;
+if not args.ratio: 
+    titY_size2=0.04; titY_off2 = 1.2;
+    titX_size= 0.05; titX_off = 1.1;
+    titY_lab=0.04; titY2_lab=titY_lab;titX_lab=titY_lab;
 
 aux_ratio = 0.977; aux_rwqq = 0.999; aux_conratio = 1.022;
 
 syst_val = {}
 
-syst_val["btagMM_chitest"] = 0.05; syst_val["btagMM_chitest_antisl"] = 0.05; syst_val["btagMM_chitest_sl"] = 0.05;
-syst_val["btagMM_chitest_slssos"] = 0.069; syst_val["btagMM_chitest_slos"] = 0.05; syst_val["btagMM_chitest_slss"] = 0.05;
+syst_val["btagMM_chitest"] = 0.065; syst_val["btagMM_chitest_antisl"] = 0.065; syst_val["btagMM_chitest_sl"] = 0.05;
+syst_val["btagMM_chitest_slssos"] = 0.066; syst_val["btagMM_chitest_slos"] = 0.05; syst_val["btagMM_chitest_slss"] = 0.05;
 
 ##########################
 
@@ -121,36 +152,22 @@ norm_factorE = {}
 norm_factorM["all"] = {}; norm_factorM["2016"] = {}; norm_factorM["2016B"] = {}; norm_factorM["2017"] = {}; norm_factorM["2018"] = {};
 norm_factorE["all"] = {}; norm_factorE["2016"] = {}; norm_factorE["2016B"] = {}; norm_factorE["2017"] = {}; norm_factorE["2018"] = {};
 
-### btagMM
-norm_factorM["all"]["btagMM"] = 0.95;
-norm_factorE["all"]["btagMM"] = 0.94;
-
 ### btagMM smeared, chitest
-norm_factorM["all"]["btagMM_chitest"] = 0.915;
-norm_factorE["all"]["btagMM_chitest"] = 0.894;
+norm_factorM["all"]["wqq"] = 0.915;
+norm_factorE["all"]["wqq"] = 0.894;
 
-norm_factorM["2016"]["btagMM_chitest"] = 0.89;norm_factorE["2016"]["btagMM_chitest"] = 0.87;
-norm_factorM["2016B"]["btagMM_chitest"] = 0.92;norm_factorE["2016B"]["btagMM_chitest"] = 0.94;
-norm_factorM["2017"]["btagMM_chitest"] = 0.92;norm_factorE["2017"]["btagMM_chitest"] = 0.88;
-norm_factorM["2018"]["btagMM_chitest"] = 0.91;norm_factorE["2018"]["btagMM_chitest"] = 0.90;
+norm_factorM["2016"]["wqq"] = 0.89;norm_factorE["2016"]["wqq"] = 0.87;
+norm_factorM["2016B"]["wqq"] = 0.92;norm_factorE["2016B"]["wqq"] = 0.94;
+norm_factorM["2017"]["wqq"] = 0.92;norm_factorE["2017"]["wqq"] = 0.88;
+norm_factorM["2018"]["wqq"] = 0.91;norm_factorE["2018"]["wqq"] = 0.90;
 
 ### btagMM smeared, chitest, SL
-norm_factorM["all"]["btagMM_chitest_sl"] = 0.92; norm_factorM["all"]["btagMM_chitest_slss"] = 0.92; 
-norm_factorM["all"]["btagMM_chitest_slos"] = 0.92; norm_factorM["all"]["btagMM_chitest_slssos"] = 0.92;
-norm_factorE["all"]["btagMM_chitest_sl"] = 0.90; norm_factorE["all"]["btagMM_chitest_slss"] = 0.90; 
-norm_factorE["all"]["btagMM_chitest_slos"] = 0.90; norm_factorE["all"]["btagMM_chitest_slssos"] = 0.90;
+norm_factorM["all"]["sl_full"] = 0.92; norm_factorM["all"]["sl_ss"] = 0.92;
+norm_factorM["all"]["sl_os"] = 0.92; norm_factorM["all"]["sl_ssos"] = 0.92;
+norm_factorE["all"]["sl_full"] = 0.90; norm_factorE["all"]["sl_ss"] = 0.90;
+norm_factorE["all"]["sl_os"] = 0.90; norm_factorE["all"]["sl_ssos"] = 0.90;
 
-norm_factorM["all"]["btagMM_chitest_ctag"] = 0.92; norm_factorE["all"]["btagMM_chitest_ctag"] = 0.9; 
-norm_factorM["all"]["btagMM_chitest_noctag"] = 0.92; norm_factorE["all"]["btagMM_chitest_noctag"] = 0.9; 
-norm_factorM["all"]["btagMM_chitest_auxctag"] = 0.92; norm_factorE["all"]["btagMM_chitest_auxctag"] = 0.9; 
-norm_factorM["all"]["btagMM_chitest_antisl"] = 0.92; norm_factorE["all"]["btagMM_chitest_antisl"] = 0.9; 
-
-if args.hem:
-   norm_factorM["all"][args.channel] = 0.9038;norm_factorE["all"][args.channel] = 0.8834;
-   norm_factorM["2016"][args.channel] = 0.891;norm_factorE["2016"][args.channel] = 0.8714;
-   norm_factorM["2016B"][args.channel] = 0.9233;norm_factorE["2016B"][args.channel] = 0.9384;
-   norm_factorM["2017"][args.channel] = 0.9254;norm_factorE["2017"][args.channel] = 0.8818;
-   norm_factorM["2018"][args.channel] = 0.8879;norm_factorE["2018"][args.channel] = 0.8754;
+norm_factorM["all"]["antisl"] = 0.92; norm_factorE["all"]["antisl"] = 0.9;
 
 ########### pT jet not corrected
 #norm_factorM["all"]["btagMM_chitest"] = 0.930;
@@ -172,29 +189,39 @@ observable_names = ["InvM_2jets","nJetGood","jet_1_pt", "jet_2_pt", "jet_1_eta",
    "jet_1_cvbtag_csv", "jet_2_cvbtag_csv", "jet_1_cvbtag", "jet_2_cvbtag", "jet_max_cvbtag", "jet_min_cvbtag",
    "jet_1_eta_thick","jet_2_eta_thick","jet_bot1_eta_thick","jet_bot2_eta_thick",
    "InvM_2jets_thick","InvM_2jets_short","bot1_muons","bot2_muons","muon_bot1_eta","muon_bot2_eta","muon_bot1_pt","muon_bot2_pt",
-   "jet_bot1_tracks","jet_bot2_tracks"]
+   "jet_bot1_tracks","jet_bot2_tracks", "jet_1_pt_long", "jet_2_pt_long", "jet_bot1_pt_long", "jet_bot2_pt_long",
+   "lepton_pt_long","transverse_mass_long","MET_pt_aux_long"]
 
 
-if ("sl" in str(args.channel)) and not("anti" in str(args.channel)): observable_names = observable_names + ["muon_jet_pt","muon_jet_z","muon_jet_eta",
-         "muon_jet_pt_rel","muon_jet_iso","muon_jet_xy","muon_jet_dz",
-         "muon_jet_iso_log","muon_jet_z_short","InvM3_good_short","muon_jet_sigr","muon_jet_sigxy","muon_jet_sigdz","muon_jet_r","deltaR_jet1_muon",
-         "muon_jet_z2_v2","muon_jet_z3","muon_jet_iso_abs","jet_muon_pt","jet_muon_eta","jet_muon_btag","jet_muon_btagnumber",
-         "jet_notmuon_pt","jet_notmuon_eta","jet_notmuon_btag","jet_notmuon_btagnumber","jet_muon_nmu","jet_notmuon_nmu","muon_jet_pt_short","muon_jet_eta_short"]
+observable_names = ["InvM_2jets","nJetGood","jet_1_pt", "jet_2_pt", "jet_1_eta", "jet_2_eta","lepton_pt","lepton_eta","lepton_eta_thick",
+     "deltaR_jet1_jet2", "MET_pt_aux","transverse_mass","pT_Wlep","deltaphi_MET_lep","jet_bot1_pt", "jet_bot1_eta", "jet_bot2_pt", "jet_bot2_eta",
+     "InvM3_good","InvMl_good","chi2_test_good","jet_1_eta_thick","jet_2_eta_thick","jet_bot1_eta_thick","jet_bot2_eta_thick",
+     "InvM_2jets_short","MET_my_sig", "jet_1_pt_long", "jet_2_pt_long", "jet_bot1_pt_long", "jet_bot2_pt_long",
+     "lepton_pt_long","transverse_mass_long","MET_pt_aux_long","jet_bot1_btag","jet_bot2_btag","jet_1_btagnumber","jet_2_btagnumber"]
 
-if ("ctag" in str(args.channel)): observable_names = observable_names + ["jet_max_pt","jet_max_eta","jet_min_pt","jet_min_eta"]
-else: observable_names = observable_names + ["second_muon_pt","second_el_pt"]
 
-#observable_names = ["jet_1_eta","jet_2_eta"]
+if (channel in sl_channel): observable_names = ["nJetGood","jet_1_pt", "jet_2_pt", "jet_1_eta", 
+     "jet_2_eta","lepton_pt","lepton_eta_thick","jet_bot1_btag","jet_bot2_btag",
+     "deltaR_jet1_jet2", "MET_pt_aux","transverse_mass","deltaphi_MET_lep",
+     "InvM3_good","InvMl_good","chi2_test_good","jet_bot1_eta_thick","jet_bot2_eta_thick",
+     "InvM_2jets_short","MET_my_sig", "jet_bot1_pt_long", "jet_bot2_pt_long",
+     "muon_jet_pt","muon_jet_eta",
+     "muon_jet_xy","muon_jet_dz","muon_jet_z_short","muon_jet_iso_abs"]
 
 cosmetic_names = {}
+axisY_label_name = {}
 
 for name in observable_names:
     cosmetic_names[name] = name
+    axisY_label_name[name] = "Events"
 
 cosmetic_names["InvM_2jets_short"] = "m_{jj}^{W} [GeV]";cosmetic_names["nJetGood"] = "Number of jets";
 cosmetic_names["InvM_2jets"] = "m_{jj}^{W} [GeV]"; cosmetic_names["InvM3_good"] = "m_{jjb}^{t} [GeV]"; cosmetic_names["InvMl_good"] = "m_{lb} [GeV]"; 
 cosmetic_names["jet_1_pt"] = "p_{T}^{jet} [GeV]";cosmetic_names["jet_2_pt"] = "p_{T}^{jet} [GeV]";cosmetic_names["jet_bot1_pt"] = "p_{T}^{jet} [GeV]";cosmetic_names["jet_bot2_pt"] = "p_{T}^{jet} [GeV]";
-cosmetic_names["jet_1_eta"] = "\eta^{ jet}";cosmetic_names["jet_2_eta"] = "\eta^{ jet}";cosmetic_names["jet_bot1_eta"] = "\eta^{ jet}";cosmetic_names["jet_bot2_eta"] = "\eta^{ jet}";
+cosmetic_names["jet_1_pt_long"] = "p_{T}^{jet} [GeV]";cosmetic_names["jet_2_pt_long"] = "p_{T}^{jet} [GeV]";
+cosmetic_names["jet_bot1_pt_long"] = "p_{T}^{jet} [GeV]";cosmetic_names["jet_bot2_pt_long"] = "p_{T}^{jet} [GeV]";
+cosmetic_names["jet_1_eta"] = "\eta^{ jet}";cosmetic_names["jet_2_eta"] = "\eta^{ jet}";cosmetic_names["jet_bot1_eta"] = "\eta^{ jet}";
+cosmetic_names["jet_bot2_eta"] = "\eta^{ jet}";
 cosmetic_names["jet_max_pt"] = "p_{T}^{jet} [GeV]";cosmetic_names["jet_min_pt"] = "p_{T}^{jet} [GeV]";
 cosmetic_names["jet_max_eta"] = "\eta^{ jet}";cosmetic_names["jet_min_eta"] = "\eta^{ jet}";
 cosmetic_names["jet_1_flavourP"] = "Parton flavour";cosmetic_names["jet_2_flavourP"] = "Parton flavour";
@@ -207,12 +234,14 @@ cosmetic_names["jet_1_btagnumber"] = "DeepJet WP (b)"; cosmetic_names["jet_2_bta
 cosmetic_names["deltaR_jet1_jet2"] = "\Delta R (jet 1, jet 2)"; cosmetic_names["deltaphi_jet1_jet2"] = "\Delta \phi (jet 1, jet 2)";
 cosmetic_names["deltaR_jet1_jet2"] = "\Delta R (jet 1, jet 2)"; cosmetic_names["deltaphi_MET_lep"] = "\Delta \phi (l, MET)";
 cosmetic_names["pT_Wlep"] = "W^{l} p_{T} [GeV]";
-cosmetic_names["muon_jet_pt"] = "p_{T}^{#mu} [GeV]"; cosmetic_names["muon_jet_eta"] = "#eta^{#mu}"; cosmetic_names["muon_jet_iso_abs"] = "I_{PF} [GeV]";
+cosmetic_names["muon_jet_pt"] = "p_{T}^{#mu} [GeV]"; cosmetic_names["muon_jet_eta"] = "#eta^{#mu}"; cosmetic_names["muon_jet_iso_abs"] = "I^{#mu} [GeV]";
 cosmetic_names["muon_jet_z_short"] = "p_{T}^{#mu}/p_{T}^{jet}";cosmetic_names["muon_jet_z"] = "p_{T}^{#mu}/p_{T}^{jet}";
 cosmetic_names["jet_1_eta_thick"] = "\eta^{ jet}";cosmetic_names["jet_2_eta_thick"] = "\eta^{ jet}";
 cosmetic_names["jet_bot1_eta_thick"] = "\eta^{ jet}";cosmetic_names["jet_bot2_eta_thick"] = "\eta^{ jet}";
 cosmetic_names["muon_jet_iso"] = "I_{PF}/p_{T}^{#mu}";
 cosmetic_names["muon_jet_pt_short"] = "p_{T}^{#mu} [GeV]"; cosmetic_names["muon_jet_eta_short"] = "#eta^{#mu}";
+cosmetic_names["lepton_pt_long"] = "p_{T}^{l} [GeV]";cosmetic_names["transverse_mass_long"] = "m_{T} [GeV]";cosmetic_names["MET_pt_aux_long"] = "MET p_{T} [GeV]";
+cosmetic_names["jet_1_flavourP"] = "Jet Flavour";cosmetic_names["jet_2_flavourP"] = "Jet Flavour";cosmetic_names["jet_bot1_flavourP"] = "Jet Flavour";cosmetic_names["jet_bot2_flavourP"] = "Jet Flavour";
 
 ### Ptmiss, MT, pt y eta de los bjets, btag discriminant cvl for the b-jets, pt y eta
 ### de los dos jets del W, deltaR(jet1W, jet2W), number of b-tag jets, deltaphi (lepton, MET), pt
@@ -223,10 +252,10 @@ not_rebin = ["nJetGood","lepton_eta_thick","jet_bot1_btagnumber", "jet_bot2_btag
       "jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP",
       "tau_discr_jetbot2","muon_jet_iso","jet_muon_btagnumber","jet_notmuon_btagnumber",
       "jet_1_nmu","jet_2_nmu","jet_muon_nmu","jet_notmuon_nmu","ttsl_lepflav","ttdl_lepflav",
-      "muon_jet_pt","muon_jet_eta","muon_jet_pt_short","muon_jet_eta_short","muon_jet_z_short"]
+      "muon_jet_pt","muon_jet_eta","muon_jet_pt_short","muon_jet_eta_short","muon_jet_z_short",
+      "jet_1_eta_thick","jet_2_eta_thick"]
 
 datayears = ["2016","2016B","2017","2018"]
-#datayears = ["2017","2018"]
 
 samplesHT = ["ww","wjets_1","wjets_2","wjets_3","wjets_4","wjets_5","wjets_6","wjets_7","wjets_8",
         "zjets_1","zjets_2","zjets_3","zjets_4","zjets_5","zjets_6","zjets_7","zjets_8",
@@ -309,17 +338,12 @@ histFileDM = {}
 histFileDE = {}
 
 for name in observable_names:
-  if name in ["muon_jet_iso","lepton_pt","deltaphi_MET_lep","jet_1_pt","jet_2_pt"]: 
+  if name in ["muon_jet_iso","deltaphi_MET_lep"]: 
      nrebin = 5;
   else:
      nrebin = 2;
   ## Open hists files
-  filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
-  if args.wcs: 
-     filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+str(args.folder)+term_path+"/"
-     #filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes/muon_pt_3gev"+term_path+"/"
-     #filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_last"+term_path+"/"
-     #filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes/test_pt27"+term_path+"/"
+  filePath = folder_path
   term = "hist_wqqfromJF_"
   end_term = ".root"
   ## mc files
@@ -330,15 +354,8 @@ for name in observable_names:
        if isfile(filePath + term+"MC_"+data_op+"_"+name+end_term):
            histFile[name][data_op] = TFile.Open(filePath + term+"MC_"+data_op+"_"+name+end_term,"READ")
        # data files
-       if (data_op == "2018" and args.hem):
-           if not args.nodata:
-              histFileDM_aux = TFile.Open(filePath + term+"dataM_"+data_op+"_"+name+"HEMAB.root","READ")
-              histFileDE_aux = TFile.Open(filePath + term+"dataE_"+data_op+"_"+name+"HEMAB.root","READ")
-              histFileDM[name][data_op] = TFile.Open(filePath + term+"dataM_"+data_op+"_"+name+"HEMCD.root","READ")
-              histFileDE[name][data_op] = TFile.Open(filePath + term+"dataE_"+data_op+"_"+name+"HEMCD.root","READ")
-       else:
-           if not args.nodata: histFileDM[name][data_op] = TFile.Open(filePath + term+"dataM_"+data_op+"_"+name+".root","READ")
-           if not args.nodata: histFileDE[name][data_op] = TFile.Open(filePath + term+"dataE_"+data_op+"_"+name+".root","READ")
+       if not args.nodata: histFileDM[name][data_op] = TFile.Open(filePath + term+"dataM_"+data_op+"_"+name+".root","READ")
+       if not args.nodata: histFileDE[name][data_op] = TFile.Open(filePath + term+"dataE_"+data_op+"_"+name+".root","READ")
   #print(data_op)
   #print(histFile[data_op].keys())
   #print(histFileDM[data_op].keys())
@@ -411,17 +428,8 @@ for name in observable_names:
          for syst in list_syst:
              hist_syst_M[syst][data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_M_"+str(syst))
              hist_syst_E[syst][data_op][s] = histFile[name][data_op].Get(s_term+"_"+name+"_E_"+str(syst))
-    if (data_op == "2018" and args.hem):
-      if not args.nodata:
-         histM_aux = histFileDM_aux.Get("data"+data_op+"M_"+name+"_M")
-         histE_aux = histFileDE_aux.Get("data"+data_op+"E_"+name+"_E")
-         histdata_M[data_op] = histFileDM[name][data_op].Get("data"+data_op+"M_"+name+"_M")
-         histdata_E[data_op] = histFileDE[name][data_op].Get("data"+data_op+"E_"+name+"_E")
-         histdata_M[data_op].Add(histM_aux)
-         histdata_E[data_op].Add(histE_aux)
-    else:
-      if not args.nodata: histdata_M[data_op] = histFileDM[name][data_op].Get("data"+data_op+"M_"+name+"_M")
-      if not args.nodata: histdata_E[data_op] = histFileDE[name][data_op].Get("data"+data_op+"E_"+name+"_E")
+    if not args.nodata: histdata_M[data_op] = histFileDM[name][data_op].Get("data"+data_op+"M_"+name+"_M")
+    if not args.nodata: histdata_E[data_op] = histFileDE[name][data_op].Get("data"+data_op+"E_"+name+"_E")
 
   samples_st = {}
   samples_wjets = {}
@@ -439,12 +447,12 @@ for name in observable_names:
          for syst in list_syst:
            hist_syst_M[syst][data_op][s].Scale(lumi_data/lumi[data_op][s])
            hist_syst_E[syst][data_op][s].Scale(lumi_data/lumi[data_op][s])
-      if args.norm: hist_nom_M[data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-      if args.norm: hist_nom_E[data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
+      if args.norm: hist_nom_M[data_op][s].Scale(norm_factorM[str(args.year)][str(channel)])
+      if args.norm: hist_nom_E[data_op][s].Scale(norm_factorE[str(args.year)][str(channel)])
       if False:
          for syst in list_syst:
-             if args.norm: hist_syst_M[syst][data_op][s].Scale(norm_factorM[str(args.year)][str(args.channel)])
-             if args.norm: hist_syst_E[syst][data_op][s].Scale(norm_factorE[str(args.year)][str(args.channel)])
+             if args.norm: hist_syst_M[syst][data_op][s].Scale(norm_factorM[str(args.year)][str(channel)])
+             if args.norm: hist_syst_E[syst][data_op][s].Scale(norm_factorE[str(args.year)][str(channel)])
     ## Fixing single top
     #print(samples_foryear[data_op]) 
     #### List of summing samples:
@@ -535,7 +543,7 @@ for name in observable_names:
              for syst in list_syst:
                  histT_syst_M[syst][s].Add(hist_syst_M[syst][d][s])
                  histT_syst_E[syst][s].Add(hist_syst_E[syst][d][s])
-       if (args.channel in sl_channel) and (name not in not_rebin):
+       if (channel in sl_channel) and (name not in not_rebin):
           histT_nom_M[s].Rebin(nrebin)
           histT_nom_E[s].Rebin(nrebin)
           if False:
@@ -549,9 +557,12 @@ for name in observable_names:
     for d in datayears[1:]:
        histD_M.Add(histdata_M[d])
        histD_E.Add(histdata_E[d])
-    if (args.channel in sl_channel) and (name not in not_rebin): 
+    if (channel in sl_channel) and (name not in not_rebin): 
        histD_M.Rebin(nrebin)
        histD_E.Rebin(nrebin)
+    if ("_pt" in name or ("transverse" in name)) and name != "muon_jet_pt":
+       histD_M.GetXaxis().SetRange(1,histD_M.GetNbinsX() + 1)
+       histD_E.GetXaxis().SetRange(1,histD_E.GetNbinsX() + 1)
 
   if False:
     histT_sT_syst_M = {}
@@ -584,17 +595,39 @@ for name in observable_names:
   colors["st_nocharm"] = (198,101,222)
   colors["st_else"] = (207,176,235)
 
-  ##### para los daltonicos
-  #colors["ttbar_sl_charm"] = (0,128,255)
-  #colors["ttbar_sl_nocharm"] = (255,178,102)
-  #colors["st_charm"] = (204,0,0)
-  #colors["st_nocharm"] = (192,192,192)
-  #colors["st_else"] = (166,114,101)
-  #colors["ttbar_dl"] = (243,89,0)
-  #colors["zjets"] = (198,201,114)
-  #colors["wjets"] = (108,121,152)
-  #colors["vv"] = (152,228,230)
-  #colors["ttbar_dh"] = (35,192,30)
+  ##### para los daltonicos de los cojones
+  colors["ttbar_sl_charm"] = (152,228,230)
+  colors["ttbar_sl_nocharm"] = (255,178,102)
+  colors["st_charm"] = (131,45,182)
+  colors["st_nocharm"] = (192,192,192)
+  colors["st_else"] = (166,114,101)
+  colors["ttbar_dl"] = (243,89,0)
+  colors["zjets"] = (198,201,114)
+  colors["wjets"] = (108,121,152)
+  colors["vv"] = (0,128,255)
+  colors["ttbar_dh"] = (35,192,30)
+  colors["vjets_plus"] = (0,128,255)
+
+  #colors["ttbar_sl_charm"] = (204,255,153)
+  #colors["ttbar_sl_nocharm"] = (120,154,86)
+  #colors["st_charm"] = (102,0,204)
+  #colors["st_nocharm"] = (198,101,222)
+  #colors["st_else"] = (207,176,235)
+  #colors["ttbar_dl"] = (222,90,106)
+  #colors["zjets"] = (113,209,223)
+  #colors["wjets"] = (155,152,204)
+  #colors["vv"] = (255,180,85)
+  #colors["vjets_plus"] = (155,152,204)
+
+  ############# Axis Y name deff
+  a = histT_nom_M[samples[0]].GetXaxis().GetXmin()
+  b = histT_nom_M[samples[0]].GetXaxis().GetXmax()
+  c = histT_nom_M[samples[0]].GetNbinsX()
+  aux_n = round((b-a)/c,2)
+  if (("pt" in name or "pT" in name) or ("Inv" in name or "mass" in name) or "bs" in name) and "eta" not in name:
+     axisY_label_name[name] = "Events /" + str(aux_n)+" GeV"
+  else:
+     axisY_label_name[name] = "Events /" + str(aux_n)
 
   if args.stack:
     ymax_M = 0
@@ -604,16 +637,20 @@ for name in observable_names:
     for s in samples:
       histT_nom_M[s].SetLineWidth(1)
       histT_nom_M[s].SetFillColor(ROOT.TColor.GetColor(*colors[s]))
-      histT_nom_M[s].GetYaxis().SetTitle("Events")
+      histT_nom_M[s].GetYaxis().SetMaxDigits(3)
+      histT_nom_M[s].GetYaxis().SetTitle(axisY_label_name[name])
       histT_nom_M[s].GetXaxis().SetTitle(name)
       histT_nom_M[s].GetYaxis().SetTitleOffset(titY_off2)
       histT_nom_M[s].GetYaxis().SetTitleSize(titY_size2)
+      if ("_pt" in name or ("transverse" in name))  and name != "muon_jet_pt": histT_nom_M[s].GetXaxis().SetRange(1, histT_nom_M[s].GetNbinsX() + 1);
       histT_nom_E[s].SetLineWidth(1)
       histT_nom_E[s].SetFillColor(ROOT.TColor.GetColor(*colors[s]))
-      histT_nom_E[s].GetYaxis().SetTitle("Events")
+      histT_nom_E[s].GetYaxis().SetMaxDigits(3)
+      histT_nom_E[s].GetYaxis().SetTitle(axisY_label_name[name])
       histT_nom_E[s].GetXaxis().SetTitle(name)
       histT_nom_E[s].GetYaxis().SetTitleOffset(titY_off2)
       histT_nom_E[s].GetYaxis().SetTitleSize(titY_size2)
+      if ("_pt" in name or ("transverse" in name))  and name != "muon_jet_pt": histT_nom_E[s].GetXaxis().SetRange(1, histT_nom_E[s].GetNbinsX() + 1);
 
       y = histT_nom_M[s].GetMaximum()
       ym = histT_nom_M[s].GetMinimum()
@@ -633,17 +670,33 @@ for name in observable_names:
 
       #histT_M["vv"].SetMinimum(1000.)
       #histT_M["vv"].SetMaximum(3*ymax_M)
-      if args.linear: histT_nom_M["vv"].SetMaximum(1.3*ymax_M)
-      if args.linear: histT_nom_M["vv"].SetMinimum(1.3*ymin_M)
+      if not args.linear: 
+         histT_nom_M["vv"].SetMaximum(3*ymax_M)
+      else:
+         histT_nom_M["vv"].SetMaximum(1.3*ymax_M)
+         histT_nom_M["vv"].SetMinimum(1.3*ymin_M)
 
       #histT_E["vv"].SetMinimum(1000.)
       #histT_E["vv"].SetMaximum(3*ymax_E)
-      if args.linear: histT_nom_E["vv"].SetMaximum(1.3*ymax_E)
-      if args.linear: histT_nom_E["vv"].SetMinimum(1.3*ymin_E)
+      if not args.linear: 
+         histT_nom_E["vv"].SetMaximum(3*ymax_M)
+      else:
+         histT_nom_E["vv"].SetMaximum(1.3*ymax_E)
+         histT_nom_E["vv"].SetMinimum(1.3*ymin_E)
 
     ## Stack creation
     samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","ttbar_sl_bottomgluon","ttbar_sl_charmgluon","ttbar_sl_else","ttbar_sl_bottom","st","ttbar_sl_light","ttbar_sl_charm"]
     if args.wcs: samples = ["vv","ttbar_dl","ttbar_dh","zjets","wjets","st_else","st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
+
+    ############### Backgrounds reorganisation
+    if args.wcs: 
+       histT_nom_M["vjets_plus"] = histT_nom_M["vv"]
+       histT_nom_E["vjets_plus"] = histT_nom_E["vv"]
+       for s in ["ttbar_dh","zjets","wjets","st_else","st_nocharm"]:
+           histT_nom_M["vjets_plus"].Add(histT_nom_M[s])
+           histT_nom_E["vjets_plus"].Add(histT_nom_E[s])
+       samples = ["vjets_plus","ttbar_dl","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]
+    ###############################################
 
     if args.ratio: upper_pad.cd()
 
@@ -655,18 +708,30 @@ for name in observable_names:
        #stack_T = ROOT.THStack("hs", ";;Events")
        stack_T = ROOT.THStack()
        if args.postfit:
-          for s in ["st_nocharm","st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]:
+          for s in ["st_charm","ttbar_sl_nocharm","ttbar_sl_charm"]:
              histT_nom_T[s].Scale(aux_rwqq)
           histT_nom_T["ttbar_sl_charm"].Scale(aux_ratio)
           histT_nom_T["ttbar_sl_nocharm"].Scale(aux_conratio)
        for s in samples:
-         if ("jet" in name) and ("pt" in name) and (not "muon_jet" in name):
-            if (args.channel in sl_channel) and (name not in not_rebin):
+         if ("jet" in name) and ("pt" in name) and (not "muon_jet" in name): 
+            if (not "long" in name):
+               if (channel in sl_channel) and (name not in not_rebin):
+                  histT_nom_T[s].SetBinContent(1,0.)
+               else:
+                  histT_nom_T[s].SetBinContent(5,0.)
+            else:
+               if (channel in sl_channel) and (name not in not_rebin):
+                  histT_nom_T[s].SetBinContent(1,0.)
+               else:
+                  histT_nom_T[s].SetBinContent(2,0.)
+         if "pt_long" in name:
+            if (channel in sl_channel) and (name not in not_rebin):
                histT_nom_T[s].SetBinContent(1,0.)
             else:
-               histT_nom_T[s].SetBinContent(5,0.)
+               histT_nom_T[s].SetBinContent(2,0.)
          stack_T.Add(histT_nom_T[s])
        last_T = stack_T.GetStack().Last()
+       if ("_pt" in name or ("transverse" in name))  and name != "muon_jet_pt": last_T.GetXaxis().SetRange(1,last_T.GetNbinsX()+1);
 
     else:
        stack_M = ROOT.THStack()
@@ -681,36 +746,48 @@ for name in observable_names:
           histT_nom_E["ttbar_sl_nocharm"].Scale(aux_conratio)
        for s in samples:
          if ("jet" in name) and ("pt" in name) and (not "muon_jet" in name):
-            if (args.channel in sl_channel) and (name not in not_rebin):
-               histT_nom_M[s].SetBinContent(1,0.)
-               histT_nom_E[s].SetBinContent(1,0.)
-       	    else:
-               histT_nom_M[s].SetBinContent(5,0.)
-               histT_nom_E[s].SetBinContent(5,0.)
+            if (not "long" in name):
+               if (channel in sl_channel) and (name not in not_rebin):
+                  histT_nom_M[s].SetBinContent(1,0.)
+                  histT_nom_E[s].SetBinContent(1,0.)
+       	       else:
+                  histT_nom_M[s].SetBinContent(5,0.)
+                  histT_nom_E[s].SetBinContent(5,0.)
+            else:
+               if (channel in sl_channel) and (name not in not_rebin):
+                  histT_nom_M[s].SetBinContent(1,0.)
+                  histT_nom_E[s].SetBinContent(1,0.)
+               else:
+                  histT_nom_M[s].SetBinContent(2,0.)
+                  histT_nom_E[s].SetBinContent(2,0.)
          stack_M.Add(histT_nom_M[s])
          stack_E.Add(histT_nom_E[s])
 
        last_M = stack_M.GetStack().Last()
        last_E = stack_E.GetStack().Last()
+       if ("_pt" in name or ("transverse" in name))  and name != "muon_jet_pt": 
+              last_M.GetXaxis().SetRange(1,last_M.GetNbinsX()+1);
+              last_E.GetXaxis().SetRange(1,last_E.GetNbinsX()+1);
 
     if args.sumEM:
       if not args.nosyst:
         graph_err_T = TGraphAsymmErrors();
         ratio_graph_err_T = TGraphAsymmErrors();
 
-        for bin in range(last_T.GetNbinsX()):
+        n_aux = last_T.GetNbinsX()+1
+        for bin in range(n_aux):
           graph_err_T.SetPointEXhigh(bin,last_T.GetBinWidth(bin+1)/2);
           graph_err_T.SetPointEXlow(bin,last_T.GetBinWidth(bin+1)/2);
           graph_err_T.SetPoint(bin,last_T.GetBinCenter(bin+1),last_T.GetBinContent(bin+1));
-          graph_err_T.SetPointEYhigh(bin,last_T.GetBinContent(bin+1)*syst_val[args.channel]);
-          graph_err_T.SetPointEYlow(bin,last_T.GetBinContent(bin+1)*syst_val[args.channel]);
+          graph_err_T.SetPointEYhigh(bin,last_T.GetBinContent(bin+1)*syst_val[channel]);
+          graph_err_T.SetPointEYlow(bin,last_T.GetBinContent(bin+1)*syst_val[channel]);
  
           ratio_graph_err_T.SetPointEXhigh(bin,last_T.GetBinWidth(bin+1)/2);
           ratio_graph_err_T.SetPointEXlow(bin,last_T.GetBinWidth(bin+1)/2);
           ratio_graph_err_T.SetPoint(bin,last_T.GetBinCenter(bin+1),1.);
           if (last_T.GetBinContent(bin+1)>0.001):
-             ratio_graph_err_T.SetPointEYhigh(bin,syst_val[args.channel]);
-             ratio_graph_err_T.SetPointEYlow(bin,syst_val[args.channel]);
+             ratio_graph_err_T.SetPointEYhigh(bin,syst_val[channel]);
+             ratio_graph_err_T.SetPointEYlow(bin,syst_val[channel]);
           else:
              ratio_graph_err_T.SetPointEYhigh(bin,0.);
              ratio_graph_err_T.SetPointEYlow(bin,0.);
@@ -730,25 +807,26 @@ for name in observable_names:
         ratio_graph_err_M = TGraphAsymmErrors();
         ratio_graph_err_E = TGraphAsymmErrors();
 
-        for bin in range(last_M.GetNbinsX()):
+        n_aux = last_M.GetNbinsX()+1
+        for bin in range(n_aux):
           graph_err_M.SetPointEXhigh(bin,last_M.GetBinWidth(bin+1)/2);
           graph_err_M.SetPointEXlow(bin,last_M.GetBinWidth(bin+1)/2);
           graph_err_M.SetPoint(bin,last_M.GetBinCenter(bin+1),last_M.GetBinContent(bin+1));
-          graph_err_M.SetPointEYhigh(bin,last_M.GetBinContent(bin+1)*syst_val[args.channel]);
-          graph_err_M.SetPointEYlow(bin,last_M.GetBinContent(bin+1)*syst_val[args.channel]);
+          graph_err_M.SetPointEYhigh(bin,last_M.GetBinContent(bin+1)*syst_val[channel]);
+          graph_err_M.SetPointEYlow(bin,last_M.GetBinContent(bin+1)*syst_val[channel]);
 
           graph_err_E.SetPointEXhigh(bin,last_E.GetBinWidth(bin+1)/2);
           graph_err_E.SetPointEXlow(bin,last_E.GetBinWidth(bin+1)/2);
           graph_err_E.SetPoint(bin,last_E.GetBinCenter(bin+1),last_E.GetBinContent(bin+1));
-          graph_err_E.SetPointEYhigh(bin,last_E.GetBinContent(bin+1)*syst_val[args.channel]);
-          graph_err_E.SetPointEYlow(bin,last_E.GetBinContent(bin+1)*syst_val[args.channel]);
+          graph_err_E.SetPointEYhigh(bin,last_E.GetBinContent(bin+1)*syst_val[channel]);
+          graph_err_E.SetPointEYlow(bin,last_E.GetBinContent(bin+1)*syst_val[channel]);
 
           ratio_graph_err_M.SetPointEXhigh(bin,last_M.GetBinWidth(bin+1)/2);
           ratio_graph_err_M.SetPointEXlow(bin,last_M.GetBinWidth(bin+1)/2);
           ratio_graph_err_M.SetPoint(bin,last_M.GetBinCenter(bin+1),1.);
           if (last_M.GetBinContent(bin+1)>0.01):
-             ratio_graph_err_M.SetPointEYhigh(bin,syst_val[args.channel]);
-             ratio_graph_err_M.SetPointEYlow(bin,syst_val[args.channel]);
+             ratio_graph_err_M.SetPointEYhigh(bin,syst_val[channel]);
+             ratio_graph_err_M.SetPointEYlow(bin,syst_val[channel]);
           else:
              ratio_graph_err_M.SetPointEYhigh(bin,0.);
              ratio_graph_err_M.SetPointEYlow(bin,0.);
@@ -757,8 +835,8 @@ for name in observable_names:
           ratio_graph_err_E.SetPointEXlow(bin,last_E.GetBinWidth(bin+1)/2);
           ratio_graph_err_E.SetPoint(bin,last_E.GetBinCenter(bin+1),1.);
           if (last_E.GetBinContent(bin+1)>0.01):
-             ratio_graph_err_E.SetPointEYhigh(bin,syst_val[args.channel]);
-             ratio_graph_err_E.SetPointEYlow(bin,syst_val[args.channel]);
+             ratio_graph_err_E.SetPointEYhigh(bin,syst_val[channel]);
+             ratio_graph_err_E.SetPointEYlow(bin,syst_val[channel]);
           else:
              ratio_graph_err_E.SetPointEYhigh(bin,0.);
              ratio_graph_err_E.SetPointEYlow(bin,0.);
@@ -787,38 +865,48 @@ for name in observable_names:
       ymax_T = ymax_E+ymax_M
       y_T = stack_T.GetMaximum()
       if y_T>ymax_T: ymax_T=y_T
+      ymin_T = stack_T.GetMinimum()
       #stack_M.SetMinimum(1000.)
       #stack_M.SetMaximum(3*ymax_T)
-      if args.linear: stack_T.SetMaximum(1.25*ymax_T)
-      if args.linear: stack_T.SetMinimum(1.)
-
+      if not args.linear: 
+         stack_T.SetMaximum(3*ymax_T)
+      else:
+         stack_T.SetMaximum(1.25*ymax_T)
+         stack_T.SetMinimum(1.)
+         
       if not args.nodata:
         histD_T = histD_M
         histD_T.Add(histD_E)
+        if ("_pt" in name or ("transverse" in name)) and name != "muon_jet_pt": histD_T.GetXaxis().SetRange(1,histD_T.GetNbinsX() + 1)
 
       stack_T.Draw("HIST")
-      stack_T.GetYaxis().SetTitle("Events")
+      stack_T.GetYaxis().SetTitle(axisY_label_name[name])
       if not args.ratio: 
          stack_T.GetXaxis().SetTitle(cosmetic_names[name])
          stack_T.GetYaxis().SetLabelSize(titY_size2)
+      if ("_pt" in name or ("transverse" in name))   and name != "muon_jet_pt": stack_T.GetXaxis().SetRange(1,last_T.GetNbinsX() + 1)
       stack_T.GetYaxis().SetTitleSize(titY_size2)
+      stack_T.GetYaxis().SetMaxDigits(3)
+      stack_T.GetXaxis().SetLabelSize(titX_lab)
+      stack_T.GetYaxis().SetLabelSize(titY_lab)
+      stack_T.GetYaxis().SetLabelFont(42)
+      stack_T.GetYaxis().SetTitleFont(42)
+      if not args.ratio:
+         stack_T.GetXaxis().SetLabelFont(42)
+         stack_T.GetXaxis().SetTitleFont(42)
       stack_T.GetYaxis().SetTitleOffset(titY_off2)
-      if not args.nosyst: graph_err_T.Draw("SAME 2")
+      if not args.nosyst: 
+         graph_err_T.Draw("SAME 2")
+         if ("_pt" in name or ("transverse" in name))   and name != "muon_jet_pt": graph_err_T.GetXaxis().SetRange(1,last_T.GetNbinsX()+1) 
       if not args.nodata:
-        if args.channel=="btagMM_chitest" or args.channel=="btagMM_chitest_antisl":
-           if name == "InvM_2jets_short": histD_T.SetBinContent(25,0.)
-           if name == "MET_my_sig": histD_T.SetBinContent(1,0.)
-           if name == "deltaR_jet1_jet2": histD_T.SetBinContent(4,0.)
-        if "sl" in str(args.channel) and not("anti" in str(args.channel)):
-           if name == "jet_2_nmu": histD_T.SetBinContent(1,0.)
         histD_T.SetMarkerStyle(20)
-        if args.channel == "btagMM_chitest_slssos":
+        if channel == "sl_ssos":
            histD_T.SetMarkerSize(1.5)
         else:
            histD_T.SetMarkerSize(1)
         histD_T.SetLineWidth(1)
         histD_T.SetLineColor(ROOT.kBlack)
-        histD_T.Draw("E SAME")
+        histD_T.Draw("EX0 SAME")
 
       if args.ratio and not args.nodata:
         CMS_lumi.CMS_lumi(upper_pad, iPeriod, iPos)
@@ -830,6 +918,7 @@ for name in observable_names:
 
       if args.ratio:
         lower_pad.cd()
+        lower_pad.SetGridy();
         if not args.nodata:
           ratio = histD_T.Clone("ratio")
           ratio.SetLineColor(kBlack)
@@ -837,12 +926,17 @@ for name in observable_names:
           ratio.SetTitle("")
           ratio.SetMinimum(c_rat2)
           ratio.SetMaximum(c_rat)
-          ratio.GetYaxis().SetTitle("Data/MC")
+          ratio.GetYaxis().SetTitle("Data/Pred")
           ratio.GetXaxis().SetTitle(cosmetic_names[name])
-          ratio.GetXaxis().SetLabelSize(0.08)
+          ratio.GetXaxis().SetLabelSize(titX_lab)
           ratio.GetXaxis().SetTitleSize(tit_size)
+          ratio.GetXaxis().SetLabelFont(42)
+          ratio.GetYaxis().SetLabelFont(42)
+          ratio.GetYaxis().SetNdivisions(1008)
+          ratio.GetXaxis().SetTitleFont(42)
+          ratio.GetYaxis().SetTitleFont(42)
           ratio.GetXaxis().SetTitleOffset(titX_off)
-          ratio.GetYaxis().SetLabelSize(0.05)
+          ratio.GetYaxis().SetLabelSize(titY2_lab)
           ratio.GetYaxis().SetTitleSize(titY_size)
           ratio.GetYaxis().CenterTitle(False)
           ratio.GetYaxis().ChangeLabel(nrat,-1,-1,-1,-1,-1,"  ");
@@ -850,16 +944,19 @@ for name in observable_names:
           # Set up plot for markers and errors
           ratio.Sumw2()
           ratio.SetStats(0)
-          hTotal = histT_nom_T["vv"].Clone('hTotal')
+          if args.wcs:
+             hTotal = histT_nom_T["vjets_plus"].Clone('hTotal')
+          else:
+             hTotal = histT_nom_T["vv"].Clone('hTotal')
           for s in samples[1:]:
             hTotal.Add(histT_nom_T[s])
           ratio.Divide(hTotal)
-          ratio.Draw("ep")
+          ratio.Draw("epx0")
           if not args.nosyst: ratio_graph_err_T.Draw("same 2")
-          ratio.Draw("ep same")
+          ratio.Draw("epx0 same")
         else:
           if not args.nosyst:
-             ratio = histT_nom_T["vv"].Clone('ratio')
+             ratio = histT_nom_T["vjets_plus"].Clone('ratio')
              ratio.SetLineColor(kBlack)
              ratio.SetMarkerStyle(6)
              ratio.SetTitle("")
@@ -926,24 +1023,17 @@ for name in observable_names:
       leg.SetNColumns(2)
       #leg.AddEntry(histT_nom_T["vv"],"VV","f")
       if args.wcs:
-        if args.channel == "btagMM_chitest_slssos":
-          leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
-          leg.AddEntry(histT_nom_T["ttbar_sl_nocharm"],"t#bar{t} uq","f")
-          leg.AddEntry(histT_nom_T["st_charm"],"Single top tW cq","f")
-          leg.AddEntry(histT_nom_T["ttbar_dl"],"Dileptonic t#bar{t}","f")
-          if args.stack and not args.nodata: leg.AddEntry(histD_T, "Data" ,"lep")
-          if not args.nosyst: leg.AddEntry(graph_err_T, "Uncertainty" ,"f")
-        else:
-          leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
-          leg.AddEntry(histT_nom_T["ttbar_sl_nocharm"],"t#bar{t} uq","f")
-          leg.AddEntry(histT_nom_T["st_charm"],"Single top tW cq","f")
-          leg.AddEntry(histT_nom_T["st_nocharm"],"Single top tW uq","f")
-          leg.AddEntry(histT_nom_T["st_else"],"Single top s/t channel","f")
-          leg.AddEntry(histT_nom_T["ttbar_dl"],"Dileptonic t#bar{t}","f")
-          leg.AddEntry(histT_nom_T["zjets"],"Z+jets","f")
-          leg.AddEntry(histT_nom_T["wjets"],"W+jets","f")
-          if args.stack and not args.nodata: leg.AddEntry(histD_T, "Data" ,"lep")
-          if not args.nosyst: leg.AddEntry(graph_err_T, "Uncertainty" ,"f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_T["st_charm"],"Single top cq","f")
+        leg.AddEntry(histT_nom_T["ttbar_sl_nocharm"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_T["vjets_plus"],"V+jets and other","f")
+        leg.AddEntry(histT_nom_T["ttbar_dl"],"t#bar{t} dileptonic","f")
+        #leg.AddEntry(histT_nom_T["st_nocharm"],"Single top tW uq","f")
+        #leg.AddEntry(histT_nom_T["st_else"],"Single top s/t channel","f")
+        #leg.AddEntry(histT_nom_T["zjets"],"Z+jets","f")
+        #leg.AddEntry(histT_nom_T["wjets"],"W+jets","f")
+        if not args.nosyst: leg.AddEntry(graph_err_T, "Syst. Unc." ,"f")
+        if args.stack and not args.nodata: leg.AddEntry(histD_T, "Data" ,"ep")
       else:
         leg.AddEntry(histT_nom_T["ttbar_sl_charm"],"t#bar{t} cq","f")
         leg.AddEntry(histT_nom_T["ttbar_dl"],"Dileptonic t#bar{t}","f")
@@ -957,6 +1047,7 @@ for name in observable_names:
         if args.stack and not args.nodata: leg.AddEntry(histD_T, "Data" ,"lep")
         leg.AddEntry(histT_nom_T["ttbar_sl_bottomgluon"],"t#bar{t} bg","f")
       #leg.AddEntry(histT_nom_T["ttbar_dh"],"Hadronic t#bar{t}","f")
+      leg.SetTextFont(42);
       leg.Draw()
       termp= "totalHT_wqq"
       if args.ratio:
@@ -996,22 +1087,33 @@ for name in observable_names:
       if args.linear: stack_M.SetMinimum(1.)
 
       stack_M.Draw("HIST")
-      stack_M.GetYaxis().SetTitle("Events")
+      stack_M.GetYaxis().SetTitle(axisY_label_name[name])
+      stack_M.GetYaxis().SetMaxDigits(3)
       stack_M.GetYaxis().SetTitleSize(titY_size2)
       stack_M.GetYaxis().SetTitleOffset(titY_off2)
+      stack_M.GetXaxis().SetLabelSize(titX_lab)
+      stack_M.GetYaxis().SetLabelSize(titY_lab)
+      stack_M.GetYaxis().SetLabelFont(42)
+      stack_M.GetYaxis().SetTitleFont(42)
+      if not args.ratio:
+         stack_M.GetXaxis().SetLabelFont(42)
+         stack_M.GetXaxis().SetTitleFont(42)
+      if ("_pt" in name or ("transverse" in name))   and name != "muon_jet_pt": stack_M.GetXaxis().SetRange(1,last_M.GetNbinsX() + 1)
       if not args.ratio:
          stack_M.GetXaxis().SetTitle(cosmetic_names[name])
          stack_M.GetYaxis().SetLabelSize(titY_size2)
-      if not args.nosyst: graph_err_M.Draw("SAME 2")
+      if not args.nosyst: 
+         graph_err_M.Draw("SAME 2")
+         if ("_pt" in name or ("transverse" in name))  and name != "muon_jet_pt": graph_err_M.GetXaxis().SetRange(1,last_M.GetNbinsX()+1) 
       if not args.nodata:
         histD_M.SetMarkerStyle(20)
-        if args.channel == "btagMM_chitest_slssos":
+        if channel == "sl_ssos":
            histD_M.SetMarkerSize(1.5)
         else:
            histD_M.SetMarkerSize(1)
         histD_M.SetLineWidth(1)
         histD_M.SetLineColor(ROOT.kBlack)
-        histD_M.Draw("E SAME")
+        histD_M.Draw("EX0 SAME")
 
       if args.ratio:
         CMS_lumi.CMS_lumi(upper_pad, iPeriod, iPos)
@@ -1020,6 +1122,7 @@ for name in observable_names:
         upper_pad.RedrawAxis()
         frame = upper_pad.GetFrame()
         lower_pad.cd()
+        lower_pad.SetGridy();
         if not args.nodata:
           ratio = histD_M.Clone("ratio")
           ratio.SetLineColor(kBlack)
@@ -1027,12 +1130,17 @@ for name in observable_names:
           ratio.SetTitle("")
           ratio.SetMinimum(c_rat2)
           ratio.SetMaximum(c_rat)
-          ratio.GetYaxis().SetTitle("Data/MC")
+          ratio.GetYaxis().SetTitle("Data/Pred")
           ratio.GetXaxis().SetTitle(cosmetic_names[name])
-          ratio.GetXaxis().SetLabelSize(0.08)
+          ratio.GetXaxis().SetLabelSize(titX_lab)
+          ratio.GetXaxis().SetLabelFont(42)
+          ratio.GetYaxis().SetLabelFont(42)
+          ratio.GetYaxis().SetNdivisions(1008)
+          ratio.GetXaxis().SetTitleFont(42)
+          ratio.GetYaxis().SetTitleFont(42)
           ratio.GetXaxis().SetTitleSize(tit_size)
           ratio.GetXaxis().SetTitleOffset(titX_off)
-          ratio.GetYaxis().SetLabelSize(0.05)
+          ratio.GetYaxis().SetLabelSize(titY2_lab)
           ratio.GetYaxis().SetTitleSize(titY_size)
           ratio.GetYaxis().CenterTitle()
           ratio.GetYaxis().ChangeLabel(nrat,-1,-1,-1,-1,-1,"  ");
@@ -1040,13 +1148,16 @@ for name in observable_names:
           # Set up plot for markers and errors
           ratio.Sumw2()
           ratio.SetStats(0)
-          hTotal = histT_nom_M["vv"].Clone('hTotal')
+          if args.wcs:
+             hTotal = histT_nom_M["vjets_plus"].Clone('hTotal')
+          else:
+             hTotal = histT_nom_M["vv"].Clone('hTotal')
           for s in samples[1:]:
             hTotal.Add(histT_nom_M[s])
           ratio.Divide(hTotal)
-          ratio.Draw("ep")
+          ratio.Draw("epx0")
           if not args.nosyst: ratio_graph_err_M.Draw("same 2")
-          ratio.Draw("ep same")
+          ratio.Draw("epx0 same")
 
       if (name == "InvM_2jets" or name == "InvM3_good") and (not args.nodata):
         print("Integral of M data is "+str(histD_M.Integral()))
@@ -1071,24 +1182,17 @@ for name in observable_names:
       leg.SetNColumns(2)
       #leg.AddEntry(histT_nom_M["vv"],"VV","f")
       if args.wcs:
-        if args.channel == "btagMM_chitest_slssos":
-          leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
-          leg.AddEntry(histT_nom_M["ttbar_sl_nocharm"],"t#bar{t} uq","f")
-          leg.AddEntry(histT_nom_M["st_charm"],"Single top tW cq","f")
-          leg.AddEntry(histT_nom_M["ttbar_dl"],"Dileptonic t#bar{t}","f")
-          if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data" ,"lep")
-          if not args.nosyst: leg.AddEntry(graph_err_M, "Uncertainty" ,"f")
-        else:
-          leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
-          leg.AddEntry(histT_nom_M["ttbar_sl_nocharm"],"t#bar{t} uq","f")
-          leg.AddEntry(histT_nom_M["st_charm"],"Single top tW cq","f")
-          leg.AddEntry(histT_nom_M["st_nocharm"],"Single top tW uq","f")
-          leg.AddEntry(histT_nom_M["st_else"],"Single top s/t channel","f")
-          leg.AddEntry(histT_nom_M["ttbar_dl"],"Dileptonic t#bar{t}","f")
-          leg.AddEntry(histT_nom_M["zjets"],"Z+jets","f")
-          leg.AddEntry(histT_nom_M["wjets"],"W+jets","f")
-          if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data" ,"lep")
-          if not args.nosyst: leg.AddEntry(graph_err_M, "Uncertainty" ,"f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_M["st_charm"],"Single top cq","f")
+        leg.AddEntry(histT_nom_M["ttbar_sl_nocharm"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_M["vjets_plus"],"V+jets and other","f")
+        leg.AddEntry(histT_nom_M["ttbar_dl"],"t#bar{t} dileptonic","f")
+        #leg.AddEntry(histT_nom_M["st_nocharm"],"Single top tW uq","f")
+        #leg.AddEntry(histT_nom_M["st_else"],"Single top s/t channel","f")
+        #leg.AddEntry(histT_nom_M["zjets"],"Z+jets","f")
+        #leg.AddEntry(histT_nom_M["wjets"],"W+jets","f")
+        if not args.nosyst: leg.AddEntry(graph_err_M, "Syst. Unc." ,"f")
+        if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data" ,"ep")
       else:
         leg.AddEntry(histT_nom_M["ttbar_sl_charm"],"t#bar{t} cq","f")
         leg.AddEntry(histT_nom_M["ttbar_sl_light"],"t#bar{t} uq","f")
@@ -1102,6 +1206,7 @@ for name in observable_names:
         leg.AddEntry(histT_nom_M["ttbar_dl"],"Dileptonic t#bar{t}","f")
         #leg.AddEntry(histT_nom_M["ttbar_dh"],"Hadronic t#bar{t}","f")
         if args.stack and not args.nodata: leg.AddEntry(histD_M, "Data" ,"lep")
+      leg.SetTextFont(42);
       leg.Draw()
       termp= "totalHT_wqq_M"
       if args.ratio: 
@@ -1126,19 +1231,30 @@ for name in observable_names:
       if not args.ratio:
          stack_E.GetXaxis().SetTitle(cosmetic_names[name])
          stack_E.GetYaxis().SetLabelSize(titY_size2)
-      stack_E.GetYaxis().SetTitle("Events")
+      stack_E.GetYaxis().SetTitle(axisY_label_name[name])
+      stack_E.GetYaxis().SetMaxDigits(3)
       stack_E.GetYaxis().SetTitleSize(titY_size2)
       stack_E.GetYaxis().SetTitleOffset(titY_off2)
-      if not args.nosyst: graph_err_E.Draw("SAME 2")
+      stack_E.GetXaxis().SetLabelSize(titX_lab)
+      stack_E.GetYaxis().SetLabelSize(titY_lab)
+      stack_E.GetYaxis().SetLabelFont(42)
+      stack_E.GetYaxis().SetTitleFont(42)
+      if not args.ratio:
+         stack_E.GetXaxis().SetLabelFont(42)
+         stack_E.GetXaxis().SetTitleFont(42)
+      if ("_pt" in name or ("transverse" in name))   and name != "muon_jet_pt": stack_E.GetXaxis().SetRange(1,last_E.GetNbinsX() + 1)
+      if not args.nosyst: 
+         graph_err_E.Draw("SAME 2")
+         if ("_pt" in name or ("transverse" in name))   and name != "muon_jet_pt": graph_err_E.GetXaxis().SetRange(1,last_E.GetNbinsX()+1) 
       if not args.nodata:
         histD_E.SetMarkerStyle(20)
-        if args.channel == "btagMM_chitest_slssos":
+        if channel == "sl_ssos":
            histD_E.SetMarkerSize(1.5)
         else:
            histD_E.SetMarkerSize(1)
         histD_E.SetLineWidth(1)
         histD_E.SetLineColor(ROOT.kBlack)
-        histD_E.Draw("E SAME")
+        histD_E.Draw("EX0 SAME")
 
       if args.ratio and not args.nodata:
         CMS_lumi.CMS_lumi(upper_pad, iPeriod, iPos)
@@ -1147,6 +1263,7 @@ for name in observable_names:
         upper_pad.RedrawAxis()
         frame = upper_pad.GetFrame()
         lower_pad.cd()
+        lower_pad.SetGridy();
         if not args.nodata:
           ratio = histD_E.Clone("ratio")
           ratio.SetLineColor(kBlack)
@@ -1154,12 +1271,17 @@ for name in observable_names:
           ratio.SetTitle("")
           ratio.SetMinimum(c_rat2)
           ratio.SetMaximum(c_rat)
-          ratio.GetYaxis().SetTitle("Data/MC")
+          ratio.GetYaxis().SetTitle("Data/Pred")
           ratio.GetXaxis().SetTitle(cosmetic_names[name])
-          ratio.GetXaxis().SetLabelSize(0.08)
+          ratio.GetXaxis().SetLabelSize(titX_lab)
           ratio.GetXaxis().SetTitleSize(tit_size)
+          ratio.GetXaxis().SetLabelFont(42)
+          ratio.GetYaxis().SetLabelFont(42)
+          ratio.GetYaxis().SetNdivisions(1008)
+          ratio.GetXaxis().SetTitleFont(42)
+          ratio.GetYaxis().SetTitleFont(42)
           ratio.GetXaxis().SetTitleOffset(titX_off)
-          ratio.GetYaxis().SetLabelSize(0.05)
+          ratio.GetYaxis().SetLabelSize(titY2_lab)
           ratio.GetYaxis().SetTitleSize(titY_size)
           ratio.GetYaxis().CenterTitle()
           ratio.GetYaxis().ChangeLabel(nrat,-1,-1,-1,-1,-1,"  ");
@@ -1167,13 +1289,16 @@ for name in observable_names:
           # Set up plot for markers and errors
           ratio.Sumw2()
           ratio.SetStats(0)
-          hTotal = histT_nom_E["vv"].Clone('hTotal')
+          if args.wcs:
+             hTotal = histT_nom_E["vjets_plus"].Clone('hTotal')
+          else:
+             hTotal = histT_nom_E["vv"].Clone('hTotal')
           for s in samples[1:]:
             hTotal.Add(histT_nom_E[s])
           ratio.Divide(hTotal)
-          ratio.Draw("ep")
+          ratio.Draw("epx0")
           if not args.nosyst: ratio_graph_err_E.Draw("same 2")
-          ratio.Draw("ep same")
+          ratio.Draw("epx0 same")
 
       if (name == "InvM_2jets" or name == "InvM3_good") and (not args.nodata):
         print("Integral of E data is "+str(histD_E.Integral()))
@@ -1196,24 +1321,17 @@ for name in observable_names:
       leg.SetNColumns(2)
       #leg.AddEntry(histT_nom_E["vv"],"VV","f")
       if args.wcs:
-        if args.channel == "btagMM_chitest_slssos":
-          leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"t#bar{t} cq","f")
-          leg.AddEntry(histT_nom_E["ttbar_sl_nocharm"],"t#bar{t} uq","f")
-          leg.AddEntry(histT_nom_E["st_charm"],"Single top tW cq","f")
-          leg.AddEntry(histT_nom_E["ttbar_dl"],"Dileptonic t#bar{t}","f")
-          if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"lep")
-          if not args.nosyst: leg.AddEntry(graph_err_E, "Uncertainty" ,"f")
-        else:
-          leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"t#bar{t} cq","f")
-          leg.AddEntry(histT_nom_E["ttbar_sl_nocharm"],"t#bar{t} uq","f")
-          leg.AddEntry(histT_nom_E["st_charm"],"Single top tW cq","f")
-          leg.AddEntry(histT_nom_E["st_nocharm"],"Single top tW uq","f")
-          leg.AddEntry(histT_nom_E["st_else"],"Single top s/t channel","f")
-          leg.AddEntry(histT_nom_E["ttbar_dl"],"Dileptonic t#bar{t}","f")
-          leg.AddEntry(histT_nom_E["zjets"],"Z+jets","f")
-          leg.AddEntry(histT_nom_E["wjets"],"W+jets","f")
-          if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"lep")
-          if not args.nosyst: leg.AddEntry(graph_err_E, "Uncertainty" ,"f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"t#bar{t} cq","f")
+        leg.AddEntry(histT_nom_E["st_charm"],"Single top cq","f")
+        leg.AddEntry(histT_nom_E["ttbar_sl_nocharm"],"t#bar{t} uq","f")
+        leg.AddEntry(histT_nom_E["vjets_plus"],"V+jets and other","f")
+        leg.AddEntry(histT_nom_E["ttbar_dl"],"t#bar{t} dileptonic","f")
+        #leg.AddEntry(histT_nom_E["st_nocharm"],"Single top tW uq","f")
+        #leg.AddEntry(histT_nom_E["st_else"],"Single top s/t channel","f")
+        #leg.AddEntry(histT_nom_E["zjets"],"Z+jets","f")
+        #leg.AddEntry(histT_nom_E["wjets"],"W+jets","f")
+        if not args.nosyst: leg.AddEntry(graph_err_E, "Syst. Unc." ,"f")
+        if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"ep")
       else:
         leg.AddEntry(histT_nom_E["ttbar_sl_charm"],"t#bar{t} cq","f")
         leg.AddEntry(histT_nom_E["ttbar_sl_light"],"t#bar{t} uq","f")
@@ -1226,6 +1344,7 @@ for name in observable_names:
         leg.AddEntry(histT_nom_E["wjets"],"W+jets","f")
         leg.AddEntry(histT_nom_E["ttbar_dl"],"Dileptonic t#bar{t}","f")
         if args.stack and not args.nodata: leg.AddEntry(histD_E, "Data" ,"lep")
+      leg.SetTextFont(42);
       leg.Draw()
       termp= "totalHT_wqq_E"
       if args.ratio:

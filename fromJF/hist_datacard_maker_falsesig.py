@@ -38,7 +38,7 @@ parser.add_argument("--sumEM", action="store_true", default=False,
                     help="union of M and E channels")
 
 # Use like:
-# python higgssearch/fromJF/hist_fromJFwqq_syst_total.py --stack --ratio --png --norm --year="all" --channel="btagMM_chitest_sl"
+# python higgssearch/fromJF/hist_datacard_maker_falsesig.py --stack --norm --wcs --year="all" --channel="btagMM_chitest_slssos"
 
 args = parser.parse_args()
 
@@ -119,7 +119,7 @@ not_rebin = ["nJetGood","InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","lepto
       "jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP","lepton_pt", "muon_jet_z","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1",
       "tau_discr_jetbot2","muon_jet_iso","InvM3_good_short"]
 
-observable_names = ["InvM_2jets_short","InvM3_good"]
+observable_names = ["jet_bot1_eta_thick","jet_1_eta_thick","lepton_eta_thick","jet_1_pt","jet_bot1_pt","lepton_pt"]
 #observable_names = ["jet_bot1_btagnumber"]
 
 datayears = ["2016","2016B","2017","2018"]
@@ -208,14 +208,14 @@ histFileDE = {}
 
 myfile = {}
 #path_histfile = "/nfs/cms/vazqueze/higgssearch/datacards/"
-path_histfile = "/nfs/cms/vazqueze/CMSSW_11_3_4/src/HiggsAnalysis/CombinedLimit/data/tutorials/longexercise/shape_analysis/"
+path_histfile = "/nfs/cms/vazqueze/CMSSW_11_3_4/src/HiggsAnalysis/CombinedLimit/data/tutorials/longexercise/prefit_plots/"
 
 for name in observable_names:
   #### Systematics to take into account
-  #list_syst = ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown", "seclepup", "seclepdown", "lepidup", "lepiddown", 
-  #    "lepisoup", "lepisodown", "leptrigup", "leptrigdown", "notoppt","puwup","puwdown"] 
+  list_syst = ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown", "seclepup", "seclepdown", "lepidup", "lepiddown", 
+      "lepisoup", "lepisodown", "leptrigup", "leptrigdown", "notoppt","puwup","puwdown"] 
   #list_syst = ["jecup","jecdown"]
-  list_syst = ["ctagup","ctagdown","btaglightup", "btaglightdown","btagheavyup", "btagheavydown"] 
+  #list_syst = ["ctagup","ctagdown","btaglightup", "btaglightdown","btagheavyup", "btagheavydown"] 
   ## Open hists files
   filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
   if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
@@ -577,16 +577,22 @@ for name in observable_names:
        data_obs = histT_nom_M[samples[0]].Clone("mcss")
        for s in samples[1:]:
            data_obs.Add(histT_nom_M[s])
+       auxx = histT_nom_M[samples[0]].Clone("aux")
+       auxx.Scale(0.)
     elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
        data_obs = histT_nom_M[samples[0]].Clone("data_obs")
        for s in samples[1:]:
            data_obs.Add(histT_nom_M[s])
        aux_mcss = histT_nom_M[samples[0]].Clone("mcss")
        aux_mcss.Scale(0.)
+       auxx = histT_nom_M[samples[0]].Clone("aux")
+       auxx.Scale(0.)
     else:
        data_obs = histT_nom_M[samples[0]].Clone("data_obs")
        for s in samples[1:]:
            data_obs.Add(histT_nom_M[s])
+       auxx = histT_nom_M[samples[0]].Clone("aux")
+       auxx.Scale(0.)
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -659,6 +665,7 @@ for name in observable_names:
     if args.channel == "btagMM_chitest_slss" or args.channel == "btagMM_chitest_slos":
        data_obs.Write()
     elif args.channel == "btagMM_chitest_slssos":
+       auxx.Write()
        for s in aux_list:
          mchists[s].Write()
          for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
@@ -669,6 +676,7 @@ for name in observable_names:
                mchists_syst["seclepup"][s].Write()
                mchists_syst["seclepdown"][s].Write()
     elif (args.channel == "btagMM_chitest" or args.channel=="btagMM_chitest_antisl"):
+       auxx.Write()
        aux_mcss.Write()
        data_obs.Write()
        for s in aux_list:
@@ -681,6 +689,7 @@ for name in observable_names:
                mchists_syst["seclepup"][s].Write()
                mchists_syst["seclepdown"][s].Write()
     else:
+       auxx.Write()
        data_obs.Write()
        for s in aux_list:
          mchists[s].Write()
@@ -712,6 +721,8 @@ for name in observable_names:
     ### hist renamings
     #data_obs = histD_E.Clone("data_obs")
     if args.channel == "btagMM_chitest_slss":
+       auxx = histT_nom_E[samples[0]].Clone("aux")
+       auxx.Scale(0.)
        data_obs = histT_nom_E[samples[0]].Clone("mcss")
        for s in samples[1:]:
            data_obs.Add(histT_nom_E[s])
@@ -721,10 +732,14 @@ for name in observable_names:
            data_obs.Add(histT_nom_E[s])
        aux_mcss = histT_nom_E[samples[0]].Clone("mcss")
        aux_mcss.Scale(0.)
+       auxx = histT_nom_E[samples[0]].Clone("aux")
+       auxx.Scale(0.)
     else:
        data_obs = histT_nom_E[samples[0]].Clone("data_obs")
        for s in samples[1:]:
            data_obs.Add(histT_nom_E[s])
+       auxx = histT_nom_E[samples[0]].Clone("aux")
+       auxx.Scale(0.)
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -798,6 +813,7 @@ for name in observable_names:
     if args.channel == "btagMM_chitest_slss":
        data_obs.Write()
     elif args.channel == "btagMM_chitest_slssos":
+       auxx.Write()
        for s in aux_list:
          mchists[s].Write()
          for syst_name in ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown","puwup","puwdown"]:
@@ -808,6 +824,7 @@ for name in observable_names:
                mchists_syst["seclepup"][s].Write()
                mchists_syst["seclepdown"][s].Write()
     elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
+       auxx.Write()
        aux_mcss.Write()
        data_obs.Write()
        for s in aux_list:
@@ -820,6 +837,7 @@ for name in observable_names:
                mchists_syst["seclepup"][s].Write()
                mchists_syst["seclepdown"][s].Write()
     else:
+       auxx.Write()
        data_obs.Write()
        for s in aux_list:
          mchists[s].Write()

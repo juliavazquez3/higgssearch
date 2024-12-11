@@ -104,11 +104,12 @@ observable_names = ["InvM_2jets","jet_1_pt", "jet_1_nmu", "jet_1_eta", "jet_2_pt
    "jet_bot1_btag_thick", "jet_bot2_btag_thick", "jet_1_btag_thick", "jet_2_btag_thick",
    "jet_bot1_btagnumber", "jet_bot2_btagnumber", "jet_1_btagnumber", "jet_2_btagnumber",
    "jet_1_cvltag_csv", "jet_2_cvltag_csv", "jet_1_cvltag", "jet_2_cvltag","InvM30","InvM31","InvMl0","InvMl1","chi2_test0","chi2_test1",
-   "InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","chi2_test_good","chi2_test_bad","jet_max_cvltag","jet_min_cvltag",
+   "InvM3_bad","InvMl_good","InvMl_bad","chi2_test_bad","jet_max_cvltag","jet_min_cvltag",
    "jet_1_cvbtag_csv", "jet_2_cvbtag_csv", "jet_1_cvbtag", "jet_2_cvbtag", "jet_max_cvbtag", "jet_min_cvbtag",
    "jet_1_eta_thick","jet_2_eta_thick","jet_bot1_eta_thick","jet_bot2_eta_thick",
-   "InvM_2jets_thick","InvM_2jets_short","bot1_muons","bot2_muons","muon_bot1_eta","muon_bot2_eta","muon_bot1_pt","muon_bot2_pt","nJetGood",
-   "jet_bot1_tracks","jet_bot2_tracks","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1","tau_discr_jetbot2"]
+   "InvM_2jets_thick","bot1_muons","bot2_muons","muon_bot1_eta","muon_bot2_eta","muon_bot1_pt","muon_bot2_pt","nJetGood",
+   "jet_bot1_tracks","jet_bot2_tracks","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1","tau_discr_jetbot2",
+   "jet_1_pt_long", "jet_2_pt_long","jet_bot1_pt_long","jet_bot2_pt_long","lepton_pt_long"]
 
 if "sl" in str(args.channel): observable_names = observable_names + ["muon_jet_pt","muon_jet_z","muon_jet_eta","muon_jet_pt_rel","muon_jet_iso",
          "muon_jet_iso_log","muon_jet_z_short","InvM3_good_short","muon_jet_sigr","muon_jet_sigxy","muon_jet_sigdz","muon_jet_r","deltaR_jet1_muon",
@@ -119,8 +120,10 @@ not_rebin = ["nJetGood","InvM3_good","InvM3_bad","InvMl_good","InvMl_bad","lepto
       "jet_1_flavourP", "jet_2_flavourP", "jet_bot1_flavourP", "jet_bot2_flavourP","lepton_pt", "muon_jet_z","tau_discr_jet1","tau_discr_jet2","tau_discr_jetbot1",
       "tau_discr_jetbot2","muon_jet_iso","InvM3_good_short"]
 
-observable_names = ["InvM_2jets_short","InvM3_good"]
-#observable_names = ["jet_bot1_btagnumber"]
+observable_names = ["lepton_pt", "lepton_eta", "lepton_eta_thick","deltaR_jet1_jet2", "MET_pt_aux","transverse_mass","jet_bot1_pt", "jet_bot1_eta", "jet_bot2_pt", "jet_bot2_eta",
+      "InvMl_good","jet_1_pt_long", "jet_2_pt_long","jet_bot1_pt_long","jet_bot2_pt_long","lepton_pt_long"]
+
+observable_names = ["jet_1_pt","jet_2_pt"]
 
 datayears = ["2016","2016B","2017","2018"]
 #datayears = ["2018","2016","2016B"]
@@ -212,10 +215,10 @@ path_histfile = "/nfs/cms/vazqueze/CMSSW_11_3_4/src/HiggsAnalysis/CombinedLimit/
 
 for name in observable_names:
   #### Systematics to take into account
-  #list_syst = ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown", "seclepup", "seclepdown", "lepidup", "lepiddown", 
-  #    "lepisoup", "lepisodown", "leptrigup", "leptrigdown", "notoppt","puwup","puwdown"] 
+  list_syst = ["btaglightup", "btaglightdown", "btagheavyup", "btagheavydown", "seclepup", "seclepdown", "lepidup", "lepiddown", 
+      "lepisoup", "lepisodown", "leptrigup", "leptrigdown", "notoppt","puwup","puwdown"] 
   #list_syst = ["jecup","jecdown"]
-  list_syst = ["ctagup","ctagdown","btaglightup", "btaglightdown","btagheavyup", "btagheavydown"] 
+  #list_syst = ["ctagup","ctagdown","btaglightup", "btaglightdown","btagheavyup", "btagheavydown"] 
   ## Open hists files
   filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test"+term_path+"/"
   if args.wcs: filePath = "/nfs/cms/vazqueze/new_hists/fromJF/wqq/btagMM/chi_test/wcs_classes"+term_path+"/"
@@ -413,6 +416,16 @@ for name in observable_names:
     #   histD_M.Rebin(2)
     #   histD_E.Rebin(2)
 
+  if ("_pt" in name or ("transverse" in name)) and name != "muon_jet_pt":
+    histD_M.GetXaxis().SetRange(1,histD_M.GetNbinsX() + 1)
+    histD_E.GetXaxis().SetRange(1,histD_E.GetNbinsX() + 1)
+    for s in samples:
+        histT_nom_M[s].GetXaxis().SetRange(1,histT_nom_M[s].GetNbinsX() + 1)
+        histT_nom_E[s].GetXaxis().SetRange(1,histT_nom_E[s].GetNbinsX() + 1)
+        for syst_name in list_syst:
+           histT_syst_M[syst_name][s].GetXaxis().SetRange(1, histT_syst_M[syst_name][s].GetNbinsX() + 1)
+           histT_syst_E[syst_name][s].GetXaxis().SetRange(1, histT_syst_E[syst_name][s].GetNbinsX() + 1)
+
   env_syst_T = {}
   env_syst_M = {}
   env_syst_E = {}
@@ -479,10 +492,10 @@ for name in observable_names:
 
     list_syst = list_syst+["mcstat"]
     ### hist renamings
-    #data_obs = histD_T.Clone("data_obs")
-    data_obs = histT_nom_T[samples[0]].Clone("data_obs")
-    for	s in samples[1:]:
-      data_obs.Add(histT_nom_T[s])
+    data_obs = histD_T.Clone("data_obs")
+    #data_obs = histT_nom_T[samples[0]].Clone("data_obs")
+    #for s in samples[1:]:
+    #  data_obs.Add(histT_nom_T[s])
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -566,27 +579,30 @@ for name in observable_names:
             error_tot[s] = error_tot[s] + histT_nom_M[s].GetBinError(bin+1)**2
             #env_syst_M["mcstat"][s].SetBinContent(bin+1,env_syst_M["mcstat"][s].GetBinContent(bin+1)+histT_nom_M[s].GetBinError(bin+1))
         error_tot[s] = sqrt(error_tot[s])
-        env_syst_M["mcstat"][s].Scale((histT_nom_M[s].Integral()+error_tot[s])/histT_nom_M[s].Integral())
-        print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_M[s].Integral(),3)))
+        if histT_nom_M[s].Integral()>0.0: 
+           env_syst_M["mcstat"][s].Scale((histT_nom_M[s].Integral()+error_tot[s])/histT_nom_M[s].Integral())
+           print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_M[s].Integral(),3)))
 
     list_syst = list_syst+["mcstat"]
     print(list_syst)
     ### hist renamings
-    #data_obs = histD_M.Clone("data_obs")
     if args.channel == "btagMM_chitest_slss":
-       data_obs = histT_nom_M[samples[0]].Clone("mcss")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_M[s])
+       data_obs = histD_M.Clone("data_obs")
+       #data_obs = histT_nom_M[samples[0]].Clone("mcss")
+       #for s in samples[1:]:
+       #    data_obs.Add(histT_nom_M[s])
     elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
-       data_obs = histT_nom_M[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_M[s])
+       data_obs = histD_M.Clone("data_obs")
+       #data_obs = histT_nom_M[samples[0]].Clone("data_obs")
+       #for s in samples[1:]:
+       #    data_obs.Add(histT_nom_M[s])
        aux_mcss = histT_nom_M[samples[0]].Clone("mcss")
        aux_mcss.Scale(0.)
     else:
-       data_obs = histT_nom_M[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_M[s])
+       data_obs = histD_M.Clone("data_obs")
+       #data_obs = histT_nom_M[samples[0]].Clone("data_obs")
+       #for s in samples[1:]:
+       #    data_obs.Add(histT_nom_M[s])
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -632,7 +648,7 @@ for name in observable_names:
           print("Integral of "+str(s)+" MC in M channel process is "+str(round(number_nom,2)))
           for syst_name in list_syst:
              number = mchists_syst[syst_name][s].Integral()
-             print(syst_name+" effect is %s with effect of %s percent for M channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
+             if number_nom > 0.0: print(syst_name+" effect is %s with effect of %s percent for M channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
       print("-------------------------------------------------------")
       print("-------------------------------------------------------")
       quant = 0
@@ -643,7 +659,7 @@ for name in observable_names:
         quant = quant + mchists[s].Integral()
         for syst_name in list_syst:
            quant_syst[syst_name] = quant_syst[syst_name] + mchists_syst[syst_name][s].Integral()
-      print("Integral of all MC processes in M channel is "+str(round(quant,2)) + " for M cahnnel")
+      print("Integral of all MC processes in M channel is "+str(round(quant,2)) + " for M channel")
       for syst_name in list_syst:
         print(syst_name+" effect is %s with effect of %s percent for M channel" %(str(quant_syst[syst_name]),str(round(100*abs(quant-quant_syst[syst_name])/quant,2))))
     else:
@@ -705,26 +721,29 @@ for name in observable_names:
             error_tot[s] = error_tot[s] + histT_nom_E[s].GetBinError(bin+1)**2
             #env_syst_E["mcstat"][s].SetBinContent(bin+1,env_syst_E["mcstat"][s].GetBinContent(bin+1)+histT_nom_E[s].GetBinError(bin+1))
         error_tot[s] = sqrt(error_tot[s])
-        env_syst_E["mcstat"][s].Scale((histT_nom_E[s].Integral()+error_tot[s])/histT_nom_E[s].Integral())
-        print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_E[s].Integral(),3)))
+        if histT_nom_E[s].Integral()>0.0: 
+           env_syst_E["mcstat"][s].Scale((histT_nom_E[s].Integral()+error_tot[s])/histT_nom_E[s].Integral())
+           print("MC stat error is %s for %s sample with %s percentual effect"%(round(error_tot[s],2),str(s),round(error_tot[s]/histT_nom_E[s].Integral(),3)))
 
     #list_syst = list_syst+["mcstat"]
     ### hist renamings
-    #data_obs = histD_E.Clone("data_obs")
     if args.channel == "btagMM_chitest_slss":
-       data_obs = histT_nom_E[samples[0]].Clone("mcss")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_E[s])
+       data_obs = histD_E.Clone("data_obs")
+       #data_obs = histT_nom_E[samples[0]].Clone("mcss")
+       #for s in samples[1:]:
+       #    data_obs.Add(histT_nom_E[s])
     elif (args.channel == "btagMM_chitest" or args.channel == "btagMM_chitest_antisl"):
-       data_obs = histT_nom_E[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_E[s])
+       data_obs = histD_E.Clone("data_obs")
+       #data_obs = histT_nom_E[samples[0]].Clone("data_obs")
+       #for s in samples[1:]:
+       #    data_obs.Add(histT_nom_E[s])
        aux_mcss = histT_nom_E[samples[0]].Clone("mcss")
        aux_mcss.Scale(0.)
     else:
-       data_obs = histT_nom_E[samples[0]].Clone("data_obs")
-       for s in samples[1:]:
-           data_obs.Add(histT_nom_E[s])
+       data_obs = histD_E.Clone("data_obs")
+       #data_obs = histT_nom_E[samples[0]].Clone("data_obs")
+       #for s in samples[1:]:
+       #    data_obs.Add(histT_nom_E[s])
     mchists = {}
     mchists_syst = {}
     for syst_name in list_syst:
@@ -771,7 +790,7 @@ for name in observable_names:
           print("Integral of "+str(s)+" MC in E channel process is "+str(round(number_nom,2)))
           for syst_name in list_syst:
              number = mchists_syst[syst_name][s].Integral()
-             print(syst_name+" effect is %s with effect of %s percent for E channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
+             if number_nom > 0.0: print(syst_name+" effect is %s with effect of %s percent for E channel" %(str(round(number,2)),str(round(100*abs(number-number_nom)/number_nom,2))))
       print("-------------------------------------------------------")
       print("-------------------------------------------------------")
       quant = 0

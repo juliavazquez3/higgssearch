@@ -1,5 +1,6 @@
 Executable = /nfs/cms/vazqueze/higgssearch/hcondor/run_sl_syst.sh
 
+Request_memory = 10000
 +CieIncludeAF=True
 +CieSingularityImage=cc7
 

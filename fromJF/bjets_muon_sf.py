@@ -1483,10 +1483,12 @@ for s in samples:
                df[s] = df[s].Define('lep_trig_sf','nMuonGood>0 ? trigger_sf_mu_aux[MuonGoodInd[0]] : trigger_sf_el_aux[ElectronGoodInd[0]]')
                #df_M[s] = df_M[s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*puWeight*PUjetID_SF*lep_trig_sf*top_weight')
                #df_E[s] = df_E[s].Define('weightSSOS_final','weight_aux*lep_id_sf*btag_sf*puWeight*PUjetID_SF*lep_trig_sf*top_weight')
-               df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso_abs[0]')
+               #df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_iso_abs[0]')
                df[s] = df[s].Define('lep_id_lowpt_sf_up','muon_from_bot_sf_iso_abs_up[0]')
                df[s] = df[s].Define('lep_id_lowpt_sf_down','muon_from_bot_sf_iso_abs_down[0]')
                #df[s] = df[s].Define('lep_id_lowpt_sf','1.')
+               #df[s] = df[s].Define('lep_id_lowpt_sf','bot1_muon_id > -1 ? muon_from_bot_sf_iso[bot1_muon_id] : muon_from_bot_sf_iso[bot2_muon_id]')
+               df[s] = df[s].Define('lep_id_lowpt_sf','muon_from_bot_sf_z[0]')
                df[s] = df[s].Define('frag_weight','1.')
                df[s] = df[s].Define('ssos_weight','1.')
                df[s] = df[s].Define('weightSSOS_final','weight_aux*btag_sf*lep_id_sf*lep_iso_sf*lep_trig_sf*puWeight*top_weight*l1_prefw*lep_id_lowpt_sf*ssos_weight*frag_weight')
@@ -1728,18 +1730,18 @@ if mode == "mc":
 
 if channel[8:] == "_chi":
    if channel[0:8] == "jet_bot1":
-      term1 = "botjets_muons_corr/muon_bot1/"
+      term1 = "botjets_muons/muon_bot1/"
    elif channel[0:8] == "jet_bot2":
-      term1 = "botjets_muons_corr/muon_bot2/"
+      term1 = "botjets_muons/muon_bot2/"
    elif channel[0:8] == "jet_both":
-      term1 = "botjets_muons_corr/muon_both/"
+      term1 = "botjets_muons_corr_Z/muon_both/"
 else:
    if channel[0:8] == "jet_bot1":
-      term1 = "botjets_muons_corr/muon_bot1/nochitest/"
+      term1 = "botjets_muons/muon_bot1/nochitest/"
    elif channel[0:8] == "jet_bot2":
-      term1 = "botjets_muons_corr/muon_bot2/nochitest/"
+      term1 = "botjets_muons/muon_bot2/nochitest/"
    elif channel[0:8] == "jet_both":
-      term1 = "botjets_muons_corr/muon_both/nochitest/"
+      term1 = "botjets_muons_corr_Z/muon_both/nochitest/"
 
 if eta_bin == "one":
    if channel == "jet_bot1_chi":
